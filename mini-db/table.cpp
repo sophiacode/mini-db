@@ -2,8 +2,6 @@
 #include<string>
 #include<fstream>
 
-#define record_num 1000
-
 #include "database.h"
 #include "table.h"
 #include "sqlstatement.h"
@@ -14,7 +12,10 @@ using namespace std;
 /**
 *  \brief 构造函数
 */
-Table::Table() {}
+Table::Table(std::string new_table_name) 
+{
+	table_name = new_table_name;
+}
 
 /**
 *  \brief 析构函数
@@ -54,6 +55,11 @@ bool Table::UseTable()
 bool Table::CreateTable(SQLCreateTable &sql)
 {
 	table_name = sql.GetTableName();	/* 获得表单名称 */
+	if (table_name.size() >= 20)		/* 若表单名称过长则失败 */
+	{
+		return false;
+	}
+
 	std::string cmd = "md ..\\" + table_name;		/* 构建命令创建表单文件夹 */
 	if (Table::UseTable())							/* 判断表单是否已经存在 */
 	{
@@ -109,9 +115,14 @@ bool Table::CreateRecord(SQLInsert &st)
 			for (int i = 0; i < st.GetFields().size(); i++) /* 遍历匹配制定字段与表头字段 */
 			{
 				key = 0;
+				if (st.GetValues().at(i).GetValueData().size() >= 255)			/* 若字符串过长，则存储失败 */
+				{
+					return false;
+				}
+
 				for (int j = 0; j < fields.size(); j++)
 				{
-					if (st.GetFields().at(i) == fields[j].GetFieldName())	/* 匹配到同名字段key = 1 */
+					if (st.GetFields().at(i) == kNullType || st.GetFields().at(i) == fields[j].GetFieldName())	/* 匹配到同名字段key = 1 */
 					{
 						key = 1;
 						if (st.GetValues().at(i).GetValueType() == fields[j].GetFieldType())/* 若数据类型也匹配，则在指定位置写入文件 */
@@ -130,7 +141,12 @@ bool Table::CreateRecord(SQLInsert &st)
 			else {
 				for (int i = 0; i < st.GetValues().size(); i++)				/* 按默认顺序插入value */
 				{
-					if (st.GetValues().at(i).GetValueType() == fields[i].GetFieldType())/* 若数据类型匹配 */
+					if (st.GetValues().at(i).GetValueData().size() >= 255)	/* 若字符串过长，则存储失败 */
+					{
+						return false;
+					}
+					
+					if (st.GetFields().at(i) == kNullType || st.GetValues().at(i).GetValueType() == fields[i].GetFieldType())/* 若数据类型匹配 */
 					{
 						fp.seekp(((Record_id%record_num - 1) * fields.size() + i) * 255, ios::beg);/* 在指定位置写入记录数据 */
 						fp.write(st.GetValues().at(i).GetValueData().c_str(), 255);
@@ -143,4 +159,39 @@ bool Table::CreateRecord(SQLInsert &st)
 		return true;										/* 返回成功 */
 	}
 	else return false;										/* 打开目标表单失败，返回false */
+}
+
+/**
+*  \brief 删除记录
+*/
+bool Table::DeleteRecord(SQLDelete &sd)
+{
+	if (UseTable())												
+	{/* 打开表单成功 */
+		if (!Table::SelectRecord(sd))
+		{
+			return false;					/* 搜索目标记录失败，返回false */
+		}
+		else {
+			int Record_id;					/* 搜索目标记录成功，Record_id记录当前要删除的记录主键 */
+			std::string Null_str = "";		/* 删除记录即为将记录置空 */
+			for (int i = 0; i < select_id.size(); i++)
+			{/* 从要删除主键池中按序取出主键，删除对应记录 */
+				Record_id = select_id[i];
+				char records_no[1];
+				itoa(Record_id / record_num, records_no, 1);						
+				std::string record_file = table_name + "_records_" + records_no;	/* 构建目标文件名 */
+
+				fstream fp;
+				fp.open(record_file, std::ios::binary | std::ios::out);				/* 打开目标文件 */
+				fp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg); /* 定位到要更改的位置 */
+				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
+				{
+					fp.write(Null_str.c_str(), 255);
+				}
+			}
+			return true;					/* 修改成功，返回true */
+		}
+	}
+	else return false;						/* 表单打开失败，返回false */
 }
