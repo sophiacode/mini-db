@@ -4,12 +4,13 @@
 #include"database.h"
 #include"direct.h"
 #include"io.h"
+#include"sqlstatement.h"
 
 /************Value************/
 std::string Value::GetValueData()
 {
 	return value_data;
-};
+}
 
 ValueType Value::GetValueType()
 {
@@ -23,14 +24,62 @@ void Value::SetValue(std::string new_data, ValueType new_type)
 }
 
 /*************Record*************/
-bool Record::Display(SQLInsert &st)
+bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 {
+	for (int i = 0; i < 10; i++)
+	{
+		
+		ValueType valuetype;
+		std::string valuedata;
+		valuetype = values_data[i].GetValueType();
+		valuedata = values_data[i].GetValueData();
+		if (valuedata == "\0")
+			continue;
+		else
+		{
+			std::cout << fields[i].GetFieldName() << ":" << std::endl;
+			std::cout << valuedata << std::endl;
+		}
+	}
+}
 
+void Record::SetValue(std::vector<Value> values_data)
+{
+	for (int i = 0; i < 10; i++)
+	{
+		ValueType valuetype;
+		std::string valuedata;
+		valuetype = values_data[i].GetValueType();
+		valuedata = values_data[i].GetValueData();
+		record_data[i].SetValue(valuedata, valuetype);
+	}
+}
+
+
+/**************Field*****************/
+std::string Field::GetFieldName()
+{
+	return field_name;
+}
+
+ValueType Field::GetFieldType()
+{
+	return field_type;
+}
+
+bool Field::SetFieldName(std::string new_name)
+{
+	field_name = new_name;
+}
+
+bool Field::SetFieldType(ValueType new_type)
+{
+	field_type = new_type;
 }
 
 
 
-/***********Database**********/
+/*************Database**************/
 bool Database::CreateDatabase(SQLCreateDatabase &st)
 {
 	std::string db_name;

@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#define record_num 1000
+
 #include "database.h"
 
 /**
@@ -15,7 +17,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Field(std::string Field_name);
+	Field();
 
 	/**
 	*  \brief 析构函数
@@ -56,7 +58,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Table();
+	Table(std::string nem_table_name);
 
 	/**
 	*  \brief 析构函数
@@ -81,21 +83,35 @@ public:
 	/**
 	*  \brief 更新记录
 	*/
-	bool UpdateRecord(SQLInsert &st);
+	bool UpdateRecord(SQLInsert &su);
 
 	/**
 	*  \brief 删除记录
 	*/
-	bool DeleteRecord(SQLInsert &st);
+	bool DeleteRecord(SQLDelete &sd);
 
+	/**
+	*  \brief 通过SQL直接查找记录
+	*/
+	bool SelectRecord(SQLSelect &sql);
+
+	/**
+	*  \brief Delete调用Select功能
+	*/
+	bool SelectRecord(SQLDelete &sd);
+
+	/**
+	*  \brief Update调用Select功能
+	*/
+	bool SelectRecord(SQLUpdate &su);
 
 private:
-	long long int record_num;           /* 表中已有数据数量 */
-	int fields_num;                     /* 表中字段数 */
-	std::string table_name;             /* 表单名称 */
-	std::vector<Record> records;        /* 记录 */
-	std::vector<Field> fields;          /* 字段 */
-	std::vector<Index> indexs;          /* 索引 */
+	int records_num;				     /* 表中已有数据数量 */
+	std::string table_name;				 /* 表单名称 */
+	Record record;						 /* 记录 */
+	std::vector<Field> fields;           /* 字段 */
+	std::vector<Index> indexs;           /* 索引 */
+	std::vector<int> select_id;			 /* 记录select选中的id */
 };
 
 #endif

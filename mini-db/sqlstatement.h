@@ -15,9 +15,12 @@ public:
 	int GetSQLType();
 	void SetSQLType(int sql_type);
 	virtual void Parse(std::vector<std::string> sql_token) = 0;
-	void ToLower(std::string & str);
 protected:
 	int sql_type_;
+	void ToLower(std::string & str);
+	void MergeValue(std::vector<std::string> & sql_token, int pos);
+	void ParseValue(std::string sql, Value & value);
+	OperatorType ParseOperator(std::string op);
 };
 
 /* " CREATE DATABASE databasename databasepath; " */
@@ -99,13 +102,15 @@ public:
 	void SetTableName(std::string table_name);
 	std::string GetField();
 	void SetField(std::string field);
-	std::string GetValue();
-	void SetValue(std::string value);
+	Value GetValue();
+	void SetValue(Value value);
+	bool IsInputWhere();
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string table_name_;
 	std::string field_;
-	std::string value_;
+	Value value_;
+	bool is_input_where_;
 };
 
 /* "UPDATE tablename SET field1=value1, field2=value2, ... WHERE field=value;" */
@@ -117,25 +122,25 @@ public:
 	std::string GetTableName();
 	void SetTableName(std::string table_name);
 
-	std::string GetNewField();
-	void SetNewField(std::string new_field);
+	std::vector<std::string> GetNewField();
+	void SetNewField(std::vector<std::string> new_fields);
 
-	std::string GetNewValue();
-	void SetNewValue(std::string new_value);
+	std::vector<Value> GetNewValue();
+	void SetNewValue(std::vector<Value> new_values);
 
 	std::string GetWhereField();
 	void SetWhereField(std::string where_field);
 
-	std::string GetWhereValue();
-	void SetWhereValue(std::string where_value);
+	Value GetWhereValue();
+	void SetWhereValue(Value where_value);
 
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string table_name_;
 	std::vector<std::string> new_fields_;
-	std::vector<std::string> new_values_;
+	std::vector<Value> new_values_;
 	std::string where_field_;
-	std::string where_value_;
+	Value where_value_;
 };
 
 /* "SELECET FROM tablename WHERE field op value" */
@@ -148,13 +153,14 @@ public:
 	void SetTableName(std::string table_name);
 	std::string GetField();
 	void SetField(std::string field);
-	std::string GetValue();
-	void SetValue(std::string value);
+	Value GetValue();
+	void SetValue(Value value);
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string table_name_;
 	std::string field_;
-	std::string value_;
+	Value value_;
+	OperatorType op_;
 };
 
 /* CREATE INDEX indexname ON tablename(fieldname) */
