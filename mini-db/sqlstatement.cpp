@@ -2,6 +2,7 @@
 #include<algorithm>
 #include "sqlstatement.h"
 
+//TODO:1.不允许尾部多出字符 2.不允许字符串型不加单引号
 SQLBase::SQLBase()
 {
 
@@ -45,11 +46,11 @@ void SQLBase::MergeValue(std::vector<std::string> & sql_token, int pos)
 void SQLBase::ParseValue(std::string sql, Value & value)
 {
 	auto size = sql.size();
-	if (*sql.begin() == '\''&&*sql.end() == '\'') {
-		value.SetValue(sql.substr(1, size - 1), kStringType);
+	if (sql.at(0) == '\''&&sql.at(size - 1) == '\'') {
+		value.SetValue(sql.substr(1, size - 2), kStringType);
 	}
 	else {
-		value.SetValue(sql.substr(1, size - 1), kIntegerType);
+		value.SetValue(sql, kIntegerType);
 	}
 }
 
@@ -107,11 +108,12 @@ void SQLCreateDatabase::Parse(std::vector<std::string> sql_token)
 {
 	if (sql_token.size() < 3) {
 		std::cerr << "SyntaxError:Please input the name of the database." << std::endl;
+		return;
 	}
 
 	database_name_ = sql_token[2];
 
-	if (sql_token.size() == 4) {
+	if (sql_token.size() >= 4) {
 		database_path_ = sql_token[3];
 	} else {
 		database_path_ = "Database\\";
@@ -158,7 +160,7 @@ void SQLUse::Parse(std::vector<std::string> sql_token)
 
 	database_name_ = sql_token[2];
 
-	if (sql_token.size() == 4) {
+	if (sql_token.size() >= 4) {
 		database_path_ = sql_token[3];
 	} else {
 		database_path_ = "Database\\";
@@ -205,17 +207,20 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 
 	table_name_ = sql_token[2];
 
-	if (sql_token[3] == "(") {
-		Value temp;
-		int i = 4;
-		while (sql_token[i] != ")") {
-			std::string data;
-			ValueType type;
+	int i = 3;
+	try {
+		if (sql_token.at(i++) == "(") {
+			//TODO
+			//Field temp(); 
 
-			try {
+			while (sql_token.at(i) != ")") {
+				std::string data;
+				ValueType type;
+
 				data = sql_token.at(i);
 
-				if (sql_token.at(++i) == "int") {
+				ToLower(sql_token.at(++i));
+				if (sql_token.at(i) == "int") {
 					type = kIntegerType;
 				}
 				else if (sql_token.at(i) == "string") {
@@ -223,9 +228,12 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 				}
 				else {
 					std::cerr << "SyntaxError:Invalid Field." << std::endl;
+					return;
 				}
 
-				temp.SetValue(data, type);
+				//TODO
+				//temp.SetValue(data, type); 
+				//fields_.push_back(temp);
 
 				if (sql_token.at(++i) == ",") {
 					i++;
@@ -235,15 +243,16 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 				}
 				else {
 					std::cerr << "SyntaxError:Invalid Field." << std::endl;
-				}
+					return;
+				}	
 			}
-			catch (std::out_of_range) {
-				std::cerr << "SyntaxError:Invalid Field." << std::endl;
-			}
-
+		} else {
+			std::cerr << "SynataxError:Invalid Field." << std::endl;
+			return;
 		}
-	} else {
-		std::cerr << "SynataxError:Invalid Field." << std::endl;
+	} catch (std::out_of_range) {
+		std::cerr << "SyntaxError" << std::endl;
+		return;
 	}
 }
 
@@ -319,8 +328,8 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 		if (sql_token.at(i) == "values") {
 			is_input_field_ = false;
 			i++;
-		} else if (sql_token.at(i) == "(") {
-			while (sql_token.at(++i) != ")") {
+		} else if (sql_token.at(i++) == "(") {
+			while (sql_token.at(i) != ")") {
 				fields_.push_back(sql_token.at(i));
 				if (sql_token.at(++i) == ",") {
 					i++;
@@ -347,17 +356,27 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 
 		if (sql_token.at(i) == "(") {
 			i++;
-			while (sql_token.at(i) != ")") {
+			while (true) {
 				Value temp;
-				MergeValue(sql_token, i);
-				ParseValue(sql_token.at(i), temp);
-				values_.push_back(temp);
-
-				if (sql_token.at(++i) == ",") {
+				if (sql_token.at(i) == "," || sql_token.at(i) == ")")
+				{
+					temp.SetValue("", kNullType);
+					values_.push_back(temp);
+				}
+				else {
+					MergeValue(sql_token, i);
+					ParseValue(sql_token.at(i), temp);
+					values_.push_back(temp);
 					i++;
-				} else if (sql_token.at(++i) == ")") {
+				}
+
+				if (sql_token.at(i) == ",") {
+					i++;
+				}
+				else if (sql_token.at(i) == ")") {
 					break;
-				} else {
+				}
+				else {
 					std::cerr << "SyntaxError" << std::endl;
 					return;
 				}
@@ -365,6 +384,13 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 		}
 	} catch (std::out_of_range) {
 		std::cerr << "SyntaxError" << std::endl;
+		return;
+	}
+
+	if (is_input_field_ == true
+		&& fields_.size() != values_.size()) {
+		std::cerr << "SyntaxError" << std::endl;
+		return;
 	}
 }
 
@@ -409,6 +435,11 @@ void SQLDelete::SetValue(Value value)
 	value_ = value;
 }
 
+bool SQLDelete::IsInputWhere()
+{
+	return is_input_where_;
+}
+
 void SQLDelete::Parse(std::vector<std::string> sql_token)
 {
 	int i = 1;
@@ -417,27 +448,46 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 		if (sql_token.at(i) == "from") {
 			table_name_ = sql_token.at(++i);
 			i++;
-		} else {
+		}
+		else {
 			std::cerr << "SyntaxError" << std::endl;
 			return;
 		}
+	}
+	catch (std::out_of_range) {
+		std::cerr << "SyntaxError" << std::endl;
+		return;
+	}
 
-		ToLower(sql_token.at(i));
-		if(sql_token.at(i)=="where") {
-			field_ = sql_token.at(++i);
-			if (sql_token.at(++i) == "=") {
-				MergeValue(sql_token, ++i);
-				ParseValue(sql_token.at(i), value_);
-			} else {
+	if (i >= sql_token.size())
+	{
+		is_input_where_ = false;
+	}
+	else
+	{
+		try {
+			ToLower(sql_token.at(i));
+			if (sql_token.at(i) == "where") {
+				field_ = sql_token.at(++i);
+				if (sql_token.at(++i) == "=") {
+					MergeValue(sql_token, ++i);
+					ParseValue(sql_token.at(i), value_);
+				}
+				else {
+					std::cerr << "SyntaxError" << std::endl;
+					return;
+				}
+				is_input_where_ = true;
+			}
+			else {
 				std::cerr << "SyntaxError" << std::endl;
 				return;
 			}
-		} else {
-			std::cerr << "SyntaxError" << std::endl;
 		}
-	} catch(std::out_of_range) {
-		std::cerr << "SyntaxError" << std::endl;
-		return;
+		catch (std::out_of_range) {
+			std::cerr << "SyntaxError2" << std::endl;
+			return;
+		}
 	}
 }
 
@@ -526,7 +576,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 
 				ToLower(sql_token.at(++i));
 				if (sql_token.at(i) == ",") {
-					++i;
+					continue;
 				} else if (sql_token.at(i) == "where") {
 					break;
 				} else {
@@ -670,6 +720,7 @@ void SQLCreateIndex::Parse(std::vector<std::string> sql_token)
 		ToLower(sql_token.at(++i));
 		if (sql_token.at(i) == "on") {
 			table_name_ = sql_token.at(++i);
+			i++;
 			if (sql_token.at(i) == "(" && sql_token.at(i+2) == ")" ) {
 				field_ = sql_token.at(++i);
 			} else {
