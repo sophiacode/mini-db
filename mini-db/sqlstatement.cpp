@@ -107,11 +107,12 @@ void SQLCreateDatabase::Parse(std::vector<std::string> sql_token)
 {
 	if (sql_token.size() < 3) {
 		std::cerr << "SyntaxError:Please input the name of the database." << std::endl;
+		return;
 	}
 
 	database_name_ = sql_token[2];
 
-	if (sql_token.size() == 4) {
+	if (sql_token.size() >= 4) {
 		database_path_ = sql_token[3];
 	} else {
 		database_path_ = "Database\\";
@@ -158,7 +159,7 @@ void SQLUse::Parse(std::vector<std::string> sql_token)
 
 	database_name_ = sql_token[2];
 
-	if (sql_token.size() == 4) {
+	if (sql_token.size() >= 4) {
 		database_path_ = sql_token[3];
 	} else {
 		database_path_ = "Database\\";
@@ -205,17 +206,20 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 
 	table_name_ = sql_token[2];
 
-	if (sql_token[3] == "(") {
-		Value temp;
-		int i = 4;
-		while (sql_token[i] != ")") {
-			std::string data;
-			ValueType type;
+	int i = 3;
+	try {
+		if (sql_token.at(i++) == "(") {
+			//TODO
+			//Field temp(); 
 
-			try {
+			while (sql_token.at(i) != ")") {
+				std::string data;
+				ValueType type;
+
 				data = sql_token.at(i);
 
-				if (sql_token.at(++i) == "int") {
+				ToLower(sql_token.at(++i));
+				if (sql_token.at(i) == "int") {
 					type = kIntegerType;
 				}
 				else if (sql_token.at(i) == "string") {
@@ -223,9 +227,12 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 				}
 				else {
 					std::cerr << "SyntaxError:Invalid Field." << std::endl;
+					return;
 				}
 
-				temp.SetValue(data, type);
+				//TODO
+				//temp.SetValue(data, type); 
+				//fields_.push_back(temp);
 
 				if (sql_token.at(++i) == ",") {
 					i++;
@@ -235,15 +242,16 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 				}
 				else {
 					std::cerr << "SyntaxError:Invalid Field." << std::endl;
-				}
+					return;
+				}	
 			}
-			catch (std::out_of_range) {
-				std::cerr << "SyntaxError:Invalid Field." << std::endl;
-			}
-
+		} else {
+			std::cerr << "SynataxError:Invalid Field." << std::endl;
+			return;
 		}
-	} else {
-		std::cerr << "SynataxError:Invalid Field." << std::endl;
+	} catch (std::out_of_range) {
+		std::cerr << "SyntaxError" << std::endl;
+		return;
 	}
 }
 
