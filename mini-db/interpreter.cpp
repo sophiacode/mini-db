@@ -138,31 +138,33 @@ void Interpreter::GetSQLType()
 //Todo:pass to controller
 void Interpreter::ParseSQL()
 {
+	SQLBase * sql;
+
 	switch (sql_type_)
 	{
 	case kSQLCreateDatabase:
-		SQLCreateDatabase * sql = new SQLCreateDatabase(sql_token_);
+		sql = new SQLCreateDatabase(sql_token_);
 		break;
 	case kSQLCreateTable:
-		SQLCreateTable * sql= new SQLCreateTable(sql_token_);
+		sql = new SQLCreateTable(sql_token_);
 		break;
 	case kSQLCreateIndex:
-		SQLCreateIndex * sql=new SQLCreateIndex(sql_token_);
+		sql = new SQLCreateIndex(sql_token_);
 		break;
 	case kSQLUse:
-		SQLUse * sql = new SQLUse(sql_token_);
+		sql = new SQLUse(sql_token_);
 		break;
 	case kSQLInsert:
-		SQLInsert * sql = new SQLInsert(sql_token_);
+		sql = new SQLInsert(sql_token_);
 		break;
 	case kSQLDelete:
-		SQLDelete * sql = new SQLDelete(sql_token_);
+		sql = new SQLDelete(sql_token_);
 		break;
 	case kSQLUpdate:
-		SQLUpdate * sql = new SQLUpdate(sql_token_);
+		sql = new SQLUpdate(sql_token_);
 		break;
 	case kSQLSelect:
-		SQLSelect * sql = new SQLSelect(sql_token_);
+		sql = new SQLSelect(sql_token_);
 		break;
 	}
 }
