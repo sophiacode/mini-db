@@ -69,28 +69,6 @@ void Interpreter::SplitSQL()
 		sql_token_.push_back(next);
 		next = std::strtok(nullptr, " ");
 	}
-
-	for (auto iter = sql_token_.begin();iter != sql_token_.end();)
-	{
-		if (*iter == "\'")
-		{
-			iter = sql_token_.erase(iter);
-			auto temp = iter + 1;
-			while (temp != sql_token_.end() && *temp != "\'")
-			{
-				*iter = *iter + " " + *temp;
-				temp = sql_token_.erase(temp);
-			}
-			temp = sql_token_.erase(temp);
-
-			*iter = "\'" + *iter + "\'";
-			iter = temp;
-		}
-		else
-		{
-			iter++;
-		}
-	}
 }
 
 void Interpreter::GetSQLType()
