@@ -15,7 +15,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Field(std::string Field_name);
+	Field();
 
 	/**
 	*  \brief 析构函数
@@ -88,14 +88,17 @@ public:
 	*/
 	bool DeleteRecord(SQLInsert &st);
 
+	/**
+	*  \brief 查找记录
+	*/
+	bool SearchRecord();
 
 private:
-	long long int record_num;           /* 表中已有数据数量 */
-	int fields_num;                     /* 表中字段数 */
-	std::string table_name;             /* 表单名称 */
-	std::vector<Record> records;        /* 记录 */
-	std::vector<Field> fields;          /* 字段 */
-	std::vector<Index> indexs;          /* 索引 */
+	long long int records_num;           /* 表中已有数据数量 */
+	std::string table_name;				 /* 表单名称 */
+	Record record;						 /* 记录 */
+	std::vector<Field> fields;           /* 字段 */
+	std::vector<Index> indexs;           /* 索引 */
 };
 
 #endif
