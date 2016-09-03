@@ -104,11 +104,13 @@ public:
 	void SetField(std::string field);
 	Value GetValue();
 	void SetValue(Value value);
+	bool IsInputWhere();
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string table_name_;
 	std::string field_;
 	Value value_;
+	bool is_input_where_;
 };
 
 /* "UPDATE tablename SET field1=value1, field2=value2, ... WHERE field=value;" */
