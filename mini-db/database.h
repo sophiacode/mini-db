@@ -69,11 +69,16 @@ public:
 	/**
 	*  \brief 显示记录
 	*/
-	bool Display(std::string table_name,);
+	bool Display(std::vector<Value> values_data, std::vector<Field> fields);
+
+	/**
+	*  \brief 设置Value的值
+	*/
+	void SetValue(std::vector<Value> values_data);
 
 private:
 	int record_id;                /* 记录主键 */
-	Value record_data[10];         /* 记录数据 */
+	std::vector<Value> record_data;        /* 记录数据 */
 };
 
 /**
@@ -85,7 +90,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Field(std::string Field_name);
+	Field();
 
 	/**
 	*  \brief 析构函数
