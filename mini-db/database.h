@@ -11,7 +11,8 @@
 enum ValueType
 {
 	kIntegerType,
-	kStringType
+	kStringType,
+	kNullType
 };
 
 /**
@@ -224,6 +225,11 @@ public:
 	*  \brief 打开数据库,并返回当前数据库的路径
 	*/
 	std::string UseDatabase(SQLUse &st);
+
+	/**
+	*  \brief 获取表名
+	*/
+	std::vector<Table> GetTableName();
 
 private:
 	std::string database_name;          /* 数据库名称 */
