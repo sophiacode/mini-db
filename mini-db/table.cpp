@@ -75,8 +75,19 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			std::string table_name_fields = table_name + "_fields";						/* 构建表头文件名table_name_fields */
 			fp.open(table_name_fields.c_str(), std::ios::binary | std::ios::out);		/* 创建表头文件 */
 
-			for (int i = 0; i < fields.size(); i++)						/* 写入表头数据 */
+			for (int i = 0; i < fields.size(); i++)						/* 判断是否有重名的字段 */
 			{
+				for (int j = 0; j < i; j++)
+				{
+					if (fields[i].GetFieldName() == fields[j].GetFieldName())
+					{
+						return false;									/* 若存在重名字段，则返回false */
+					}
+				}
+			}
+
+			for (int i = 0; i < fields.size(); i++)						/* 写入表头数据 */
+				{
 				std::string name = fields[i].GetFieldName() + '\0';
 				ValueType type = fields[i].GetFieldType();				/* 获取字段对应的数据类型 */
 				std::string type_;										/* type_标记数据类型 */
@@ -122,10 +133,10 @@ bool Table::CreateRecord(SQLInsert &st)
 
 				for (int j = 0; j < fields.size(); j++)
 				{
-					if (st.GetFields().at(i) == kNullType || st.GetFields().at(i) == fields[j].GetFieldName())	/* 匹配到同名字段key = 1 */
+					if (st.GetFields().at(i) == fields[j].GetFieldName())	/* 匹配到同名字段key = 1 */
 					{
 						key = 1;
-						if (st.GetValues().at(i).GetValueType() == fields[j].GetFieldType())/* 若数据类型也匹配，则在指定位置写入文件 */
+						if (st.GetFields().at(i) == kNullType || st.GetValues().at(i).GetValueType() == fields[j].GetFieldType())/* 若数据类型也匹配，则在指定位置写入文件 */
 						{
 							fp.seekp(((Record_id%record_num - 1) * fields.size() + j) * 255, ios::beg);
 							fp.write(st.GetValues().at(i).GetValueData().c_str(), 255);
@@ -177,6 +188,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 			std::string Null_str = "";		/* 删除记录即为将记录置空 */
 			for (int i = 0; i < select_id.size(); i++)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
+			 /* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
 				Record_id = select_id[i];
 				char records_no[1];
 				itoa(Record_id / record_num, records_no, 1);						
@@ -190,8 +202,57 @@ bool Table::DeleteRecord(SQLDelete &sd)
 					fp.write(Null_str.c_str(), 255);
 				}
 			}
+			records_num--;
 			return true;					/* 修改成功，返回true */
 		}
 	}
 	else return false;						/* 表单打开失败，返回false */
+}
+
+/**
+*  \brief 更新/更改记录
+*/
+bool Table::UpdateRecord(SQLUpdate &su)
+{
+	if (UseTable())
+	{
+		if (!Table::SelectRecord(su))
+		{
+			return false;
+		}
+		else {
+			if (fields.size() != su.GetNewField().size())
+			{
+				return false;
+			}
+
+			for (int i = 0; i < su.GetNewValue().size(); i++)
+			{
+				if (su.GetNewValue().at(i).size() >= 255)
+				{
+					return false;
+				}
+			}
+			int Record_id;
+			for (int i = 0; i < select_id.size(); i++)
+			{
+				Record_id = select_id[i];
+				for (int j = 0; j < su.GetNewField().size(); j++)
+				{
+					bool key = false;
+					for (int k = 0; k < fields.size(); k++)
+					{
+						if (su.GetNewField().at(j) == fields[k].GetFieldName())
+						{
+							key = true;
+							if (su.GetNewValue().at(j).)
+						}
+					}
+				}
+			}
+		}
+	}
+	else{
+		return false;
+	}
 }
