@@ -23,10 +23,15 @@ void Value::SetValue(std::string new_data, ValueType new_type)
 	value_type = new_type;
 }
 
+void Value::SetValuedata(std::string new_data)
+{
+	value_data = new_data;
+}
+
 /*************Record*************/
 bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 {
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < fields.capacity(); i++)
 	{
 		
 		ValueType valuetype;
@@ -45,7 +50,7 @@ bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 
 void Record::SetValue(std::vector<Value> values_data)
 {
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < values_data.capacity(); i++)
 	{
 		ValueType valuetype;
 		std::string valuedata;
