@@ -10,19 +10,27 @@ BPlusTreeNode<KEYTYPE>::~BPlusTreeNode()
 template<class KEYTYPE>
 BPlusTreeNode<KEYTYPE>::BPlusTreeNode()
 {
+  int timeflag;
+  stringstream ss;
+  cache_index = -1;
   is_leaf_ = true;
   key_num_ = 0;
   father_ = nullptr;
   for (int i = 0; i < BPlusTree_m + 1; i++){
     sonptr_ = nullptr;
   }
+  timeflag = time(0)*1000;
+  name_num_ &= 0x1ff;
+  timeflag += ++name_num_;
+  ss << timeflag;
+  ss >> this_file_;
 }
 
 
 
 
 template<class KEYTYPE>
-void BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key, int _data_id)
+int BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key, int _data_id)
 {
   int insert_index;
   insert_index = this->BinarySearch(_key);
