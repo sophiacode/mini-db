@@ -42,13 +42,19 @@ public:
 	ValueType GetValueType();
 
 	/**
-	*  \brief 重置Value的值
+	*  \brief 重置Value
 	*/
 	void SetValue(std::string new_data, ValueType new_type);
 
+	/**
+	*  \brief 重置Value的值
+	*/
+	void SetValuedata(std::string new_data);
+
+
 private:
-	std::string value_data;      /* 这个Value的值 */
-	ValueType value_type;         /*  */
+	std::string value_data;      /* Value的值 */
+	ValueType value_type;         /* Value的类型 */
 };
 
 /**
