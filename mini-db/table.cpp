@@ -130,14 +130,9 @@ bool Table::CreateRecord(SQLInsert &st)
 
 	if (Table::UseTable())									/* 打开目标表单文件 */
 	{
-		int Record_id = MemPool::NewNode();					/* 获得新记录的主键 */
-		char records_no_[1];
-		itoa(Record_id / record_num, records_no_, 1);
-		std::string table_name_records = path + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
+		std::vector<string> records__data;					/* records__data存储要插入的数据 */
 
-		fstream fp;
-		fp.open(table_name_records.c_str(), std::ios::binary | std::ios::out);/* 打开or创建记录文件 */
-
+		/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 		if (st.IsInputField())								
 		{/* 当插入的value指定了相应字段时 */
 			for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
@@ -158,10 +153,9 @@ bool Table::CreateRecord(SQLInsert &st)
 					{
 						key = 1;
 						if (st.GetValues().at(i).GetValueType() == kNullType 
-							|| st.GetValues().at(i).GetValueType() == fields[j].GetFieldType())/* 若数据类型也匹配，则在指定位置写入文件 */
+							|| st.GetValues().at(i).GetValueType() == fields[j].GetFieldType())/* 若数据类型也匹配，存入记录 */
 						{
-							fp.seekp(((Record_id%record_num - 1) * fields.size() + j) * 255, ios::beg);
-							fp.write(st.GetValues().at(i).GetValueData().c_str(), 255);
+							records__data[j] = st.GetValues().at(i).GetValueData();
 						}
 						else return false;									/* 同名字段数据类型不匹配，则插入记录失败 */
 					}
@@ -185,13 +179,28 @@ bool Table::CreateRecord(SQLInsert &st)
 					if (st.GetValues().at(i).GetValueType() == kNullType 
 						|| st.GetValues().at(i).GetValueType() == fields[i].GetFieldType())/* 若数据类型匹配 */
 					{
-						fp.seekp(((Record_id%record_num - 1) * fields.size() + i) * 255, ios::beg);/* 在指定位置写入记录数据 */
-						fp.write(st.GetValues().at(i).GetValueData().c_str(), 255);
+						records__data[i] = st.GetValues().at(i).GetValueData();
 					}
 					else return false;										/* 数据类型不匹配时，插入失败 */
 				}
 			}
 		}
+
+		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
+		int Record_id = MemPool::NewNode();					/* 获得新记录的主键 */
+		char records_no_[1];
+		itoa(Record_id / record_num, records_no_, 1);
+		std::string table_name_records = path + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
+
+		fstream fp;
+		fp.open(table_name_records.c_str(), std::ios::binary | std::ios::out);/* 打开or创建记录文件 */
+		fp.seekp((Record_id%record_num - 1) * fields.size() * 255, ios::beg); /* 指针定位，更改写入位置 */
+
+		for (int i = 0; i < fields.size(); i++)
+		{
+			fp.write(records__data[i].c_str(), 255);		/* 按字段顺序写入文件 */
+		}
+
 		records_num++;										/* 插入成功，表单中记录总数加一 */
 		return true;										/* 返回成功 */
 	}
@@ -229,7 +238,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 					fp.write(Null_str.c_str(), 255);
 				}
 			}
-			records_num--;
+			records_num--;					/* 删除成功，表单中记录总数减一 */
 			return true;					/* 修改成功，返回true */
 		}
 	}
@@ -249,6 +258,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			return false;
 		}
 		else {
+		/* ---------------------------------------------判断字长和字段数----------------------------------------------------- */
 			if (fields.size() < su.GetNewField().size())		/* 判断更新格式是否匹配 */
 			{
 				return false;
@@ -263,7 +273,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			}
 
 			fstream fwp,frp;
-
+		/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 			int Record_id;										/* Record_id记录当前操作记录主键 */
 			for (int i = 0; i < select_id.size(); i++)
 			{
@@ -306,7 +316,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						return false;
 					}
 				}
-				/* 若完全匹配成功，则更改磁盘上的数据 */
+		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
 				for (int j = 0; j < fields.size(); j++)
 				{
 					fwp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 指针定位 */
