@@ -98,7 +98,8 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 	else
 	{
 		system(str);
-		std::cerr << "创建成功！" << std::endl;
+		database_name = db_name;
+		std::cout << "创建成功！" << std::endl;
 		return true;
 	}
 }
@@ -115,7 +116,7 @@ std::string Database::UseDatabase(SQLUse &st)
 	strcpy(str, path.c_str());
 	if (!access(str, 0))
 	{
-		std::cerr << "打开成功！" << std::endl;
+		std::cout << "打开成功！" << std::endl;
 		return path;
 	}
 	else
@@ -123,6 +124,11 @@ std::string Database::UseDatabase(SQLUse &st)
 		std::cerr << "打开失败！" << std::endl;
 		return "\0";
 	}
+}
+
+std::string Database::GetDatabaseName()
+{
+	return database_name;
 }
 
 std::vector<Table> Database::GetTableName()
