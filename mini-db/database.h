@@ -226,6 +226,12 @@ public:
 	*/
 	std::string UseDatabase(SQLUse &st);
 
+
+	/**
+	*  \brief 获取数据库名称
+	*/
+	std::string GetDatabaseName();
+
 	/**
 	*  \brief 获取表名
 	*/
