@@ -58,7 +58,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Table(std::string nem_table_name);
+	Table(std::string new_path);
 
 	/**
 	*  \brief 析构函数
@@ -74,6 +74,11 @@ public:
 	*  \brief 打开表单
 	*/
 	bool UseTable();
+
+	/**
+	*  \brief 获取表单名称
+	*/
+	std::string GetTableName();
 
 	/**
 	*  \brief 增加记录
@@ -112,6 +117,7 @@ private:
 	std::vector<Field> fields;           /* 字段 */
 	std::vector<Index> indexs;           /* 索引 */
 	std::vector<int> select_id;			 /* 记录select选中的id */
+	std::string path;					 /* 存储数据库路径 */
 };
 
 #endif
