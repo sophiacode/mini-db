@@ -12,14 +12,13 @@ class SQLBase
 public:
 	SQLBase(); 
 	~SQLBase();
-	int GetSQLType();
-	void SetSQLType(int sql_type);
+	bool IsParseSucceed();
 	virtual void Parse(std::vector<std::string> sql_token) = 0;
 protected:
-	int sql_type_;
+	bool is_parse_succeed;
 	void ToLower(std::string & str);
 	void MergeValue(std::vector<std::string> & sql_token, int pos);
-	void ParseValue(std::string sql, Value & value);
+	bool ParseValue(std::string sql, Value & value);
 	OperatorType ParseOperator(std::string op);
 };
 
