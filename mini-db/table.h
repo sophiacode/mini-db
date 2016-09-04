@@ -83,7 +83,7 @@ public:
 	/**
 	*  \brief 更新记录
 	*/
-	bool UpdateRecord(SQLInsert &su);
+	bool UpdateRecord(SQLUpdate &su);
 
 	/**
 	*  \brief 删除记录
