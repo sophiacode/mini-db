@@ -19,13 +19,13 @@ Interpreter::~Interpreter()
 	sql_token_.clear();
 }
 
-void Interpreter::SQLInterpret(std::string sql_statement)
+bool Interpreter::SQLInterpret(std::string sql_statement)
 {
 	sql_statement_ = sql_statement;
 	SQLPretreatment();
 	SplitSQL();
 	GetSQLType();
-	ParseSQL();
+	return ParseSQL();
 }
 
 void Interpreter::SQLPretreatment()
@@ -85,6 +85,7 @@ void Interpreter::GetSQLType()
 	{
 		if (sql_token_[0].size() < 2)
 		{
+			sql_type_ = kSQLUndefined;
 			std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
 			return;
 		}
@@ -103,6 +104,7 @@ void Interpreter::GetSQLType()
 		}
 		else
 		{
+			sql_type_ = kSQLUndefined;
 			std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
 			return;
 		}
@@ -135,37 +137,34 @@ void Interpreter::GetSQLType()
 	}
 }
 
-//Todo:pass to controller
-void Interpreter::ParseSQL()
+bool Interpreter::ParseSQL()
 {
 	SQLBase * sql;
-
 	switch (sql_type_)
 	{
 	case kSQLCreateDatabase:
-		sql = new SQLCreateDatabase(sql_token_);
-		break;
+		return controller_->
+			CreateDatabase(new SQLCreateDatabase(sql_token_));
 	case kSQLCreateTable:
-		sql = new SQLCreateTable(sql_token_);
-		break;
+		return controller_->
+			CreateTable(new SQLCreateTable(sql_token_));
 	case kSQLCreateIndex:
-		sql = new SQLCreateIndex(sql_token_);
-		break;
+		return controller_->
+			CreateIndex(new SQLCreateIndex(sql_token_));
 	case kSQLUse:
-		sql = new SQLUse(sql_token_);
-		break;
+		return controller_->Use(new SQLUse(sql_token_));
 	case kSQLInsert:
-		sql = new SQLInsert(sql_token_);
-		break;
+		return controller_->Insert(new SQLInsert(sql_token_));
 	case kSQLDelete:
-		sql = new SQLDelete(sql_token_);
-		break;
+		return controller_->Delete(new SQLDelete(sql_token_));
 	case kSQLUpdate:
-		sql = new SQLUpdate(sql_token_);
-		break;
+		return controller_->Update(new SQLUpdate(sql_token_));
 	case kSQLSelect:
-		sql = new SQLSelect(sql_token_);
-		break;
+		return controller_->Select(new SQLSelect(sql_token_));
+	case kSQLUndefined:
+		return false;
+	default:
+		return false;
 	}
 }
 

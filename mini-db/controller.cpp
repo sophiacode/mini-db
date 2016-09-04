@@ -4,15 +4,24 @@
 Controller::Controller()
 	:current_database_(nullptr)
 {
+	path_.clear();
 }
 
 Controller::~Controller()
 {
-	if (current_database_ != nullptr)
-	{
+	for (auto iter = databases_.begin();iter != databases_.end();iter++) {
+		if (*iter != nullptr){
+			delete (*iter);
+			(*iter) = nullptr;
+		}
+	}
+
+	if (current_database_ != nullptr) {
 		delete current_database_;
 		current_database_ = nullptr;
 	}
+
+	path_.clear();
 }
 
 bool Controller::CreateDatabase(SQLCreateDatabase st)
@@ -21,31 +30,46 @@ bool Controller::CreateDatabase(SQLCreateDatabase st)
 	{
 		return false;
 	}
-	current_database_ = new Database();
-	if (!current_database_->CreateDatabase(st))
+
+	Database * db = new Database();
+	if (db->CreateDatabase(st))
 	{
+		databases_.push_back(db);
 		return true;
 	}
+	return false;
 }
 
 bool Controller::CreateTable(SQLCreateTable st)
 {
-	if (current_database_ == nullptr)
+	if (!st.IsParseSucceed())
 	{
-		std::cerr << "请先打开数据库" << std::endl;
 		return false;
 	}
 
-	auto temp = current_database_->table_name;
-	Table * t = new Table (st.GetTableName());
-	t->CreateTable(st);
+	if (current_database_ == nullptr)
+	{
+		std::cerr << "请先打开数据库." << std::endl;
+		return false;
+	}
+	
+
+
+	auto tables = current_database_-> GetTableName();
+	Table * table = new Table(path_);
+	table->CreateTable(st);
 }
 
 
 bool Controller::CreateIndex(SQLCreateIndex st)
 {
-	auto temp = current_database_-> table_name;
-	for (auto iter = temp.begin();iter != temp.end();iter++)
+	if (!st.IsParseSucceed())
+	{
+		return false;
+	}
+
+	auto tables = current_database_-> GetTableName();
+	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
 		if (iter->GetTableName() == st.GetTableName())
 		{
@@ -53,29 +77,66 @@ bool Controller::CreateIndex(SQLCreateIndex st)
 			return true;
 		}
 	}
+
+	std::cerr << "表" << st.GetTableName() << "不存在." << std::endl;
 	return false;
 }
 
 bool Controller::Use(SQLUse st)
 {
-	string path = current_database_->UseDatabase(st);
-	Table * t = new Table(path);
+	if (!st.IsParseSucceed())
+	{
+		return false;
+	}
+
+	for (auto iter = databases_.begin();iter != databases_.end();iter++)
+	{
+		if ((*iter)->GetDatabaseName() == st.GetDatabaseName())
+		{
+			current_database_ = *iter;
+			if ((path_ = current_database_->UseDatabase(st)).empty())
+			{
+				return false;
+			}
+			return true;
+		}
+	}
+
+	std::cerr << "数据库" << st.GetDatabaseName() << "不存在." << std::endl;
+	return false;
 }
 
 bool Controller::Insert(SQLInsert st)
 {
+	if (!st.IsParseSucceed())
+	{
+		return false;
+	}
+
 }
 
 bool Controller::Delete(SQLDelete st)
 {
+	if (!st.IsParseSucceed())
+	{
+		return false;
+	}
 }
 
 bool Controller::Update(SQLUpdate st)
 {
+	if (!st.IsParseSucceed())
+	{
+		return false;
+	}
 }
 
 bool Controller::Select(SQLSelect st)
 {
+	if (!st.IsParseSucceed())
+	{
+		return false;
+	}
 }
 
 

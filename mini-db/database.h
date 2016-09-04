@@ -209,7 +209,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Database(std::string Database_name);
+	Database();
 
 	/**
 	*  \brief 析构函数
@@ -226,6 +226,12 @@ public:
 	*/
 	std::string UseDatabase(SQLUse &st);
 
+
+	/**
+	*  \brief 获取数据库名称
+	*/
+	std::string GetDatabaseName();
+
 	/**
 	*  \brief 获取表名
 	*/
@@ -234,5 +240,6 @@ public:
 private:
 	std::string database_name;          /* 数据库名称 */
 	std::vector<Table> table_name;      /* 数据库中表单 */
+	std::string database_path;         /* 数据库路径 */
 };
 #endif
