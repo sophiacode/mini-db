@@ -69,28 +69,6 @@ void Interpreter::SplitSQL()
 		sql_token_.push_back(next);
 		next = std::strtok(nullptr, " ");
 	}
-
-	for (auto iter = sql_token_.begin();iter != sql_token_.end();)
-	{
-		if (*iter == "\'")
-		{
-			iter = sql_token_.erase(iter);
-			auto temp = iter + 1;
-			while (temp != sql_token_.end() && *temp != "\'")
-			{
-				*iter = *iter + " " + *temp;
-				temp = sql_token_.erase(temp);
-			}
-			temp = sql_token_.erase(temp);
-
-			*iter = "\'" + *iter + "\'";
-			iter = temp;
-		}
-		else
-		{
-			iter++;
-		}
-	}
 }
 
 void Interpreter::GetSQLType()
@@ -160,31 +138,33 @@ void Interpreter::GetSQLType()
 //Todo:pass to controller
 void Interpreter::ParseSQL()
 {
+	SQLBase * sql;
+
 	switch (sql_type_)
 	{
 	case kSQLCreateDatabase:
-		SQLCreateDatabase * sql = new SQLCreateDatabase(sql_token_);
+		sql = new SQLCreateDatabase(sql_token_);
 		break;
 	case kSQLCreateTable:
-		SQLCreateTable * sql= new SQLCreateTable(sql_token_);
+		sql = new SQLCreateTable(sql_token_);
 		break;
 	case kSQLCreateIndex:
-		SQLCreateIndex * sql=new SQLCreateIndex(sql_token_);
+		sql = new SQLCreateIndex(sql_token_);
 		break;
 	case kSQLUse:
-		SQLUse * sql = new SQLUse(sql_token_);
+		sql = new SQLUse(sql_token_);
 		break;
 	case kSQLInsert:
-		SQLInsert * sql = new SQLInsert(sql_token_);
+		sql = new SQLInsert(sql_token_);
 		break;
 	case kSQLDelete:
-		SQLDelete * sql = new SQLDelete(sql_token_);
+		sql = new SQLDelete(sql_token_);
 		break;
 	case kSQLUpdate:
-		SQLUpdate * sql = new SQLUpdate(sql_token_);
+		sql = new SQLUpdate(sql_token_);
 		break;
 	case kSQLSelect:
-		SQLSelect * sql = new SQLSelect(sql_token_);
+		sql = new SQLSelect(sql_token_);
 		break;
 	}
 }

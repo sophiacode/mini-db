@@ -15,3 +15,17 @@ enum SQLType
 	kSQLSelect,            /* 查询记录 */
 	kSQLCreateIndex        /* 创建索引 */
 };
+
+/**
+ *  \brief 操作符类型
+ */
+enum OperatorType
+{
+	kOpUndefined,        /*未定义*/
+	kOpEqual,            /*等于*/
+	kOpGreater,          /*大于*/
+	kOpLess,             /*小于*/
+	kOpNotEqual,         /*不等于*/ 
+	kOpGreterOrEqual,    /*大于等于*/
+	kOpLessOrEqual       /*小于等于*/
+};
