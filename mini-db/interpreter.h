@@ -28,13 +28,13 @@ public:
 	 *  
 	 *  \param sql_statement SQL语句
 	 */
-	void SQLInterpret(std::string sql_statement);
+	bool SQLInterpret(std::string sql_statement);
 
 private:
 	std::string sql_statement_;            /* SQL语句 */
 	std::vector<std::string> sql_token_;   /* SQL语句分割后得到的标识符数组 */
 	SQLType sql_type_;                     /* SQL命令类型 */
-	Controller * controller_;                /* 控制器 */
+	Controller * controller_;              /* 控制器 */
 
 	/**
 	 *  \brief SQL语句预处理
@@ -54,7 +54,7 @@ private:
 	/**
 	 *  \brief 创建SQL类并传递给控制器
 	 */
-	void ParseSQL();
+	bool ParseSQL();
 
 	void ToLower(std::string & str);
 };
