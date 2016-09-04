@@ -11,7 +11,8 @@
 enum ValueType
 {
 	kIntegerType,
-	kStringType
+	kStringType,
+	kNullType
 };
 
 /**
