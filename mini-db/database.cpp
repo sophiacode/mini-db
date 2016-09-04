@@ -33,7 +33,7 @@ bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 		std::string valuedata;
 		valuetype = values_data[i].GetValueType();
 		valuedata = values_data[i].GetValueData();
-		if (valuedata == "\0")
+		if (valuetype ==kNullType)
 			continue;
 		else
 		{
@@ -123,4 +123,9 @@ std::string Database::UseDatabase(SQLUse &st)
 		std::cerr << "´ò¿ªÊ§°Ü£¡" << std::endl;
 		return "\0";
 	}
+}
+
+std::vector<Table> Database::GetTableName()
+{
+	return table_name;
 }
