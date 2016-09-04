@@ -81,6 +81,11 @@ public:
 	std::string GetTableName();
 
 	/**
+	*  \brief 获取表头信息
+	*/
+	std::vector<Field> GetTableFields();
+
+	/**
 	*  \brief 增加记录
 	*/
 	bool CreateRecord(SQLInsert &st);
@@ -109,6 +114,11 @@ public:
 	*  \brief Update调用Select功能
 	*/
 	bool SelectRecord(SQLUpdate &su);
+
+	/**
+	*  \brief 创建索引
+	*/
+	bool CreateIndex(SQLCreateIndex &si);
 
 private:
 	int records_num;				     /* 表中已有数据数量 */
