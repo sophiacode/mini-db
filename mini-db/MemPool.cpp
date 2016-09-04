@@ -24,13 +24,13 @@ BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode()
 {
   BPlusTreeNode *p;
   if (nodelist.empty()){
-    blocklist.push_back(p = new BPlusTreeNode[1000]);
+    blocklist.push_back(p = new BPlusTreeNode<KEYTYPE>[1000]);
     for (int i = 0; i < 1000; i++, p++){
       nodelist.push_back(p);
     }
   }
   p = nodelist.front();
   nodelist.pop_front();
-  new(p)BPlusTreeNode();
+  new(p)BPlusTreeNode<KEYTYPE>();
   return p;
 }
