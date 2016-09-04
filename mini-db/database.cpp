@@ -124,3 +124,8 @@ std::string Database::UseDatabase(SQLUse &st)
 		return "\0";
 	}
 }
+
+std::vector<Table> Database::GetTableName()
+{
+	return table_name;
+}

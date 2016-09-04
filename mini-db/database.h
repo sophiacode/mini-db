@@ -226,6 +226,11 @@ public:
 	*/
 	std::string UseDatabase(SQLUse &st);
 
+	/**
+	*  \brief 获取表名
+	*/
+	std::vector<Table> GetTableName();
+
 private:
 	std::string database_name;          /* 数据库名称 */
 	std::vector<Table> table_name;      /* 数据库中表单 */
