@@ -12,41 +12,51 @@ using namespace std;
 /**
 *  \brief 构造函数
 */
-Table::Table(std::string new_table_name) 
+Table::Table(std::string new_path) 
 {
-	table_name = new_table_name;
+	path = new_path;			/* 获取表单存储路径 */
 }
 
 /**
 *  \brief 析构函数
 */
-Table::~Table() {}
+Table::~Table() 
+{
+
+}
 
 /**
 *  \brief 打开目标表单，成功返回true，失败返回false
 */
 bool Table::UseTable()
 {
-	std::string cmd = "start ..\\" + table_name;					/* 构建命令打开表单文件夹 */
-	if (system(cmd.c_str()))
+	std::string table_name_fields = path + table_name + "_fields";	/* 构建命令打开表头文件 */
+	fstream fp_fields;
+	fp_fields.open(table_name_fields.c_str(), std::ios::binary | std::ios::in);
+	if (fp_fields.bad())										/* 如果打开失败，则返回false */
 	{
-		std::string table_name_fields = table_name + "_fields";		/* 构建命令打开表头文件 */
-		fstream fp_fields;
-		fp_fields.open(table_name_fields.c_str(), std::ios::binary | std::ios::in);
-
-		char type[2],field_name[20];
-		int i = 0;
-		while (fp_fields.read(type, sizeof(char)* 2))				/* 读取字段对应的数据类型进入内存 */
-		{
-			if (type[0] == '0') fields[i].SetFieldType(kIntegerType);/* 0-整型，1-字符串 */
-			else fields[i].SetFieldType(kStringType);
-			fp_fields.read(field_name, sizeof(char)* 20);			/* 读取字段名称进入内存 */
-			fields[i].SetFieldName(field_name);
-		}
-		fp_fields.close();											/* 关闭文件 */
-		return true;
+		return false;
 	}
-	else return false;
+
+	char type[2],field_name[20];
+	int i = 0;
+	while (fp_fields.read(type, sizeof(char)* 2))				/* 读取字段对应的数据类型进入内存 */
+	{
+		if (type[0] == '0') fields[i].SetFieldType(kIntegerType);/* 0-整型，1-字符串 */
+		else fields[i].SetFieldType(kStringType);
+		fp_fields.read(field_name, sizeof(char)* 20);			/* 读取字段名称进入内存 */
+		fields[i].SetFieldName(field_name);
+	}
+	fp_fields.close();											/* 关闭文件 */
+	return true;
+}
+
+/**
+*  \brief 获取表单名称
+*/
+std::string Table::GetTableName()
+{
+	return table_name;
 }
 
 /**
@@ -60,19 +70,18 @@ bool Table::CreateTable(SQLCreateTable &sql)
 		return false;
 	}
 
-	std::string cmd = "md ..\\" + table_name;		/* 构建命令创建表单文件夹 */
+	std::string cmd = "md " + path + table_name;	/* 构建命令创建表单文件夹 */
 	if (Table::UseTable())							/* 判断表单是否已经存在 */
 	{
 		return false;
 	}
 	else {
-		if (system(cmd.c_str()))
+		if (!system(cmd.c_str()))
 		{
 			fields = sql.GetFields();				/* 获取表头数据 */
 			
-			Table::UseTable();						/* 打开表单文件夹 */
 			fstream fp;
-			std::string table_name_fields = table_name + "_fields";						/* 构建表头文件名table_name_fields */
+			std::string table_name_fields = path + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
 			fp.open(table_name_fields.c_str(), std::ios::binary | std::ios::out);		/* 创建表头文件 */
 
 			for (int i = 0; i < fields.size(); i++)						/* 判断是否有重名的字段 */
@@ -108,6 +117,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 */
 bool Table::CreateRecord(SQLInsert &st)
 {
+	table_name = st.GetTableName();							/* 获取表单名称 */
 	if (records_num >= record_num - 1) return false;		/* 判断当前表单是否被填满 */
 
 	if (Table::UseTable())									/* 打开目标表单文件 */
@@ -115,7 +125,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		int Record_id = MemPool::NewNode();					/* 获得新记录的主键 */
 		char records_no_[1];
 		itoa(Record_id / record_num, records_no_, 1);
-		std::string table_name_records = st.GetTableName() + "_records_" + records_no_;	/* 构建表单记录文件名 */
+		std::string table_name_records = path + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
 
 		fstream fp;
 		fp.open(table_name_records.c_str(), std::ios::binary | std::ios::out);/* 打开or创建记录文件 */
@@ -177,6 +187,7 @@ bool Table::CreateRecord(SQLInsert &st)
 */
 bool Table::DeleteRecord(SQLDelete &sd)
 {
+	table_name = sd.GetTableName();			/* 获取表单名称 */
 	if (UseTable())												
 	{/* 打开表单成功 */
 		if (!Table::SelectRecord(sd))
@@ -192,7 +203,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				Record_id = select_id[i];
 				char records_no[1];
 				itoa(Record_id / record_num, records_no, 1);						
-				std::string record_file = table_name + "_records_" + records_no;	/* 构建目标文件名 */
+				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
 
 				fstream fp;
 				fp.open(record_file, std::ios::binary | std::ios::out);				/* 打开目标文件 */
@@ -214,6 +225,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 */
 bool Table::UpdateRecord(SQLUpdate &su)
 {
+	table_name = su.GetTableName();
 	if (UseTable())
 	{
 		if (!Table::SelectRecord(su))
@@ -233,6 +245,10 @@ bool Table::UpdateRecord(SQLUpdate &su)
 					return false;
 				}
 			}
+
+			fstream fp;
+
+
 			int Record_id;
 			for (int i = 0; i < select_id.size(); i++)
 			{
@@ -245,7 +261,11 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						if (su.GetNewField().at(j) == fields[k].GetFieldName())
 						{
 							key = true;
-							if (su.GetNewValue().at(j).)
+							if (su.GetNewValue().at(j).GetValueType() == fields[k].GetFieldType()
+								|| su.GetNewValue().at(j).GetValueType() == kNullType)
+							{
+
+							}
 						}
 					}
 				}

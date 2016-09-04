@@ -209,7 +209,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Database(std::string Database_name);
+	Database();
 
 	/**
 	*  \brief 析构函数
