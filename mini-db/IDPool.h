@@ -1,6 +1,6 @@
 #ifndef _ID_POOL_H_
 #define _ID_POOL_H_
-#include <bits/stdc++.h>
+#include <deque>
 using namespace std;
 class IDPool
 {

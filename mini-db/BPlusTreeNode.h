@@ -1,6 +1,7 @@
 #ifndef _B_PLUS_TREE_NODE_H_
 #define _B_PLUS_TREE_NODE_H_
-#include <bits/stdc++.h>
+#include <string>
+//#include <bits/stdc++.h>
 using namespace std;
 const int BPlusTree_m = 3;
 const int MinBPlusTree_m = (BPlusTree_m + 1) / 2;
