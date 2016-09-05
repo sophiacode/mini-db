@@ -23,17 +23,22 @@ void Value::SetValue(std::string new_data, ValueType new_type)
 	value_type = new_type;
 }
 
+void Value::SetValuedata(std::string new_data)
+{
+	value_data = new_data;
+}
+
 /*************Record*************/
 bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 {
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < fields.capacity(); i++)
 	{
 		
 		ValueType valuetype;
 		std::string valuedata;
 		valuetype = values_data[i].GetValueType();
 		valuedata = values_data[i].GetValueData();
-		if (valuedata == "\0")
+		if (valuetype ==kNullType)   //数据为空
 			continue;
 		else
 		{
@@ -45,7 +50,7 @@ bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 
 void Record::SetValue(std::vector<Value> values_data)
 {
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < values_data.capacity(); i++)
 	{
 		ValueType valuetype;
 		std::string valuedata;
@@ -90,7 +95,7 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 	path = "md " + db_path + "\\" + db_name;
 	char str[1000];
 	strcpy(str, path.c_str());
-	if (!access(str, 0))
+	if (!access(str, 0))    //数据库已经存在
 	{
 		std::cerr << "数据库已存在！" << std::endl;
 		return false;
@@ -98,7 +103,9 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 	else
 	{
 		system(str);
-		std::cerr << "创建成功！" << std::endl;
+		database_name = db_name;
+		database_path = db_path;
+		std::cout << "创建成功！" << std::endl;
 		return true;
 	}
 }
@@ -115,7 +122,7 @@ std::string Database::UseDatabase(SQLUse &st)
 	strcpy(str, path.c_str());
 	if (!access(str, 0))
 	{
-		std::cerr << "打开成功！" << std::endl;
+		std::cout << "打开成功！" << std::endl;
 		return path;
 	}
 	else
@@ -123,4 +130,14 @@ std::string Database::UseDatabase(SQLUse &st)
 		std::cerr << "打开失败！" << std::endl;
 		return "\0";
 	}
+}
+
+std::string Database::GetDatabaseName()
+{
+	return database_name;
+}
+
+std::vector<Table> Database::GetTableName()
+{
+	return table_name;
 }

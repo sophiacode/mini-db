@@ -58,7 +58,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Table(std::string nem_table_name);
+	Table(std::string new_path);
 
 	/**
 	*  \brief 析构函数
@@ -76,6 +76,16 @@ public:
 	bool UseTable();
 
 	/**
+	*  \brief 获取表单名称
+	*/
+	std::string GetTableName();
+
+	/**
+	*  \brief 获取表头信息
+	*/
+	std::vector<Field> GetTableFields();
+
+	/**
 	*  \brief 增加记录
 	*/
 	bool CreateRecord(SQLInsert &st);
@@ -83,7 +93,7 @@ public:
 	/**
 	*  \brief 更新记录
 	*/
-	bool UpdateRecord(SQLInsert &su);
+	bool UpdateRecord(SQLUpdate &su);
 
 	/**
 	*  \brief 删除记录
@@ -105,13 +115,18 @@ public:
 	*/
 	bool SelectRecord(SQLUpdate &su);
 
+	/**
+	*  \brief 创建索引
+	*/
+	bool CreateIndex(SQLCreateIndex &si);
+
 private:
 	int records_num;				     /* 表中已有数据数量 */
 	std::string table_name;				 /* 表单名称 */
-	Record record;						 /* 记录 */
 	std::vector<Field> fields;           /* 字段 */
 	std::vector<Index> indexs;           /* 索引 */
 	std::vector<int> select_id;			 /* 记录select选中的id */
+	std::string path;					 /* 存储数据库路径 */
 };
 
 #endif

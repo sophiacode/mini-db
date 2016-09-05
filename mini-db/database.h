@@ -11,7 +11,8 @@
 enum ValueType
 {
 	kIntegerType,
-	kStringType
+	kStringType,
+	kNullType
 };
 
 /**
@@ -41,13 +42,19 @@ public:
 	ValueType GetValueType();
 
 	/**
-	*  \brief 重置Value的值
+	*  \brief 重置Value
 	*/
 	void SetValue(std::string new_data, ValueType new_type);
 
+	/**
+	*  \brief 重置Value的值
+	*/
+	void SetValuedata(std::string new_data);
+
+
 private:
-	std::string value_data;      /* 这个Value的值 */
-	ValueType value_type;         /*  */
+	std::string value_data;      /* Value的值 */
+	ValueType value_type;         /* Value的类型 */
 };
 
 /**
@@ -208,7 +215,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Database(std::string Database_name);
+	Database();
 
 	/**
 	*  \brief 析构函数
@@ -225,8 +232,20 @@ public:
 	*/
 	std::string UseDatabase(SQLUse &st);
 
+
+	/**
+	*  \brief 获取数据库名称
+	*/
+	std::string GetDatabaseName();
+
+	/**
+	*  \brief 获取表名
+	*/
+	std::vector<Table> GetTableName();
+
 private:
 	std::string database_name;          /* 数据库名称 */
 	std::vector<Table> table_name;      /* 数据库中表单 */
+	std::string database_path;         /* 数据库路径 */
 };
 #endif
