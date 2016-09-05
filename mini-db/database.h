@@ -137,31 +137,32 @@ private:
 /**
 *  \brief 索引类
 */
-template<class KEYTYPE>
 class Index
 {
 public:
 	/**
 	*  \brief 构造函数
 	*/
-	Index(std::string index_name,std::string field_name);
+	Index(std::string index_name,std::string field_name,ValueType type);
 
 	/**
 	*  \brief 析构函数
 	*/
 	~Index();
 
-	bool InsertNode(KEYTYPE key, int data_id);
+	bool InsertNode(std::string value, int data_id);
 
-	bool DeleteNode(KEYTYPE key);
+	bool DeleteNode(std::string value);
 
-	int SearchNode(KEYTYPE key);
+	int SearchNode(std::string value);
 
-	bool UpdateNode(KEYTYPE key);
-private:
-	BPlusTree * bplustree_;   /* 索引的B+树 */
-	std::string field_name;  /* 索引对应的字段名 */
-	std::string index_name;  /* 索引名 */
+	bool UpdateNode(std::string value);
+private:  
+	BPlusTree<int> * bplustree_int_;               /* int类型索引的B+树 */
+	BPlusTree<std::string> * bplustree_string_;    /* string类型索引的B+树 */
+	std::string field_name_;                       /* 索引对应的字段名 */
+	std::string index_name_;                       /* 索引名 */
+	ValueType type_;                               /* 索引类型 */
 };
 
 /**
@@ -207,48 +208,4 @@ private:
 };
 #endif
 
-
-
-template<class KEYTYPE>
-inline Index<KEYTYPE>::Index(std::string index_name, std::string field_name)
-{
-	index_name_ = index_name;
-	field_name_ = field_name;
-	
-	bplustree_ = new BPlusTree();
-}
-
-template<class KEYTYPE>
-inline Index<KEYTYPE>::~Index()
-{
-	if (bplustree_ != nullptr)
-	{
-		delete bplustree_;
-		bplustree_ = nullptr;
-	}
-}
-
-template<class KEYTYPE>
-inline bool Index<KEYTYPE>::InsertNode(KEYTYPE key, int data_id)
-{
-	return bplustree_->InsertNode(key,data_id);
-}
-
-template<class KEYTYPE>
-inline bool Index<KEYTYPE>::DeleteNode(KEYTYPE key)
-{
-	return bplustree_->DeleteNode(key);
-}
-
-template<class KEYTYPE>
-inline int Index<KEYTYPE>::SearchNode(KEYTYPE key)
-{
-	return bplustree_->SearchNode(key);
-}
-
-template<class KEYTYPE>
-inline bool Index<KEYTYPE>::UpdateNode(KEYTYPE key)
-{
-	return bplustree_->UpdateNode(key);
-}
 
