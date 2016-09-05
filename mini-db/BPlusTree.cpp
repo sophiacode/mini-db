@@ -16,50 +16,50 @@ BPlusTree<KEYTYPE>::BPlusTree()
 
 
 
-template<class KEYTYPE>
-void BPlusTree<KEYTYPE>::ReadNodeFromFile(BPlusTreeNode<KEYTYPE> *_p)
-{
-  if (_p->this_file_.empty()){
-    cerr << "没有指定文件名" << endl;//错误警告保护
-    return;
-  }
-  if (cache_num_ >= BPlusTree_m){//释放缓存节点
-    deleteCache();
-  }
-  if (_p->cache_index != -1){
-    cache_fs_[_p->cache_index].read((char*)(_p), sizeof(*_p));
-  }
-  else{
-    _p->cache_index = cache_num_;
-    cache_ptr_[cache_num_] = _p;
-    cache_fs_[cache_num_].open(_p->this_file_, ios::in | ios::oct | ios::binary);
-    cache_fs_[cache_num_].read((char*)(_p), sizeof(*_p));
-    cache_num_++;
-  }
-}
+//template<class KEYTYPE>
+//void BPlusTree<KEYTYPE>::ReadNodeFromFile(BPlusTreeNode<KEYTYPE> *_p)
+//{
+//  if (_p->this_file_.empty()){
+//    cerr << "没有指定文件名" << endl;//错误警告保护
+//    return;
+//  }
+//  if (cache_num_ >= BPlusTree_m){//释放缓存节点
+//    deleteCache();
+//  }
+//  if (_p->cache_index != -1){
+//    cache_fs_[_p->cache_index].read((char*)(_p), sizeof(*_p));
+//  }
+//  else{
+//    _p->cache_index = cache_num_;
+//    cache_ptr_[cache_num_] = _p;
+//    cache_fs_[cache_num_].open(_p->this_file_, ios::in | ios::oct | ios::binary);
+//    cache_fs_[cache_num_].read((char*)(_p), sizeof(*_p));
+//    cache_num_++;
+//  }
+//}
 
-
-template<class KEYTYPE>
-void BPlusTree<KEYTYPE>::WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p)
-{
-  if (_p->this_file_.empty()){
-    cerr << "没有指定文件名" << endl;//错误警告保护
-    return;
-  }
-  if (cache_num_ >= BPlusTree_m){//释放缓存节点
-    deleteCache();
-  }
-  if (_p->cache_index != -1){
-    cache_fs_[_p->cache_index].write((char*)(_p), sizeof(*_p));
-  }
-  else{
-    _p->cache_index = cache_num_;
-    cache_ptr_[cache_num_] = _p;
-    cache_fs_[cache_num_].open(_p->this_file_, ios::in | ios::oct | ios::binary);
-    cache_fs_[cache_num_].write((char*)(_p), sizeof(*_p));
-    cache_num_++;
-  }
-}
+//
+//template<class KEYTYPE>
+//void BPlusTree<KEYTYPE>::WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p)
+//{
+//  if (_p->this_file_.empty()){
+//    cerr << "没有指定文件名" << endl;//错误警告保护
+//    return;
+//  }
+//  if (cache_num_ >= BPlusTree_m){//释放缓存节点
+//    deleteCache();
+//  }
+//  if (_p->cache_index != -1){
+//    cache_fs_[_p->cache_index].write((char*)(_p), sizeof(*_p));
+//  }
+//  else{
+//    _p->cache_index = cache_num_;
+//    cache_ptr_[cache_num_] = _p;
+//    cache_fs_[cache_num_].open(_p->this_file_, ios::in | ios::oct | ios::binary);
+//    cache_fs_[cache_num_].write((char*)(_p), sizeof(*_p));
+//    cache_num_++;
+//  }
+//}
 
 
 
@@ -184,6 +184,7 @@ void BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
         q = SonPtr(p, insert_index);
         if (q->key_num_>MinBPlusTree_m){
           //借出去
+
         }
       }
     }

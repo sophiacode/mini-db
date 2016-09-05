@@ -2,7 +2,8 @@
 #define _B_PLUS_TREE_H_
 #include "BPlusTreeNode.h"
 #include "MemPool.h"
-#include <bits/stdc++.h>
+#include <fstream>
+//#include <bits/stdc++.h>
 using namespace std;
 template<class KEYTYPE>
 class BPlusTree
@@ -20,11 +21,11 @@ private:
   /**
   *   \将文件读入节点
   */
-  void ReadNodeFromFile(BPlusTreeNode<KEYTYPE> *_p);
+  //void ReadNodeFromFile(BPlusTreeNode<KEYTYPE> *_p);
   /**
   *   \将节点写入文件
   */
-  void WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p);
+  //void WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p);
   /**
   *   \返回儿子的指针
   *
@@ -67,7 +68,10 @@ private:
   */
   BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
 
-
+  /**
+  *   \查找关键字的叶子节点
+  */
+  BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
 
 };
 
