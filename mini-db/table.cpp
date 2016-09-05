@@ -5,7 +5,7 @@
 #include "database.h"
 #include "table.h"
 #include "sqlstatement.h"
-#include "MemPool.h"
+#include "IDPool.h"
 using namespace std;
 
 
@@ -49,6 +49,20 @@ bool Table::UseTable()
 	}
 	fp_fields.close();											/* 关闭文件 */
 	return true;
+}
+
+/**
+*  \brief 找到字段对应的索引编号
+*/
+int Table::FindIndex(std::string index_field_name)
+{
+	for (int i = 0; i < indexs.size(); i++)
+	{
+		if (index_field_name == indexs[i].GetFieldName())
+		{
+			return i;
+		}
+	}
 }
 
 /**
@@ -187,7 +201,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		}
 
 		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
-		int Record_id = MemPool::NewNode();					/* 获得新记录的主键 */
+		int Record_id = idPool.NewNode();					/* 获得新记录的主键 */
 		char records_no_[1];
 		itoa(Record_id / record_num, records_no_, 1);
 		std::string table_name_records = path + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
@@ -199,6 +213,11 @@ bool Table::CreateRecord(SQLInsert &st)
 		for (int i = 0; i < fields.size(); i++)
 		{
 			fp.write(records__data[i].c_str(), 255);		/* 按字段顺序写入文件 */
+			if (fields[i].IsHaveIndex())					/* 当这个字段存在索引时，维护索引 */
+			{
+				int index_id = FindIndex(fields[i].GetFieldName());/* 找到该字段index_id（索引对应编号） */
+				indexs[index_id].InsertNode(records__data[i].c_str(), Record_id);/* 插入索引结点 */
+			}
 		}
 
 		records_num++;										/* 插入成功，表单中记录总数加一 */
@@ -236,6 +255,11 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
 				{
 					fp.write(Null_str.c_str(), 255);
+					if (fields[j].IsHaveIndex())									/* 当对应字段存在索引时，对索引进行维护 */
+					{
+						int index_id = FindIndex(fields[j].GetFieldName());			/* 找到该字段对应的索引编号index_id */
+						indexs[index_id].DeleteNode(Record_id);						/* 删除对应结点 */
+					}
 				}
 			}
 			records_num--;					/* 删除成功，表单中记录总数减一 */
@@ -283,7 +307,6 @@ bool Table::UpdateRecord(SQLUpdate &su)
 
 				itoa(Record_id / record_num, records_no, 1);
 				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
-				fwp.open(record_file.c_str(), std::ios::binary | std::ios::out);/* 打开写记录文件 */
 				frp.open(record_file.c_str(), std::ios::binary | std::ios::in); /* 打开读记录文件 */
 				frp.seekg((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 定位读文件指针 */
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
@@ -291,6 +314,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 					frp.read(record__data, sizeof(char)* 255);
 					records__data[j] = record__data;
 				}
+				frp.close();													/* 关闭读文件 */
 
 
 				for (int j = 0; j < su.GetNewField().size(); j++)
@@ -317,14 +341,18 @@ bool Table::UpdateRecord(SQLUpdate &su)
 					}
 				}
 		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
+				fwp.open(record_file.c_str(), std::ios::binary | std::ios::out);/* 打开写记录文件 */
+				fwp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 指针定位 */
 				for (int j = 0; j < fields.size(); j++)
 				{
-					fwp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 指针定位 */
 					fwp.write(records__data[j].c_str(), 255);	/* 按照字段序列进行更改 */
+					if (fields[j].IsHaveIndex())				/* 当该字段存在索引时，对索引进行维护 */
+					{
+						int index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
+						indexs[index_id].UpdateNode(records__data[j], Record_id);/* 更新索引结点 */
+					}
 				}
-
 				fwp.close();									/* 关闭写文件 */
-				frp.close();									/* 关闭读文件 */
 			}
 			return true;										/* 更新成功 */
 		}
@@ -332,4 +360,17 @@ bool Table::UpdateRecord(SQLUpdate &su)
 	else{
 		return false;											/* 打开表单文件失败，返回false */
 	}
+}
+
+/**
+*  \brief 创建索引
+*/
+bool Table::CreateIndex(SQLCreateIndex &si)
+{
+	//
+	/*table_name = si.GetTableName();
+	Index *index = new Index();
+	indexs.push_back(index);
+	indexs[index_id].SetIndexField(si.GetField());
+	indexs[index_id].SetIndexName();*/
 }
