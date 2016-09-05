@@ -20,11 +20,11 @@ private:
   /**
   *   \将文件读入节点
   */
-  void ReadNodeFromFile(BPlusTreeNode<KEYTYPE> *_p);
+  //void ReadNodeFromFile(BPlusTreeNode<KEYTYPE> *_p);
   /**
   *   \将节点写入文件
   */
-  void WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p);
+  //void WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p);
   /**
   *   \返回儿子的指针
   *
@@ -67,7 +67,10 @@ private:
   */
   BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
 
-
+  /**
+  *   \查找关键字的叶子节点
+  */
+  BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
 
 };
 
