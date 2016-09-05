@@ -101,7 +101,7 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SonPtr(BPlusTreeNode<KEYTYPE> *_p, i
 }
 
 template<class KEYTYPE>
-void BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
+bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
 {
   int insert_index;
   bool flag_first = false;//是否删除了第一个位置
@@ -126,6 +126,7 @@ void BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
     }
   }
   else{
+    return false;
     //*************************
     //键值不存在的 错误 说明
     //*************************
@@ -152,10 +153,9 @@ void BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
     if (p->key_num_ < MinBPlusTree_m){
       r = FatherPtr(p);
       insert_index = -(r->BinarySearch(p->key_[0]));
-      if (insert_index > 1){
-        q = SonPtr(p, insert_index - 2);
+      if (insert_index > 1){//向左边借
+        q = SonPtr(r, insert_index - 2);
         if (q->key_num_ > MinBPlusTree_m){
-          //借出去
           for (int i = p->key_num_; i >= 1; i--){
             p->key_[i] = p->key_[i - 1];
             if (p->isleaf()){
@@ -180,19 +180,36 @@ void BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
           r->son_file_[insert_index - 1] = p->this_file_;
         }
       }
-      else if (insert_index < r->key_num_){
-        q = SonPtr(p, insert_index);
+      else if (insert_index < r->key_num_){//向右边借
+        q = SonPtr(r, insert_index);
         if (q->key_num_>MinBPlusTree_m){
-          //借出去
-
+          p->key_[p->key_num_] = q->key_[0];
+          q->key_num_--;
+          for (int i = 0; i <q.key_num_; i--){
+            q->key_[i] = q->key_[i + 1];
+            if (p->isleaf()){
+              q->key_data_id[i] = q->key_data_id[i + 1];
+            }
+            else{
+              q->sonptr_[i] = q->sonptr_[i + 1];
+              q->son_file_[i] = q->son_file_[i + 1];
+            }
+          }
+          r->key_[insert_index] = q->key_[0];
+          //应该完了
         }
+      }
+      else{//两边都借不到  orz(统一向左合并)
+        q = SonPtr(r, insert_index - 2);
+
       }
     }
   }
+  return true;
 }
 
 template<class KEYTYPE>
-void BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
+bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
 {
   int insert_index;
   bool flag_first = false;//是否插入到第一个位置
@@ -222,6 +239,7 @@ void BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       p->key_num_++;
     }
     else{
+      return false;
       //*************************
       //键值已经存在的 错误 说明
       //*************************
@@ -297,6 +315,7 @@ void BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
     }
     p = r;
   }
+  return true;
 }
 
 
@@ -322,4 +341,22 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SearchNode(KEYTYPE _key)
     }
   }
   return p;
+}
+
+
+
+template<class KEYTYPE>
+int BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key)
+{
+  int insert_index;
+  BPlusTreeNode<KEYTYPE> *p;
+  p = SearchNode(_key);
+  if (p = nullptr){
+    return -1;//ERROR：没有找到
+  }
+  insert_index = p->BinarySearch(_key);
+  if (insert_index > 0){
+    return -1;
+  }
+  return p->key_data_id[-insert_index];
 }
