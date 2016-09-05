@@ -89,12 +89,14 @@ bool Table::CreateTable(SQLCreateTable &sql)
 	table_name = sql.GetTableName();	/* 获得表单名称 */
 	if (table_name.size() >= 20)		/* 若表单名称过长则失败 */
 	{
+		std::cout << "表单名称过长！" << endl;
 		return false;
 	}
 
 	std::string cmd = "md " + path + table_name;	/* 构建命令创建表单文件夹 */
 	if (Table::UseTable())							/* 判断表单是否已经存在 */
 	{
+		std::cout << "已存在该表单！" << endl;
 		return false;
 	}
 	else {
@@ -112,6 +114,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 				{
 					if (fields[i].GetFieldName() == fields[j].GetFieldName())
 					{
+						std::cout << "存在重名字段！" << endl;
 						return false;									/* 若存在重名字段，则返回false */
 					}
 				}
@@ -128,10 +131,43 @@ bool Table::CreateTable(SQLCreateTable &sql)
 				fp.write(name.c_str(),20);
 			}
 			fp.close();													/* 关闭文件 */
+			std::cout << "创建成功！" << endl;
 			return true;
 		}
-		else return false;
+		else {
+			std::cout << "创建命令失败！" << endl;
+			return false;
+		}
 	}
+}
+
+/**
+*  \brief 通过SQL直接查找记录
+*/
+bool Table::SelectRecord(SQLSelect &sql)
+{
+	table_name = sql.GetTableName();
+	int field_id = Table::FindIndex(sql.GetField());
+	
+}
+
+/**
+*  \brief Delete调用Select功能
+*/
+bool Table::SelectRecord(SQLDelete &sd)
+{
+	table_name = sd.GetTableName();
+	int field_id = Table::FindIndex(sd.GetField());
+
+}
+
+/**
+*  \brief Update调用Select功能
+*/
+bool Table::SelectRecord(SQLUpdate &su)
+{
+	table_name = su.GetTableName();
+	int field_id = Table::FindIndex(su.GetWhereField());
 }
 
 /**
@@ -213,7 +249,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		for (int i = 0; i < fields.size(); i++)
 		{
 			fp.write(records__data[i].c_str(), 255);		/* 按字段顺序写入文件 */
-			if (fields[i].IsHaveIndex())					/* 当这个字段存在索引时，维护索引 */
+			if (fields[i].IsCreateIndex())					/* 当这个字段存在索引时，维护索引 */
 			{
 				int index_id = FindIndex(fields[i].GetFieldName());/* 找到该字段index_id（索引对应编号） */
 				indexs[index_id].InsertNode(records__data[i].c_str(), Record_id);/* 插入索引结点 */
@@ -267,7 +303,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
 				{
 					fp.write(Null_str.c_str(), 255);
-					if (fields[j].IsHaveIndex())									/* 当对应字段存在索引时，对索引进行维护 */
+					if (fields[j].IsCreateIndex())									/* 当对应字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());			/* 找到该字段对应的索引编号index_id */
 						indexs[index_id].DeleteNode(records__data[j]);				/* 删除对应结点 */
@@ -364,10 +400,10 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				for (int j = 0; j < fields.size(); j++)
 				{
 					fwp.write(records__data2[j].c_str(), 255);	/* 按照字段序列进行更改 */
-					if (fields[j].IsHaveIndex())				/* 当该字段存在索引时，对索引进行维护 */
+					if (fields[j].IsCreateIndex())				/* 当该字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
-						indexs[index_id].UpdateNode(records__data2[j], records__data1[j]);/* 更新索引结点 */
+						//indexs[index_id].UpdateNode(records__data2[j], records__data1[j]);/* 更新索引结点 */
 					}
 				}
 				fwp.close();									/* 关闭写文件 */
@@ -385,10 +421,5 @@ bool Table::UpdateRecord(SQLUpdate &su)
 */
 bool Table::CreateIndex(SQLCreateIndex &si)
 {
-	//
-	/*table_name = si.GetTableName();
-	Index *index = new Index();
-	indexs.push_back(index);
-	indexs[index_id].SetIndexField(si.GetField());
-	indexs[index_id].SetIndexName();*/
+	
 }
