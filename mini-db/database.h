@@ -4,6 +4,8 @@
 #include<string>
 #include<vector>
 #include"sqlstatement.h"
+#include"table.h"
+#include"BPlusTree.h"
 
 /**
 *  \brief 数据类型
@@ -132,78 +134,29 @@ private:
 /**
 *  \brief 索引类
 */
+template<class KEYTYPE>
 class Index
 {
 public:
 	/**
 	*  \brief 构造函数
 	*/
-	Index(std::string Field_name);
+	Index(std::string index_name,std::string field_name);
 
 	/**
 	*  \brief 析构函数
 	*/
 	~Index();
 
-	/**
-	*  \brief 创建新增索引
-	*/
-	bool AddIndex(std::string field_name);
+	void InsertNode(KEYTYPE _key, int _data_id);
 
+	void DeleteNode(KEYTYPE _key);
+
+	void SearchNode(KEYTYPE _key);
 private:
-	BPlusTree bplustree;     /* 索引的B+树 */
+	BPlusTree * bplustree;   /* 索引的B+树 */
 	std::string field_name;  /* 索引对应的字段名 */
-};
-
-/**
-*  \brief 表单类
-*/
-class Table
-{
-public:
-	/**
-	*  \brief 构造函数
-	*/
-	Table();
-
-	/**
-	*  \brief 析构函数
-	*/
-	~Table();
-
-	/**
-	*  \brief 创建表单
-	*/
-	bool CreateTable(SQLCreateTable &sql);
-
-	/**
-	*  \brief 打开表单
-	*/
-	bool UseTable();
-
-	/**
-	*  \brief 增加记录
-	*/
-	bool CreateRecord(SQLInsert &st);
-
-	/**
-	*  \brief 更新记录
-	*/
-	bool UpdateRecord(SQLInsert &st);
-
-	/**
-	*  \brief 删除记录
-	*/
-	bool DeleteRecord(SQLInsert &st);
-
-
-private:
-	long long int record_num;           /* 表中已有数据数量 */
-	int fields_num;                     /* 表中字段数 */
-	std::string table_name;             /* 表单名称 */
-	std::vector<Record> records;        /* 记录 */
-	std::vector<Field> fields;          /* 字段 */
-	std::vector<Index> indexs;          /* 索引 */
+	std::string index_name;  /* 索引名 */
 };
 
 /**
