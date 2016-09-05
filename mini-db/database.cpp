@@ -82,7 +82,10 @@ bool Field::SetFieldType(ValueType new_type)
 	field_type = new_type;
 }
 
-
+bool Field::IsCreateIndex()
+{
+	return is_create_index;
+}
 
 /*************Database**************/
 bool Database::CreateDatabase(SQLCreateDatabase &st)
@@ -140,4 +143,96 @@ std::string Database::GetDatabaseName()
 std::vector<Table> Database::GetTableName()
 {
 	return table_name;
+}
+
+/************Value************/
+
+Index::Index(std::string index_name, std::string field_name, ValueType type)
+{
+	index_name_ = index_name;
+	field_name_ = field_name;
+	type_ = type;
+
+	if (type_ == kIntegerType)
+	{
+		bplustree_int_ = new BPlusTree<int>();
+		bplustree_string_ = nullptr;
+	}
+	if (type_ == kStringType)
+	{
+		bplustree_int_ = nullptr;
+		bplustree_string_ = new BPlusTree<std::string>();
+	}
+}
+
+Index::~Index()
+{
+	if (bplustree_int_ != nullptr)
+	{
+		delete bplustree_int_;
+		bplustree_int_ = nullptr;
+	}
+
+	if (bplustree_string_ != nullptr)
+	{
+		delete bplustree_string_;
+		bplustree_string_ = nullptr;
+	}
+
+}
+
+bool Index::InsertNode(std::string value, int data_id)
+{
+	if (type_ == kIntegerType)
+	{
+		int temp = atoi(value.c_str());
+		return bplustree_int_->InsertNode(temp, data_id);
+	}
+
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->InsertNode(value, data_id);
+	}
+}
+
+bool Index::DeleteNode(std::string value)
+{
+	if (type_ == kIntegerType)
+	{
+		int temp = atoi(value.c_str());
+		return bplustree_int_->DeleteNode(temp);
+	}
+
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->DeleteNode(value);
+	}
+}
+
+int Index::SearchNode(std::string value)
+{
+	if (type_ == kIntegerType)
+	{
+		int temp = atoi(value.c_str());
+		return bplustree_int_->SearchID(temp);
+	}
+
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->SearchID(value);
+	}
+}
+
+bool Index::UpdateNode(std::string value)
+{
+	if (type_ == kIntegerType)
+	{
+		int temp = atoi(value.c_str());
+		return bplustree_int_->UpdateNode(temp);
+	}
+
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->UpdateNode(value);
+	}
 }
