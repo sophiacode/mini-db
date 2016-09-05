@@ -56,7 +56,7 @@ public:
 
 private:
 	std::string value_data;      /* Value的值 */
-	ValueType value_type;         /* Value的类型 */
+	ValueType value_type;        /* Value的类型 */
 };
 
 /**
@@ -86,7 +86,7 @@ public:
 	void SetValue(std::vector<Value> values_data);
 
 private:
-	int record_id;                /* 记录主键 */
+	int record_id;                         /* 记录主键 */
 	std::vector<Value> record_data;        /* 记录数据 */
 };
 
@@ -126,9 +126,12 @@ public:
 	*/
 	bool SetFieldType(ValueType new_type);
 
+	bool IsCreateIndex();
+
 private:
 	std::string field_name;       /* 字段名  */
 	ValueType field_type;         /* 字段数据类型 */
+	bool is_create_index;         /* 标识该字段是否建立索引 */
 };
 
 /**
@@ -148,13 +151,15 @@ public:
 	*/
 	~Index();
 
-	void InsertNode(KEYTYPE _key, int _data_id);
+	bool InsertNode(KEYTYPE key, int data_id);
 
-	void DeleteNode(KEYTYPE _key);
+	bool DeleteNode(KEYTYPE key);
 
-	void SearchNode(KEYTYPE _key);
+	int SearchNode(KEYTYPE key);
+
+	bool UpdateNode(KEYTYPE key);
 private:
-	BPlusTree * bplustree;   /* 索引的B+树 */
+	BPlusTree * bplustree_;   /* 索引的B+树 */
 	std::string field_name;  /* 索引对应的字段名 */
 	std::string index_name;  /* 索引名 */
 };
@@ -185,7 +190,6 @@ public:
 	*/
 	std::string UseDatabase(SQLUse &st);
 
-
 	/**
 	*  \brief 获取数据库名称
 	*/
@@ -199,6 +203,52 @@ public:
 private:
 	std::string database_name;          /* 数据库名称 */
 	std::vector<Table> table_name;      /* 数据库中表单 */
-	std::string database_path;         /* 数据库路径 */
+	std::string database_path;          /* 数据库路径 */
 };
 #endif
+
+
+
+template<class KEYTYPE>
+inline Index<KEYTYPE>::Index(std::string index_name, std::string field_name)
+{
+	index_name_ = index_name;
+	field_name_ = field_name;
+	
+	bplustree_ = new BPlusTree();
+}
+
+template<class KEYTYPE>
+inline Index<KEYTYPE>::~Index()
+{
+	if (bplustree_ != nullptr)
+	{
+		delete bplustree_;
+		bplustree_ = nullptr;
+	}
+}
+
+template<class KEYTYPE>
+inline bool Index<KEYTYPE>::InsertNode(KEYTYPE key, int data_id)
+{
+	return bplustree_->InsertNode(key,data_id);
+}
+
+template<class KEYTYPE>
+inline bool Index<KEYTYPE>::DeleteNode(KEYTYPE key)
+{
+	return bplustree_->DeleteNode(key);
+}
+
+template<class KEYTYPE>
+inline int Index<KEYTYPE>::SearchNode(KEYTYPE key)
+{
+	return bplustree_->SearchNode(key);
+}
+
+template<class KEYTYPE>
+inline bool Index<KEYTYPE>::UpdateNode(KEYTYPE key)
+{
+	return bplustree_->UpdateNode(key);
+}
+
