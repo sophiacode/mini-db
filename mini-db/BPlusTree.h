@@ -53,7 +53,7 @@ private:
   *
   *   \接口：键值，该键值对应于文件中的id
   */
-  void InsertNode(KEYTYPE _key, int _data_id);
+  bool InsertNode(KEYTYPE _key, int _data_id);
 
   
   /**
@@ -61,7 +61,7 @@ private:
   *
   *   \
   */
-  void DeleteNode(KEYTYPE _key);
+  bool DeleteNode(KEYTYPE _key);
 
   /**
   *   \查找关键字的叶子节点
@@ -69,9 +69,9 @@ private:
   BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
 
   /**
-  *   \查找关键字的叶子节点
+  *   \查找关键字的id
   */
-  BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
+  int SearchID(KEYTYPE _key);
 
 };
 
