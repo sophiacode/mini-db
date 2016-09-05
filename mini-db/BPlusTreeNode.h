@@ -51,7 +51,10 @@ public:
   */
   int BinarySearch(KEYTYPE _key);
 
-  BPlusTreeNode();
+
+  BPlusTreeNode(string _file_neme);
+
+
   ~BPlusTreeNode();
 };
 
@@ -70,8 +73,10 @@ BPlusTreeNode<KEYTYPE>::~BPlusTreeNode()
 
 }
 
+
+
 template<class KEYTYPE>
-BPlusTreeNode<KEYTYPE>::BPlusTreeNode()
+BPlusTreeNode<KEYTYPE>::BPlusTreeNode(string _file_neme)
 {
   int timeflag;
   stringstream ss;
@@ -87,9 +92,9 @@ BPlusTreeNode<KEYTYPE>::BPlusTreeNode()
   timeflag += ++name_num_;
   ss << timeflag;
   ss >> this_file_;
+  ///////////////
+  this_file_ = _file_neme + "Index\\" + this_file_;
 }
-
-
 
 
 template<class KEYTYPE>
@@ -113,7 +118,7 @@ int BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key, int _data_id)
 
 
 template<class KEYTYPE>
-void BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key£¬BPlusTreeNode<KEYTYPE> *_p)
+void BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key, BPlusTreeNode<KEYTYPE> *_p)
 {
   int insert_index;
   insert_index = this->BinarySearch(_key);
