@@ -71,11 +71,6 @@ public:
 	bool CreateTable(SQLCreateTable &sql);
 
 	/**
-	*  \brief 打开表单
-	*/
-	bool UseTable();
-
-	/**
 	*  \brief 获取表单名称
 	*/
 	std::string GetTableName();
@@ -121,12 +116,25 @@ public:
 	bool CreateIndex(SQLCreateIndex &si);
 
 private:
+	/**
+	*  \brief 打开表单
+	*/
+	bool UseTable();
+
+	/**
+	*  \brief 找到字段对应的索引编号
+	*/
+	int FindIndex(std::string index_field_name);
+
+private:
 	int records_num;				     /* 表中已有数据数量 */
+	int indexs_num;						 /* 表中已有索引数量 */
 	std::string table_name;				 /* 表单名称 */
 	std::vector<Field> fields;           /* 字段 */
 	std::vector<Index> indexs;           /* 索引 */
 	std::vector<int> select_id;			 /* 记录select选中的id */
 	std::string path;					 /* 存储数据库路径 */
+	IDPool idPool;						 /* 主键内存池 */
 };
 
 #endif
