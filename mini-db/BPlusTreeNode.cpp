@@ -12,10 +12,10 @@ BPlusTreeNode<KEYTYPE>::BPlusTreeNode()
 {
   int timeflag;
   stringstream ss;
-  cache_index = -1;
   is_leaf_ = true;
   key_num_ = 0;
   father_ = nullptr;
+  brother_ = nullptr;
   for (int i = 0; i < BPlusTree_m + 1; i++){
     sonptr_ = nullptr;
   }

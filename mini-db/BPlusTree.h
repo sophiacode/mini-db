@@ -14,8 +14,7 @@ private:
   fstream rootfs_;//根节点文件流
   BPlusTreeNode<KEYTYPE> *mem_ptr_[BPlusTree_m];//需要常驻内存的节点指针
   fstream mem_fs_;//需要常驻内存的节点文件流
-  BPlusTreeNode<KEYTYPE> *cache_ptr_[BPlusTree_m];//暂时存入内存的节点指针
-  fstream cache_fs_;//暂时存入内存的节点文件流
+  fstream file_stream_;//随机文件流
   int cache_num_;//暂时存入内存的节点数量
 
   /**
@@ -27,15 +26,19 @@ private:
   */
   void WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p);
   /**
-  *   \释放缓存节点
-  */
-  void deleteCache();
-  /**
   *   \返回儿子的指针
   *
-  *   \如果节点没有读入内存，就读入，并返回指针
+  *   \有现成指针则返回，否则返回读取文件后new的指针
   */
   BPlusTreeNode<KEYTYPE>* SonPtr(BPlusTreeNode<KEYTYPE> *_p, int _insert_index);
+
+  /**
+  *   \返回父亲节点
+  *
+  *   \有现成指针则返回，否则返回读取文件后new的指针
+  */
+  BPlusTreeNode<KEYTYPE> *FatherPtr(BPlusTreeNode<KEYTYPE> *_p);
+
   public:
   BPlusTree();
   ~BPlusTree();
@@ -44,9 +47,24 @@ private:
   */
   bool isPrimareKey(){ return is_primare_key_ };
 
+  /**
+  *   \插入关键字
+  *
+  *   \接口：键值，该键值对应于文件中的id
+  */
+  void InsertNode(KEYTYPE _key, int _data_id);
 
-  void InsertNode(KEYTYPE _key, int _data_id);//插入关键字
-  void DeleteNode(KEYTYPE _key);//删除关键字
+  
+  /**
+  *   \删除关键字
+  *
+  *   \
+  */
+  void DeleteNode(KEYTYPE _key);
+
+  /**
+  *   \查找关键字的叶子节点
+  */
   BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
 
 
