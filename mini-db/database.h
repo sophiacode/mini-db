@@ -4,6 +4,8 @@
 #include<string>
 #include<vector>
 #include"sqlstatement.h"
+#include"table.h"
+#include"BPlusTree.h"
 
 /**
 *  \brief 数据类型
@@ -54,7 +56,7 @@ public:
 
 private:
 	std::string value_data;      /* Value的值 */
-	ValueType value_type;         /* Value的类型 */
+	ValueType value_type;        /* Value的类型 */
 };
 
 /**
@@ -84,7 +86,7 @@ public:
 	void SetValue(std::vector<Value> values_data);
 
 private:
-	int record_id;                /* 记录主键 */
+	int record_id;                         /* 记录主键 */
 	std::vector<Value> record_data;        /* 记录数据 */
 };
 
@@ -124,86 +126,42 @@ public:
 	*/
 	bool SetFieldType(ValueType new_type);
 
+	bool IsCreateIndex();
+
 private:
 	std::string field_name;       /* 字段名  */
 	ValueType field_type;         /* 字段数据类型 */
+	bool is_create_index;         /* 标识该字段是否建立索引 */
 };
 
 /**
 *  \brief 索引类
 */
+template<class KEYTYPE>
 class Index
 {
 public:
 	/**
 	*  \brief 构造函数
 	*/
-	Index(std::string Field_name);
+	Index(std::string index_name,std::string field_name);
 
 	/**
 	*  \brief 析构函数
 	*/
 	~Index();
 
-	/**
-	*  \brief 创建新增索引
-	*/
-	bool AddIndex(std::string field_name);
+	bool InsertNode(KEYTYPE key, int data_id);
 
+	bool DeleteNode(KEYTYPE key);
+
+	int SearchNode(KEYTYPE key);
+
+	bool UpdateNode(KEYTYPE key);
 private:
-	BPlusTree bplustree;     /* 索引的B+树 */
+	BPlusTree * bplustree_;   /* 索引的B+树 */
 	std::string field_name;  /* 索引对应的字段名 */
-};
-
-/**
-*  \brief 表单类
-*/
-class Table
-{
-public:
-	/**
-	*  \brief 构造函数
-	*/
-	Table();
-
-	/**
-	*  \brief 析构函数
-	*/
-	~Table();
-
-	/**
-	*  \brief 创建表单
-	*/
-	bool CreateTable(SQLCreateTable &sql);
-
-	/**
-	*  \brief 打开表单
-	*/
-	bool UseTable();
-
-	/**
-	*  \brief 增加记录
-	*/
-	bool CreateRecord(SQLInsert &st);
-
-	/**
-	*  \brief 更新记录
-	*/
-	bool UpdateRecord(SQLInsert &st);
-
-	/**
-	*  \brief 删除记录
-	*/
-	bool DeleteRecord(SQLInsert &st);
-
-
-private:
-	long long int record_num;           /* 表中已有数据数量 */
-	int fields_num;                     /* 表中字段数 */
-	std::string table_name;             /* 表单名称 */
-	std::vector<Record> records;        /* 记录 */
-	std::vector<Field> fields;          /* 字段 */
-	std::vector<Index> indexs;          /* 索引 */
+	std::string index_name;  /* 索引名 */
 };
 
 /**
@@ -232,7 +190,6 @@ public:
 	*/
 	std::string UseDatabase(SQLUse &st);
 
-
 	/**
 	*  \brief 获取数据库名称
 	*/
@@ -246,6 +203,52 @@ public:
 private:
 	std::string database_name;          /* 数据库名称 */
 	std::vector<Table> table_name;      /* 数据库中表单 */
-	std::string database_path;         /* 数据库路径 */
+	std::string database_path;          /* 数据库路径 */
 };
 #endif
+
+
+
+template<class KEYTYPE>
+inline Index<KEYTYPE>::Index(std::string index_name, std::string field_name)
+{
+	index_name_ = index_name;
+	field_name_ = field_name;
+	
+	bplustree_ = new BPlusTree();
+}
+
+template<class KEYTYPE>
+inline Index<KEYTYPE>::~Index()
+{
+	if (bplustree_ != nullptr)
+	{
+		delete bplustree_;
+		bplustree_ = nullptr;
+	}
+}
+
+template<class KEYTYPE>
+inline bool Index<KEYTYPE>::InsertNode(KEYTYPE key, int data_id)
+{
+	return bplustree_->InsertNode(key,data_id);
+}
+
+template<class KEYTYPE>
+inline bool Index<KEYTYPE>::DeleteNode(KEYTYPE key)
+{
+	return bplustree_->DeleteNode(key);
+}
+
+template<class KEYTYPE>
+inline int Index<KEYTYPE>::SearchNode(KEYTYPE key)
+{
+	return bplustree_->SearchNode(key);
+}
+
+template<class KEYTYPE>
+inline bool Index<KEYTYPE>::UpdateNode(KEYTYPE key)
+{
+	return bplustree_->UpdateNode(key);
+}
+
