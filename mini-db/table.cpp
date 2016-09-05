@@ -367,6 +367,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 */
 bool Table::CreateIndex(SQLCreateIndex &si)
 {
+	//
 	/*table_name = si.GetTableName();
 	Index *index = new Index();
 	indexs.push_back(index);
