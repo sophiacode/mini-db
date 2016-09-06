@@ -111,10 +111,10 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 	}
 	else
 	{
+		database_path = path;
+		database_name = db_name;
 		path = "md " + db_path + "\\" + db_name;
 		system(path.c_str());
-		database_name = db_name;
-		database_path = db_path;
 		std::cout << "创建成功！" << std::endl;
 		return true;
 	}
@@ -128,14 +128,15 @@ std::string Database::UseDatabase(SQLUse &st)
 	db_path = st.GetDatabasePath();
 	std::string path;
 	path = db_path + "\\" + db_name;
-
-	std::cout << path << std::endl;
+	database_path = path;
+	//std::cout << path << std::endl;
 
 	char str[1000];
 	strcpy(str, path.c_str());
 	if (!_access(str, 0))
 	{
 		std::cout << "打开成功！" << std::endl;
+
 		return path;
 	}
 	else
@@ -163,6 +164,7 @@ bool Database::CreateTable(SQLCreateTable & st)
 	if (table.CreateTable(st))
 	{
 		table_.push_back(table);
+
 		return true;
 	}
 	
