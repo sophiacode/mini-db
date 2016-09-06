@@ -199,7 +199,7 @@ bool Database::CreateTable(SQLCreateTable & st)
 		path = database_path + "\\" + "table_name";   /*创建一个文件名为table_name的文件夹存放表名*/
 		fp.open(path.c_str(), std::ios::out);
 		fp.write(table_name_.c_str(), 20);
-		fp.close;
+		fp.close();
 		return true;
 	}
 	return false;
