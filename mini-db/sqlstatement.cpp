@@ -693,6 +693,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 
 SQLSelect::SQLSelect(std::vector<std::string> sql_token)
 {
+	value_ = new Value();
 	Parse(sql_token);
 }
 
