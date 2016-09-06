@@ -66,29 +66,32 @@ void Record::SetValue(std::vector<Value> values_data)
 /**************Field*****************/
 std::string Field::GetFieldName()
 {
-	return field_name;
+	return field_name_;
 }
 
 ValueType Field::GetFieldType()
 {
-	return field_type;
+	return field_type_;
 }
 
-bool Field::SetFieldName(std::string new_name)
+void Field::SetFieldName(std::string new_name)
 {
-	field_name = new_name;
-	return true;
+	field_name_ = new_name;
 }
 
-bool Field::SetFieldType(ValueType new_type)
+void Field::SetFieldType(ValueType new_type)
 {
-	field_type = new_type;
-	return true;
+	field_type_ = new_type;
 }
 
 bool Field::IsCreateIndex()
 {
-	return is_create_index;
+	return is_create_index_;
+}
+
+void Field::SetIsCreateIndex(bool is_create_index)
+{
+	is_create_index_ = is_create_index;
 }
 
 /*************Database**************/
@@ -108,10 +111,10 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 	}
 	else
 	{
+		database_path = path;
+		database_name = db_name;
 		path = "md " + db_path + "\\" + db_name;
 		system(path.c_str());
-		database_name = db_name;
-		database_path = db_path;
 		std::cout << "创建成功！" << std::endl;
 		return true;
 	}
@@ -125,14 +128,15 @@ std::string Database::UseDatabase(SQLUse &st)
 	db_path = st.GetDatabasePath();
 	std::string path;
 	path = db_path + "\\" + db_name;
-
-	std::cout << path << std::endl;
+	database_path = path;
+	//std::cout << path << std::endl;
 
 	char str[1000];
 	strcpy(str, path.c_str());
 	if (!_access(str, 0))
 	{
 		std::cout << "打开成功！" << std::endl;
+
 		return path;
 	}
 	else
@@ -149,19 +153,31 @@ std::string Database::GetDatabaseName()
 
 std::vector<Table> Database::GetTableName()
 {
-	return table_name;
+	return table_;
+}
+
+bool Database::CreateTable(SQLCreateTable & st)
+{
+
+	Table table(database_path);
+
+	if (table.CreateTable(st))
+	{
+		table_.push_back(table);
+
+		return true;
+	}
+	
+	return false;
 }
 
 /************Value************/
 
-Index::Index(std::string index_name, std::string field_name, ValueType type)
+Index::Index(std::string index_name, std::string field_name, ValueType type,std::string path)
 {
 	index_name_ = index_name;
 	field_name_ = field_name;
 	type_ = type;
-
-	std::string path;
-
 
 	if (type_ == kIntegerType)
 	{

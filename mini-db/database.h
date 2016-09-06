@@ -122,19 +122,21 @@ public:
 	/**
 	*  \brief 更改字段名
 	*/
-	bool SetFieldName(std::string new_name);
+	void SetFieldName(std::string new_name);
 
 	/**
 	*  \brief 更改字段数据类型
 	*/
-	bool SetFieldType(ValueType new_type);
+	void SetFieldType(ValueType new_type);
 
 	bool IsCreateIndex();
 
+	void SetIsCreateIndex(bool is_create_index);
+
 private:
-	std::string field_name;       /* 字段名  */
-	ValueType field_type;         /* 字段数据类型 */
-	bool is_create_index;         /* 标识该字段是否建立索引 */
+	std::string field_name_;       /* 字段名  */
+	ValueType field_type_;         /* 字段数据类型 */
+	bool is_create_index_;         /* 标识该字段是否建立索引 */
 };
 
 /**
@@ -146,7 +148,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Index(std::string index_name,std::string field_name,ValueType type);
+	Index(std::string index_name,std::string field_name,ValueType type,std::string path);
 
 	/**
 	*  \brief 析构函数
@@ -206,9 +208,14 @@ public:
 	*/
 	std::vector<Table> GetTableName();
 
+	/**
+	*  \brief 创建表单
+	*/
+	bool Database::CreateTable(SQLCreateTable & st);
+
 private:
 	std::string database_name;          /* 数据库名称 */
-	std::vector<Table> table_name;      /* 数据库中表单 */
+	std::vector<Table> table_;      /* 数据库中表单 */
 	std::string database_path;          /* 数据库路径 */
 };
 #endif
