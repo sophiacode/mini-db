@@ -180,17 +180,17 @@ void SQLUse::SetDatabasePath(std::string database_path)
 
 void SQLUse::Parse(std::vector<std::string> sql_token)
 {
-	if (sql_token.size() < 3) {
+	if (sql_token.size() < 2) {
 		std::cerr << "SyntaxError:Please input the name of the database." << std::endl;
 		return;
 	}
 
-	database_name_ = sql_token[2];
+	database_name_ = sql_token[1];
 
-	if (sql_token.size() == 4) {
-		database_path_ = sql_token[3];
+	if (sql_token.size() == 3) {
+		database_path_ = sql_token[2];
 	}
-	else if (sql_token.size() < 4) {
+	else if (sql_token.size() < 3) {
 		database_path_ = "Database/";
 	}
 	else {
