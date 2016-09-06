@@ -165,6 +165,7 @@ bool Database::UseTable(std::string DatabasePath)
 	if (!fp.is_open())
 	{
 		std::cout << "打开失败" << endl;
+		fp.close();
 		return false;
 	}
 	else
@@ -176,6 +177,7 @@ bool Database::UseTable(std::string DatabasePath)
 			path = DatabasePath + "\\" + table_name;
 			Table table(path);
 			table_.push_back(table);
+			fp.close();
 		}
 		std::cout << "打开成功" << endl;
 		return true;
@@ -197,10 +199,9 @@ bool Database::CreateTable(SQLCreateTable & st)
 		path = database_path + "\\" + "table_name";   /*创建一个文件名为table_name的文件夹存放表名*/
 		fp.open(path.c_str(), std::ios::out);
 		fp.write(table_name_.c_str(), 20);
-		fp.close;
+		fp.close();
 		return true;
 	}
-
 	return false;
 }
 
