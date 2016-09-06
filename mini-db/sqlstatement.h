@@ -11,8 +11,16 @@
 class SQLBase
 {
 public:
+	/**
+	 *  \brief 构造函数
+	 */
 	SQLBase(); 
+
+	/**
+	 *  \brief 析构函数
+	 */
 	~SQLBase();
+
 	bool IsParseSucceed();
 	virtual void Parse(std::vector<std::string> sql_token) = 0;
 protected:
