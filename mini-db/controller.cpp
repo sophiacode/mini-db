@@ -4,6 +4,7 @@
 Controller::Controller()
 	:current_database_(nullptr)
 {
+	databases_.clear();
 	path_.clear();
 	is_use_database_ = false;
 }
