@@ -46,6 +46,8 @@ bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 			std::cout << valuedata << std::endl;
 		}
 	}
+
+	return true;
 }
 
 void Record::SetValue(std::vector<Value> values_data)
@@ -75,11 +77,13 @@ ValueType Field::GetFieldType()
 bool Field::SetFieldName(std::string new_name)
 {
 	field_name = new_name;
+	return true;
 }
 
 bool Field::SetFieldType(ValueType new_type)
 {
 	field_type = new_type;
+	return true;
 }
 
 bool Field::IsCreateIndex()
@@ -95,17 +99,17 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 	db_name = st.GetDatabaseName();
 	db_path = st.GetDatabasePath();
 	std::string path;
-	path = "md " + db_path + "\\" + db_name;
-	char str[1000];
-	strcpy(str, path.c_str());
-	if (!access(str, 0))    //数据库已经存在
+	path = db_path + "\\" + db_name;
+
+	if (!access(path.c_str(), 0))    //数据库已经存在
 	{
 		std::cerr << "数据库已存在！" << std::endl;
 		return false;
 	}
 	else
 	{
-		system(str);
+		path = "md " + db_path + "\\" + db_name;
+		system(path.c_str());
 		database_name = db_name;
 		database_path = db_path;
 		std::cout << "创建成功！" << std::endl;
@@ -117,13 +121,16 @@ std::string Database::UseDatabase(SQLUse &st)
 {
 	std::string db_name;
 	std::string db_path;
-	db_name = st.GetDatabaseName;
-	db_path = st.GetDatabasePath;
+	db_name = st.GetDatabaseName();
+	db_path = st.GetDatabasePath();
 	std::string path;
 	path = db_path + "\\" + db_name;
+
+	std::cout << path << std::endl;
+
 	char str[1000];
 	strcpy(str, path.c_str());
-	if (!access(str, 0))
+	if (!_access(str, 0))
 	{
 		std::cout << "打开成功！" << std::endl;
 		return path;
@@ -153,15 +160,18 @@ Index::Index(std::string index_name, std::string field_name, ValueType type)
 	field_name_ = field_name;
 	type_ = type;
 
+	std::string path;
+
+
 	if (type_ == kIntegerType)
 	{
-		bplustree_int_ = new BPlusTree<int>();
+		bplustree_int_ = new BPlusTree<int>(path);
 		bplustree_string_ = nullptr;
 	}
 	if (type_ == kStringType)
 	{
 		bplustree_int_ = nullptr;
-		bplustree_string_ = new BPlusTree<std::string>();
+		bplustree_string_ = new BPlusTree<std::string>(path);
 	}
 }
 
@@ -223,7 +233,12 @@ int Index::SearchNode(std::string value)
 	}
 }
 
-bool Index::UpdateNode(std::string value)
+std::string Index::GetFieldName()
+{
+	return field_name_;
+}
+
+/*bool Index::UpdateNode(std::string value)
 {
 	if (type_ == kIntegerType)
 	{
@@ -235,4 +250,4 @@ bool Index::UpdateNode(std::string value)
 	{
 		return bplustree_string_->UpdateNode(value);
 	}
-}
+}*/
