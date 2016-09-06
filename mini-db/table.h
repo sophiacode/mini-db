@@ -9,47 +9,6 @@
 #include "database.h"
 
 /**
-*  \brief 字段类
-*/
-class Field
-{
-public:
-	/**
-	*  \brief 构造函数
-	*/
-	Field();
-
-	/**
-	*  \brief 析构函数
-	*/
-	~Field();
-
-	/**
-	*  \brief 获取字段名
-	*/
-	std::string GetFieldName();
-
-	/**
-	*  \brief 获取字段数据类型
-	*/
-	ValueType GetFieldType();
-
-	/**
-	*  \brief 更改字段名
-	*/
-	bool SetFieldName(std::string new_name);
-
-	/**
-	*  \brief 更改字段数据类型
-	*/
-	bool SetFieldType(ValueType new_type);
-
-private:
-	std::string field_name;       /* 字段名  */
-	ValueType field_type;         /* 字段数据类型 */
-};
-
-/**
 *  \brief 表单类
 */
 class Table
