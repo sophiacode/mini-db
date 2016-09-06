@@ -30,22 +30,25 @@ Table::~Table()
 */
 bool Table::UseTable()
 {
-	std::string table_name_fields = path + table_name + "\\" + table_name + "_fields";/* 构建命令打开表头文件 */
+	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建命令打开表头文件 */
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::binary | std::ios::in);
-	if (fp_fields.bad())										/* 如果打开失败，则返回false */
+	if (!fp_fields.is_open())										/* 如果打开失败，则返回false */
 	{
+		std::cout << table_name_fields << endl;
 		return false;
 	}
 
 	char type[2], field_name[20];
-	int i = 0;
+	//int i = 0;
 	while (fp_fields.read(type, sizeof(char) * 2))				/* 读取字段对应的数据类型进入内存 */
 	{
-		if (type[0] == '0') fields[i].SetFieldType(kIntegerType);/* 0-整型，1-字符串 */
-		else fields[i].SetFieldType(kStringType);
+		Field temp;
+		if (type[0] == '0') temp.SetFieldType(kIntegerType);/* 0-整型，1-字符串 */
+		else temp.SetFieldType(kStringType);
 		fp_fields.read(field_name, sizeof(char) * 20);			/* 读取字段名称进入内存 */
-		fields[i].SetFieldName(field_name);
+		temp.SetFieldName(field_name);
+		fields.push_back(temp);
 	}
 	fp_fields.close();											/* 关闭文件 */
 	return true;
@@ -63,6 +66,7 @@ int Table::FindIndex(std::string index_field_name)
 			return i;
 		}
 	}
+	return -1;
 }
 
 /**
@@ -93,7 +97,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 		return false;
 	}
 
-	std::string cmd = "md " + path + table_name;	/* 构建命令创建表单文件夹 */
+	std::string cmd = "md " + path + "\\" + table_name;/* 构建命令创建表单文件夹 */
 	if (Table::UseTable())							/* 判断表单是否已经存在 */
 	{
 		std::cout << "已存在该表单！" << endl;
@@ -105,7 +109,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			fields = sql.GetFields();				/* 获取表头数据 */
 
 			fstream fp;
-			std::string table_name_fields = path + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
+			std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
 			fp.open(table_name_fields.c_str(), std::ios::binary | std::ios::out);		/* 创建表头文件 */
 
 			for (int i = 0; i < fields.size(); i++)						/* 判断是否有重名的字段 */
@@ -183,13 +187,14 @@ bool Table::CreateRecord(SQLInsert &st)
 	{
 		std::vector<string> records__data;					/* records__data存储要插入的数据 */
 
-															/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
+		/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 		if (st.IsInputField())
 		{/* 当插入的value指定了相应字段时 */
 			for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
 			{
 				if (st.GetValues().at(i).GetValueData().size() >= 255)			/* 若字符串过长，则存储失败 */
 				{
+					std::cout << "输入的值过长！" << endl;
 					return false;
 				}
 			}
@@ -208,10 +213,17 @@ bool Table::CreateRecord(SQLInsert &st)
 						{
 							records__data[j] = st.GetValues().at(i).GetValueData();
 						}
-						else return false;									/* 同名字段数据类型不匹配，则插入记录失败 */
+						else {
+							std::cout << "数据类型不匹配！" << endl;
+							return false;									/* 同名字段数据类型不匹配，则插入记录失败 */
+						}
 					}
 				}
-				if (key == 0) return false;					/* 当前字段名未匹配到同名表头字段，插入失败 */
+				if (key == 0)
+				{
+					std::cout << "字段名匹配失败！" << endl;
+					return false;					/* 当前字段名未匹配到同名表头字段，插入失败 */
+				}
 			}
 		}
 		else {/* 当插入的value未指定相应字段时 */
@@ -221,6 +233,7 @@ bool Table::CreateRecord(SQLInsert &st)
 				{
 					if (st.GetValues().at(i).GetValueData().size() >= 255)			/* 若字符串过长，则存储失败 */
 					{
+						std::cout << "输入的值过长！" << endl;
 						return false;
 					}
 				}
@@ -230,24 +243,29 @@ bool Table::CreateRecord(SQLInsert &st)
 					if (st.GetValues().at(i).GetValueType() == kNullType
 						|| st.GetValues().at(i).GetValueType() == fields[i].GetFieldType())/* 若数据类型匹配 */
 					{
-						records__data[i] = st.GetValues().at(i).GetValueData();
+						std::string temp;
+						temp = st.GetValues().at(i).GetValueData();
+						records__data.push_back(temp);
 					}
-					else return false;										/* 数据类型不匹配时，插入失败 */
+					else  {
+						std::cout << "数据类型不匹配！" << endl;
+						return false;										/* 同名字段数据类型不匹配，则插入记录失败 */
+					}
 				}
 			}
 		}
 
 		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
 		int Record_id = idPool.NewNode();					/* 获得新记录的主键 */
-		char records_no_[1];
+		char records_no_[2];
 		itoa(Record_id / record_num, records_no_, 1);
-		std::string table_name_records = path + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
+		std::string table_name_records = path + "\\" + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
 
 		fstream fp;
 		fp.open(table_name_records.c_str(), std::ios::binary | std::ios::out);/* 打开or创建记录文件 */
-		fp.seekp((Record_id%record_num - 1) * fields.size() * 255, ios::beg); /* 指针定位，更改写入位置 */
+		fp.seekp((Record_id%record_num) * fields.size() * 255, ios::beg); /* 指针定位，更改写入位置 */
 
-		for (int i = 0; i < fields.size(); i++)
+		for (int i = 0; i < records__data.size(); i++)
 		{
 			fp.write(records__data[i].c_str(), 255);		/* 按字段顺序写入文件 */
 			if (fields[i].IsCreateIndex())					/* 当这个字段存在索引时，维护索引 */
@@ -258,9 +276,13 @@ bool Table::CreateRecord(SQLInsert &st)
 		}
 
 		records_num++;										/* 插入成功，表单中记录总数加一 */
+		std::cout << "插入成功！" << endl;
 		return true;										/* 返回成功 */
 	}
-	else return false;										/* 打开目标表单失败，返回false */
+	else {
+		std::cout << "表单打开失败！" << endl;
+		return false;										/* 打开目标表单失败，返回false */
+	}
 }
 
 /**
@@ -285,7 +307,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				char records_no[1], record__data[255];
 				std::vector<string> records__data;
 				itoa(Record_id / record_num, records_no, 1);
-				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
+				std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
 
 				fstream fp;
 				fp.open(record_file, std::ios::binary | std::ios::in);				/* 打开读文件 */
@@ -357,7 +379,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				std::vector<string> records__data2;				/* records__data2记录当前需要更改的记录信息 */
 
 				itoa(Record_id / record_num, records_no, 1);
-				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
+				std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
 				frp.open(record_file.c_str(), std::ios::binary | std::ios::in); /* 打开读记录文件 */
 				frp.seekg((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 定位读文件指针 */
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
