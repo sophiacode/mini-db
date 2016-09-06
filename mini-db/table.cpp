@@ -18,11 +18,15 @@ Table::Table(std::string new_path)
 }
 
 /**
-*  \brief 析构函数
+*  \brief 析构函数，更新主键内存池
 */
 Table::~Table()
 {
-
+	fstream file_stream_;
+	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
+	file_stream_.open(pool_file.c_str(), ios::out | ios::binary);
+	file_stream_.write((char*)(&idPool), sizeof(idPool));
+	file_stream_.close();
 }
 
 /**
@@ -55,6 +59,12 @@ bool Table::UseTable()
 			fields.push_back(temp);
 		}
 		fp_fields.close();											/* 关闭文件 */
+
+		fstream file_stream_;										/* 读入主键内存池 */
+		std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
+		file_stream_.open(pool_file, ios::out | ios::binary);
+		file_stream_.read((char*)(&idPool), sizeof(idPool));
+		file_stream_.close();
 	}
 	return true;
 }
@@ -144,6 +154,12 @@ bool Table::CreateTable(SQLCreateTable &sql)
 				fp.write(name.c_str(), 20);
 			}
 			fp.close();													/* 关闭文件 */
+
+			fstream file_stream_;										/* 创建主键存储池的物理文件 */
+			std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
+			file_stream_.open(pool_file, ios::out | ios::binary);
+			file_stream_.close();
+
 			std::cout << "创建成功！" << endl;
 			return true;
 		}
