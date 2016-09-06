@@ -30,10 +30,10 @@ Table::~Table()
 */
 bool Table::UseTable()
 {
-	std::string table_name_fields = path + table_name + "\\" + table_name + "_fields";/* 构建命令打开表头文件 */
+	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建命令打开表头文件 */
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::binary | std::ios::in);
-	if (fp_fields.bad())										/* 如果打开失败，则返回false */
+	if (!fp_fields.bad())										/* 如果打开失败，则返回false */
 	{
 		return false;
 	}
@@ -63,6 +63,7 @@ int Table::FindIndex(std::string index_field_name)
 			return i;
 		}
 	}
+	return -1;
 }
 
 /**
@@ -93,7 +94,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 		return false;
 	}
 
-	std::string cmd = "md " + path + table_name;	/* 构建命令创建表单文件夹 */
+	std::string cmd = "md " + path + "\\" + table_name;/* 构建命令创建表单文件夹 */
 	if (Table::UseTable())							/* 判断表单是否已经存在 */
 	{
 		std::cout << "已存在该表单！" << endl;
@@ -105,7 +106,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			fields = sql.GetFields();				/* 获取表头数据 */
 
 			fstream fp;
-			std::string table_name_fields = path + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
+			std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
 			fp.open(table_name_fields.c_str(), std::ios::binary | std::ios::out);		/* 创建表头文件 */
 
 			for (int i = 0; i < fields.size(); i++)						/* 判断是否有重名的字段 */
@@ -241,7 +242,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		int Record_id = idPool.NewNode();					/* 获得新记录的主键 */
 		char records_no_[1];
 		itoa(Record_id / record_num, records_no_, 1);
-		std::string table_name_records = path + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
+		std::string table_name_records = path + "\\" + st.GetTableName() + "\\" + st.GetTableName() + "_records_" + records_no_;/* 构建表单记录文件名 */
 
 		fstream fp;
 		fp.open(table_name_records.c_str(), std::ios::binary | std::ios::out);/* 打开or创建记录文件 */
@@ -285,7 +286,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				char records_no[1], record__data[255];
 				std::vector<string> records__data;
 				itoa(Record_id / record_num, records_no, 1);
-				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
+				std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
 
 				fstream fp;
 				fp.open(record_file, std::ios::binary | std::ios::in);				/* 打开读文件 */
@@ -357,7 +358,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				std::vector<string> records__data2;				/* records__data2记录当前需要更改的记录信息 */
 
 				itoa(Record_id / record_num, records_no, 1);
-				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
+				std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
 				frp.open(record_file.c_str(), std::ios::binary | std::ios::in); /* 打开读记录文件 */
 				frp.seekg((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 定位读文件指针 */
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
