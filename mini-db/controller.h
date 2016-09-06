@@ -1,8 +1,10 @@
 #pragma once
 
+#include "global.h"
 #include"sqlstatement.h"
 #include"database.h"
 #include"table.h"
+
 
 class Controller
 {
@@ -21,4 +23,5 @@ private:
 	std::vector<Database *> databases_; /* 创建的数据库 */
 	Database * current_database_;     /* 当前使用的数据库 */
 	std::string path_;                /* 当前使用的数据库所在路径 */
+	bool is_use_database_;
 };

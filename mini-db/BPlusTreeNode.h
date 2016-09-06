@@ -1,15 +1,19 @@
 #ifndef _B_PLUS_TREE_NODE_H_
 #define _B_PLUS_TREE_NODE_H_
 #include <string>
+#include <sstream>
+#include <time.h>
+
+#include "global.h"
 //#include <bits/stdc++.h>
 using namespace std;
 const int BPlusTree_m = 3;
 const int MinBPlusTree_m = (BPlusTree_m + 1) / 2;
-extern int name_num_;//名字流水号
+
 template<class KEYTYPE>
 class BPlusTreeNode
 {
-private:
+public:
   bool is_leaf_;//判断是否是叶子节点
   int key_num_;//当前关键字个数 <= m-1;
   string this_file_;//当前节点文件地址
@@ -40,7 +44,7 @@ public:
   /**
   *   \是否为叶子节点
   */
-  bool isleaf(){return is_leaf_}
+	bool isleaf() { return is_leaf_; }
 
   /**
   *   \二分查找
@@ -51,7 +55,11 @@ public:
   */
   int BinarySearch(KEYTYPE _key);
 
-  BPlusTreeNode();
+  BPlusTreeNode() = default;
+
+  BPlusTreeNode(string _file_neme);
+
+
   ~BPlusTreeNode();
 };
 
@@ -70,8 +78,10 @@ BPlusTreeNode<KEYTYPE>::~BPlusTreeNode()
 
 }
 
+
+
 template<class KEYTYPE>
-BPlusTreeNode<KEYTYPE>::BPlusTreeNode()
+BPlusTreeNode<KEYTYPE>::BPlusTreeNode(string _file_neme)
 {
   int timeflag;
   stringstream ss;
@@ -80,16 +90,16 @@ BPlusTreeNode<KEYTYPE>::BPlusTreeNode()
   father_ = nullptr;
   brother_ = nullptr;
   for (int i = 0; i < BPlusTree_m + 1; i++){
-    sonptr_ = nullptr;
+    sonptr_[i] = nullptr;
   }
   timeflag = time(0) * 1000;
   name_num_ &= 0x1ff;
   timeflag += ++name_num_;
   ss << timeflag;
   ss >> this_file_;
+  ///////////////
+  this_file_ = _file_neme + "Index\\" + this_file_;
 }
-
-
 
 
 template<class KEYTYPE>
@@ -113,7 +123,7 @@ int BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key, int _data_id)
 
 
 template<class KEYTYPE>
-void BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key，BPlusTreeNode<KEYTYPE> *_p)
+void BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key, BPlusTreeNode<KEYTYPE> *_p)
 {
   int insert_index;
   insert_index = this->BinarySearch(_key);

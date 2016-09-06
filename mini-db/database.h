@@ -3,9 +3,12 @@
 
 #include<string>
 #include<vector>
-#include"sqlstatement.h"
-#include"table.h"
-#include"BPlusTree.h"
+
+#include "global.h"
+#include "sqlstatement.h"
+#include "table.h"
+#include "BPlusTree.h"
+
 
 /**
 *  \brief 数据类型
@@ -26,12 +29,12 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Value();
+	Value() { ; }
 
 	/**
 	*  \brief 析构函数
 	*/
-	~Value();
+	~Value() { ; }
 
 	/**
 	*  \brief 获取Value的值
@@ -68,12 +71,12 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Record();
+	Record() { ; }
 
 	/**
 	*  \brief 析构函数
 	*/
-	~Record();
+	~Record() { ; }
 
 	/**
 	*  \brief 显示记录
@@ -99,12 +102,12 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Field();
+	Field() { ; }
 
 	/**
 	*  \brief 析构函数
 	*/
-	~Field();
+	~Field() { ; }
 
 	/**
 	*  \brief 获取字段名
@@ -156,7 +159,9 @@ public:
 
 	int SearchNode(std::string value);
 
-	bool UpdateNode(std::string value);
+	//bool UpdateNode(std::string value);
+
+	std::string GetFieldName();
 private:  
 	BPlusTree<int> * bplustree_int_;               /* int类型索引的B+树 */
 	BPlusTree<std::string> * bplustree_string_;    /* string类型索引的B+树 */
@@ -174,12 +179,12 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Database();
+	Database() { ; }
 
 	/**
 	*  \brief 析构函数
 	*/
-	~Database();
+	~Database() { ; }
 
 	/**
 	*  \brief 创建数据库

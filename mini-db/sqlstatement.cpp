@@ -246,8 +246,7 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 	int i = 3;
 	try {
 		if (sql_token.at(i++) == "(") {
-			//TODO
-			//Field temp(); 
+			Field temp; 
 
 			while (sql_token.at(i) != ")") {
 				std::string data;
@@ -267,9 +266,9 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 					return;
 				}
 
-				//TODO
-				//temp.SetValue(data, type); 
-				//fields_.push_back(temp);
+				temp.SetFieldName(data);
+				temp.SetFieldType(type); 
+				fields_.push_back(temp);
 
 				if (sql_token.at(++i) == ",") {
 					i++;
@@ -488,12 +487,12 @@ void SQLDelete::SetField(std::string field)
 
 Value SQLDelete::GetValue()
 {
-	return value_;
+	return *value_;
 }
 
 void SQLDelete::SetValue(Value value)
 {
-	value_ = value;
+	value_ = &value;
 }
 
 bool SQLDelete::IsInputWhere()
@@ -532,7 +531,7 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 				field_ = sql_token.at(++i);
 				if (sql_token.at(++i) == "=") {
 					MergeValue(sql_token, ++i);
-					if (ParseValue(sql_token.at(i), value_) == false) {
+					if (ParseValue(sql_token.at(i), *value_) == false) {
 						std::cerr << "SyntaxError" << std::endl;
 						return;
 					}
@@ -619,12 +618,12 @@ void SQLUpdate::SetWhereField(std::string where_field)
 
 Value SQLUpdate::GetWhereValue()
 {
-	return where_value_;
+	return *where_value_;
 }
 
 void SQLUpdate::SetWhereValue(Value where_value)
 {
-	where_value_ = where_value;
+	where_value_ = &where_value;
 }
 
 void SQLUpdate::Parse(std::vector<std::string> sql_token)
@@ -665,7 +664,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 			where_field_ = sql_token.at(++i);
 			if (sql_token.at(++i) == "=") {
 				MergeValue(sql_token, ++i);
-				if (ParseValue(sql_token.at(i), where_value_) == false) {
+				if (ParseValue(sql_token.at(i), *where_value_) == false) {
 					std::cerr << "SyntaxError" << std::endl;
 					return;
 				}
@@ -726,12 +725,12 @@ void SQLSelect::SetField(std::string field)
 
 Value SQLSelect::GetValue()
 {
-	return value_;
+	return *value_;
 }
 
 void SQLSelect::SetValue(Value value)
 {
-	value_ = value;
+	value_ = &value;
 }
 
 void SQLSelect::Parse(std::vector<std::string> sql_token)
@@ -753,7 +752,7 @@ void SQLSelect::Parse(std::vector<std::string> sql_token)
 				std::cerr << "SyntaxError" << std::endl;
 			}
 			MergeValue(sql_token,++i);
-			if (ParseValue(sql_token.at(i), value_) == false) {
+			if (ParseValue(sql_token.at(i), *value_) == false) {
 				std::cerr << "SyntaxError" << std::endl;
 				return;
 			}
