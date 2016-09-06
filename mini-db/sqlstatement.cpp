@@ -246,8 +246,7 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 	int i = 3;
 	try {
 		if (sql_token.at(i++) == "(") {
-			//TODO
-			//Field temp(); 
+			Field temp; 
 
 			while (sql_token.at(i) != ")") {
 				std::string data;
@@ -267,9 +266,9 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 					return;
 				}
 
-				//TODO
-				//temp.SetValue(data, type); 
-				//fields_.push_back(temp);
+				temp.SetFieldName(data);
+				temp.SetFieldType(type); 
+				fields_.push_back(temp);
 
 				if (sql_token.at(++i) == ",") {
 					i++;
