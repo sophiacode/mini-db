@@ -208,9 +208,14 @@ public:
 	*/
 	std::vector<Table> GetTableName();
 
+	/**
+	*  \brief 创建表单
+	*/
+	bool Database::CreateTable(SQLCreateTable & st);
+
 private:
 	std::string database_name;          /* 数据库名称 */
-	std::vector<Table> table_name;      /* 数据库中表单 */
+	std::vector<Table> table_;      /* 数据库中表单 */
 	std::string database_path;          /* 数据库路径 */
 };
 #endif
