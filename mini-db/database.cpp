@@ -66,29 +66,32 @@ void Record::SetValue(std::vector<Value> values_data)
 /**************Field*****************/
 std::string Field::GetFieldName()
 {
-	return field_name;
+	return field_name_;
 }
 
 ValueType Field::GetFieldType()
 {
-	return field_type;
+	return field_type_;
 }
 
-bool Field::SetFieldName(std::string new_name)
+void Field::SetFieldName(std::string new_name)
 {
-	field_name = new_name;
-	return true;
+	field_name_ = new_name;
 }
 
-bool Field::SetFieldType(ValueType new_type)
+void Field::SetFieldType(ValueType new_type)
 {
-	field_type = new_type;
-	return true;
+	field_type_ = new_type;
 }
 
 bool Field::IsCreateIndex()
 {
-	return is_create_index;
+	return is_create_index_;
+}
+
+void Field::SetIsCreateIndex(bool is_create_index)
+{
+	is_create_index_ = is_create_index;
 }
 
 /*************Database**************/
@@ -154,14 +157,11 @@ std::vector<Table> Database::GetTableName()
 
 /************Value************/
 
-Index::Index(std::string index_name, std::string field_name, ValueType type)
+Index::Index(std::string index_name, std::string field_name, ValueType type,std::string path)
 {
 	index_name_ = index_name;
 	field_name_ = field_name;
 	type_ = type;
-
-	std::string path;
-
 
 	if (type_ == kIntegerType)
 	{

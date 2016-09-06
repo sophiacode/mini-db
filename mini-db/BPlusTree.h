@@ -2,7 +2,7 @@
 #define _B_PLUS_TREE_H_
 
 #include <fstream>
-
+#include <sstream>
 #include "global.h"
 #include "BPlusTreeNode.h"
 #include "MemPool.h"
@@ -29,6 +29,7 @@ public:
 
   fstream file_stream_;//随机文件流
 
+  stringstream strintss;//转换
 
   /**
   *   \检查并返回儿子的指针
@@ -68,6 +69,7 @@ public:
   */
   bool isPrimareKey() { return is_primare_key_; };
 
+
   /**
   *   \置为主键
   */
@@ -94,8 +96,6 @@ public:
   *   \将cache内存中节点全部保存到文件中
   *
   *   \返回保存的文件个数
-  *
-  *   \失败返回-1
   */
   int DeleteCache();
 
@@ -125,12 +125,11 @@ public:
 
 
   /**
-  *   \查找关键字的叶子节点
+  *   \查找第一个关键字的叶子节点
   *
   *   \接口：键值
   */
   BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
-
 
   /**
   *   \查找第一个关键字的id
@@ -239,7 +238,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
     }
     if (insert_index > 0){
       if (insert_index == 1){
-        flag_first == true;
+        flag_first = true;
         last_first_key = p->key_[0];
       }
       for (int i = p->key_num_; i >= insert_index; i--){
@@ -500,6 +499,11 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
             p->sister_->brother_ = p->brother_;
           }
         }
+        char ch[100];
+        strintss << p->this_file_;
+        strintss >> ch;
+        remove(ch);
+        p->this_file_.clear();
         Pool.deleteNode(p);
         borrow_flag = false;
       }
@@ -545,6 +549,12 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
             p->sister_->brother_ = p->brother_;
           }
         }
+        p->this_file_.clear();
+        char ch[100];
+        strintss << p->this_file_;
+        strintss >> ch;
+        remove(ch);
+        p->this_file_.clear();
         Pool.deleteNode(p);
         borrow_flag = false;
       }
@@ -634,7 +644,7 @@ int BPlusTree<KEYTYPE>::DeleteCache()
   int num = Pool.cachelist.size();
   for (auto x : Pool.cachelist){
     if (x->this_file_.empty()){
-      return -1;
+      continue;
     }
     file_stream_.clear();
     file_stream_.open(x->this_file_, ios::in | ios::out || ios::binary);
@@ -645,6 +655,7 @@ int BPlusTree<KEYTYPE>::DeleteCache()
       x->sonptr_[i] = nullptr;
     }
     file_stream_.write((char*)(x), sizeof(*x));
+    file_stream_.sync();
   }
   Pool.cachelist.clear();
   return num;
@@ -679,6 +690,7 @@ bool BPlusTree<KEYTYPE>::WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p)
     _p->sonptr_[i] = nullptr;
   }
   file_stream_.write((char*)(_p), sizeof(*_p));
+  file_stream_.sync();
   return true;
 }
 
