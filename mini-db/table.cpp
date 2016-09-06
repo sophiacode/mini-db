@@ -42,16 +42,20 @@ bool Table::UseTable()
 	char type[2], field_name[20],records_numb[4];
 	fp_fields.read(records_numb, sizeof(char)* 4);				/* 读取当前记录数量 */
 	records_num = atoi(records_numb);
-	while (fp_fields.read(type, sizeof(char) * 2))				/* 读取字段对应的数据类型进入内存 */
+
+	if (fields.size() == 0)
 	{
-		Field temp;
-		if (type[0] == '0') temp.SetFieldType(kIntegerType);/* 0-整型，1-字符串 */
-		else temp.SetFieldType(kStringType);
-		fp_fields.read(field_name, sizeof(char) * 20);			/* 读取字段名称进入内存 */
-		temp.SetFieldName(field_name);
-		fields.push_back(temp);
+		while (fp_fields.read(type, sizeof(char)* 2))				/* 读取字段对应的数据类型进入内存 */
+		{
+			Field temp;
+			if (type[0] == '0') temp.SetFieldType(kIntegerType);	/* 0-整型，1-字符串 */
+			else temp.SetFieldType(kStringType);
+			fp_fields.read(field_name, sizeof(char)* 20);			/* 读取字段名称进入内存 */
+			temp.SetFieldName(field_name);
+			fields.push_back(temp);
+		}
+		fp_fields.close();											/* 关闭文件 */
 	}
-	fp_fields.close();											/* 关闭文件 */
 	return true;
 }
 
