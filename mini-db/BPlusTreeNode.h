@@ -96,18 +96,20 @@ BPlusTreeNode<KEYTYPE>::~BPlusTreeNode()
 template<class KEYTYPE>
 BPlusTreeNode<KEYTYPE>::BPlusTreeNode(string _file_neme)
 {
-  int timeflag;
+  __int64 timeflag;
   stringstream ss;
   is_leaf_ = true;
   key_num_ = 0;
   father_ = nullptr;
   brother_ = nullptr;
+  sister_ = nullptr;
   for (int i = 0; i < BPlusTree_m + 1; i++){
     sonptr_[i] = nullptr;
   }
   timeflag = time(0) * 1000;
   name_num_ &= 0x1ff;
-  timeflag += ++name_num_;
+  timeflag += name_num_;
+  name_num_++;
   ss << timeflag;
   ss >> this_file_;
   ///////////////

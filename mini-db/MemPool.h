@@ -12,11 +12,15 @@ class MemPool
 {
   deque<BPlusTreeNode<KEYTYPE>*>blocklist;
   deque<BPlusTreeNode<KEYTYPE>*>nodelist;
-public:\
-  vector<BPlusTreeNode<KEYTYPE>*>cachelist;
+public:
+  deque<BPlusTreeNode<KEYTYPE>*>cachelist;
   BPlusTreeNode<KEYTYPE>* NewNode(std::string path);
   void deleteNode(BPlusTreeNode<KEYTYPE> *p);
   void release();
+  /**
+  *   \记录使用过的节点
+  */
+  void RecordNode(BPlusTreeNode<KEYTYPE> *_p);
   MemPool() { ; }
   ~MemPool() { ; }
 };
@@ -64,5 +68,19 @@ BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode(std::string path)
   return p;
 }
 
+
+template<class KEYTYPE>
+void MemPool<KEYTYPE>::RecordNode(BPlusTreeNode<KEYTYPE> *_p)
+{
+  bool flag = false;
+  for (auto x : cachelist){
+    if (x == _p){
+      flag = true;
+    }
+  }
+  if (!flag){
+    cachelist.push_back(_p);
+  }
+}
 
 #endif
