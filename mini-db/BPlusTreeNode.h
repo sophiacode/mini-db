@@ -55,11 +55,24 @@ public:
   */
   int BinarySearch(KEYTYPE _key);
 
+
+  /**
+  *   \默认无参构造函数
+  */
   BPlusTreeNode() = default;
 
+
+  /**
+  *   \构造函数
+  *
+  *   \传入文件路径
+  */
   BPlusTreeNode(string _file_neme);
 
 
+  /**
+  *   \析构函数
+  */
   ~BPlusTreeNode();
 };
 
@@ -98,7 +111,7 @@ BPlusTreeNode<KEYTYPE>::BPlusTreeNode(string _file_neme)
   ss << timeflag;
   ss >> this_file_;
   ///////////////
-  this_file_ = _file_neme + "Index\\" + this_file_;
+  this_file_ = _file_neme + "Index\\" + this_file_+".dbi";
 }
 
 
@@ -152,7 +165,12 @@ int BPlusTreeNode<KEYTYPE>::BinarySearch(KEYTYPE _key)
   while (op <= ed){
     mid = (op + ed) / 2;
     if (this->key_[mid] == _key){
-      return -(mid + 1);//命中
+      if (op <= ed){
+        ed = mid;
+      }
+      if (op >= ed){
+        return -(mid + 1);//命中
+      }
     }
     if (_key < this->key_[mid]){
       ed = mid - 1;

@@ -1,7 +1,7 @@
 #ifndef _MEM_POOL_H_
 #define _MEM_POOL_H_
 #include <deque>
-#include <vector>;
+#include <vector>
 
 #include "global.h"
 #include "BPlusTreeNode.h"
