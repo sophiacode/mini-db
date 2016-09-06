@@ -2,15 +2,16 @@
 #include <iostream>
 
 Controller::Controller()
-	//:current_database_(nullptr)
+	:current_database_(nullptr)
 {
+	databases_.clear();
 	path_.clear();
 	is_use_database_ = false;
 }
 
 Controller::~Controller()
 {
-	/*for (auto iter = databases_.begin();iter != databases_.end();iter++) {
+	for (auto iter = databases_.begin();iter != databases_.end();iter++) {
 		if (*iter != nullptr) {
 			delete (*iter);
 			(*iter) = nullptr;
@@ -20,7 +21,7 @@ Controller::~Controller()
 	if (current_database_ != nullptr) {
 		delete current_database_;
 		current_database_ = nullptr;
-	}*/
+	}
 
 	path_.clear();
 	is_use_database_ = true;
@@ -33,16 +34,16 @@ bool Controller::CreateDatabase(SQLCreateDatabase *st)
 		return false;
 	}
 
-	/*Database * db = new Database();
+	Database * db = new Database();
 	if (db->CreateDatabase(*st))
 	{
 		databases_.push_back(db);
 		return true;
 	}
-	return false;*/
+	return false;
 
-	Database db;
-	return db.CreateDatabase(*st);
+	/*Database db;
+	return db.CreateDatabase(*st);*/
 }
 
 bool Controller::CreateTable(SQLCreateTable *st)
@@ -62,8 +63,10 @@ bool Controller::CreateTable(SQLCreateTable *st)
 	Table * table = new Table(path_);
 	return table->CreateTable(*st);*/
 
-	Table table(path_);
-	return table.CreateTable(*st);
+	/*Table table(path_);
+	return table.CreateTable(*st);*/
+
+	return current_database_->CreateTable(*st);
 }
 
 
@@ -74,7 +77,13 @@ bool Controller::CreateIndex(SQLCreateIndex *st)
 		return false;
 	}
 
-	/*auto tables = current_database_->GetTableName();
+	if (!is_use_database_)
+	{
+		std::cerr << "请先打开数据库." << std::endl;
+		return false;
+	}
+
+	auto tables = current_database_->GetTableName();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
 		if (iter->GetTableName() == st->GetTableName())
@@ -84,16 +93,12 @@ bool Controller::CreateIndex(SQLCreateIndex *st)
 	}
 
 	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
-	return false;*/
+	return false;
 
-	if (!is_use_database_)
-	{
-		std::cerr << "请先打开数据库." << std::endl;
-		return false;
-	}
+	
 
-	Table table(path_);
-	return table.CreateIndex(*st);
+	/*Table table(path_);
+	return table.CreateIndex(*st);*/
 }
 
 bool Controller::Use(SQLUse *st)
@@ -103,7 +108,7 @@ bool Controller::Use(SQLUse *st)
 		return false;
 	}
 
-	/*for (auto iter = databases_.begin();iter != databases_.end();iter++)
+	for (auto iter = databases_.begin();iter != databases_.end();iter++)
 	{
 		if ((*iter)->GetDatabaseName() == st->GetDatabaseName())
 		{
@@ -112,11 +117,12 @@ bool Controller::Use(SQLUse *st)
 			{
 				return false;
 			}
+			is_use_database_ = true;
 			return true;
 		}
-	}*/
+	}
 
-	Database db;
+	/*Database db;
 	path_ = db.UseDatabase(*st);
 
 	if (path_.empty())
@@ -127,7 +133,7 @@ bool Controller::Use(SQLUse *st)
 	}
 
 	is_use_database_ = true;
-	return true;
+	return true;*/
 }
 
 bool Controller::Insert(SQLInsert *st)
@@ -137,7 +143,13 @@ bool Controller::Insert(SQLInsert *st)
 		return false;
 	}
 
-	/*auto tables = current_database_->GetTableName();
+	if (!is_use_database_)
+	{
+		std::cerr << "请先打开数据库." << std::endl;
+		return false;
+	}
+
+	auto tables = current_database_->GetTableName();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
 		if (iter->GetTableName() == st->GetTableName())
@@ -147,16 +159,10 @@ bool Controller::Insert(SQLInsert *st)
 	}
 
 	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
-	return false;*/
+	return false;
 
-	if (!is_use_database_)
-	{
-		std::cerr << "请先打开数据库." << std::endl;
-		return false;
-	}
-
-	Table table(path_);
-	return table.CreateRecord(*st);
+	//Table table(path_);
+	//return table.CreateRecord(*st);
 }
 
 bool Controller::Delete(SQLDelete *st)
@@ -166,7 +172,13 @@ bool Controller::Delete(SQLDelete *st)
 		return false;
 	}
 
-	/*auto tables = current_database_->GetTableName();
+	if (!is_use_database_)
+	{
+		std::cerr << "请先打开数据库." << std::endl;
+		return false;
+	}
+
+	auto tables = current_database_->GetTableName();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
 		if (iter->GetTableName() == st->GetTableName())
@@ -176,16 +188,12 @@ bool Controller::Delete(SQLDelete *st)
 	}
 
 	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
-	return false;*/
+	return false;
 
-	if (!is_use_database_)
-	{
-		std::cerr << "请先打开数据库." << std::endl;
-		return false;
-	}
+	
 
-	Table table(path_);
-	return table.DeleteRecord(*st);
+	/*Table table(path_);
+	return table.DeleteRecord(*st);*/
 }
 
 bool Controller::Update(SQLUpdate *st)
@@ -195,7 +203,14 @@ bool Controller::Update(SQLUpdate *st)
 		return false;
 	}
 
-	/*auto tables = current_database_->GetTableName();
+
+	if (!is_use_database_)
+	{
+		std::cerr << "请先打开数据库." << std::endl;
+		return false;
+	}
+
+	auto tables = current_database_->GetTableName();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
 		if (iter->GetTableName() == st->GetTableName())
@@ -205,16 +220,11 @@ bool Controller::Update(SQLUpdate *st)
 	}
 
 	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
-	return false;*/
+	return false;
 
-	if (!is_use_database_)
-	{
-		std::cerr << "请先打开数据库." << std::endl;
-		return false;
-	}
 
-	Table table(path_);
-	return table.UpdateRecord(*st);
+	/*Table table(path_);
+	return table.UpdateRecord(*st);*/
 }
 
 bool Controller::Select(SQLSelect *st)
@@ -224,7 +234,13 @@ bool Controller::Select(SQLSelect *st)
 		return false;
 	}
 
-	/*auto tables = current_database_->GetTableName();
+	if (!is_use_database_)
+	{
+		std::cerr << "请先打开数据库." << std::endl;
+		return false;
+	}
+
+	auto tables = current_database_->GetTableName();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
 		if (iter->GetTableName() == st->GetTableName())
@@ -234,16 +250,12 @@ bool Controller::Select(SQLSelect *st)
 	}
 
 	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
-	return false;*/
+	return false;
 
-	if (!is_use_database_)
-	{
-		std::cerr << "请先打开数据库." << std::endl;
-		return false;
-	}
+	
 
-	Table table(path_);
-	return table.SelectRecord(*st);
+	/*Table table(path_);
+	return table.SelectRecord(*st);*/
 }
 
 
