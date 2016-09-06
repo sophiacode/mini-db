@@ -5,6 +5,8 @@
 #include <vector>
 
 #define record_num 1000
+#define record_max 10000
+#define record_len 256
 
 #include "database.h"
 #include "IDPool.h"
@@ -74,6 +76,11 @@ public:
 	*  \brief 创建索引
 	*/
 	bool CreateIndex(SQLCreateIndex &si);
+
+	/**
+	*  \brief 表格显示
+	*/
+	bool Display();
 
 private:
 	/**
