@@ -245,11 +245,23 @@ bool Table::DeleteRecord(SQLDelete &sd)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
 			 /* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
 				Record_id = select_id[i];
-				char records_no[1];
+				char records_no[1],record__data[255];
+				std::vector<string> records__data;
 				itoa(Record_id / record_num, records_no, 1);						
 				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
 
 				fstream fp;
+				fp.open(record_file, std::ios::binary | std::ios::in);				/* 打开读文件 */
+				fp.seekg((Record_id%record_num - 1)*fields.size() * 255, ios::beg); /* 指针定位 */
+				for (int j = 0; j < fields.size(); j++)								/* 将原记录读入records__data */
+				{
+					fp.read(record__data, sizeof(char)* 255);
+					std::string *r = new string();
+					records__data.push_back(*r);
+					records__data[j] = record__data;
+				}
+				fp.close();															/* 关闭读文件 */
+				
 				fp.open(record_file, std::ios::binary | std::ios::out);				/* 打开目标文件 */
 				fp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg); /* 定位到要更改的位置 */
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
@@ -258,9 +270,10 @@ bool Table::DeleteRecord(SQLDelete &sd)
 					if (fields[j].IsHaveIndex())									/* 当对应字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());			/* 找到该字段对应的索引编号index_id */
-						indexs[index_id].DeleteNode(Record_id);						/* 删除对应结点 */
+						indexs[index_id].DeleteNode(records__data[j]);				/* 删除对应结点 */
 					}
 				}
+				fp.close();															/* 关闭写文件 */
 			}
 			records_num--;					/* 删除成功，表单中记录总数减一 */
 			return true;					/* 修改成功，返回true */
@@ -303,7 +316,8 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			{
 				Record_id = select_id[i];
 				char records_no[1], record__data[256];			/* record__data记录一个字段的信息 */
-				std::vector<string> records__data;				/* records__data记录当前需要更改的记录信息 */
+				std::vector<string> records__data1;				/* records__data1记录原有记录信息 */
+				std::vector<string> records__data2;				/* records__data2记录当前需要更改的记录信息 */
 
 				itoa(Record_id / record_num, records_no, 1);
 				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
@@ -312,7 +326,11 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
 				{
 					frp.read(record__data, sizeof(char)* 255);
-					records__data[j] = record__data;
+					std::string *r1 = new string();
+					std::string *r2 = new string();
+					records__data1.push_back(*r1);
+					records__data2.push_back(*r2);
+					records__data1[j] = record__data;
 				}
 				frp.close();													/* 关闭读文件 */
 
@@ -328,7 +346,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 							if (su.GetNewValue().at(j).GetValueType() == fields[k].GetFieldType()/* 判断数据类型是否匹配 */
 								|| su.GetNewValue().at(j).GetValueType() == kNullType)
 							{
-								records__data[k] = su.GetNewValue().at(j).GetValueData();
+								records__data2[k] = su.GetNewValue().at(j).GetValueData();
 							}
 							else {
 								return false;					/* 数据类型不匹配，返回false */
@@ -345,11 +363,11 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				fwp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 指针定位 */
 				for (int j = 0; j < fields.size(); j++)
 				{
-					fwp.write(records__data[j].c_str(), 255);	/* 按照字段序列进行更改 */
+					fwp.write(records__data2[j].c_str(), 255);	/* 按照字段序列进行更改 */
 					if (fields[j].IsHaveIndex())				/* 当该字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
-						indexs[index_id].UpdateNode(records__data[j], Record_id);/* 更新索引结点 */
+						indexs[index_id].UpdateNode(records__data2[j], records__data1[j]);/* 更新索引结点 */
 					}
 				}
 				fwp.close();									/* 关闭写文件 */
