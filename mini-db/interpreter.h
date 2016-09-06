@@ -4,8 +4,10 @@
 #include<string>
 #include<vector>
 
+#include "global.h"
 #include"sqltype.h"
 #include"controller.h"
+
 
 /**
  *  \brief ·­ÒëÆ÷Àà

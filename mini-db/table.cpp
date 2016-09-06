@@ -5,14 +5,14 @@
 #include "database.h"
 #include "table.h"
 #include "sqlstatement.h"
-#include "IDPool.h"
+
 using namespace std;
 
 
 /**
 *  \brief 构造函数
 */
-Table::Table(std::string new_path) 
+Table::Table(std::string new_path)
 {
 	path = new_path;			/* 获取表单存储路径 */
 }
@@ -20,7 +20,7 @@ Table::Table(std::string new_path)
 /**
 *  \brief 析构函数
 */
-Table::~Table() 
+Table::~Table()
 {
 
 }
@@ -38,13 +38,13 @@ bool Table::UseTable()
 		return false;
 	}
 
-	char type[2],field_name[20];
+	char type[2], field_name[20];
 	int i = 0;
-	while (fp_fields.read(type, sizeof(char)* 2))				/* 读取字段对应的数据类型进入内存 */
+	while (fp_fields.read(type, sizeof(char) * 2))				/* 读取字段对应的数据类型进入内存 */
 	{
 		if (type[0] == '0') fields[i].SetFieldType(kIntegerType);/* 0-整型，1-字符串 */
 		else fields[i].SetFieldType(kStringType);
-		fp_fields.read(field_name, sizeof(char)* 20);			/* 读取字段名称进入内存 */
+		fp_fields.read(field_name, sizeof(char) * 20);			/* 读取字段名称进入内存 */
 		fields[i].SetFieldName(field_name);
 	}
 	fp_fields.close();											/* 关闭文件 */
@@ -103,7 +103,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 		if (!system(cmd.c_str()))
 		{
 			fields = sql.GetFields();				/* 获取表头数据 */
-			
+
 			fstream fp;
 			std::string table_name_fields = path + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
 			fp.open(table_name_fields.c_str(), std::ios::binary | std::ios::out);		/* 创建表头文件 */
@@ -121,14 +121,14 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			}
 
 			for (int i = 0; i < fields.size(); i++)						/* 写入表头数据 */
-				{
+			{
 				std::string name = fields[i].GetFieldName() + '\0';
 				ValueType type = fields[i].GetFieldType();				/* 获取字段对应的数据类型 */
 				std::string type_;										/* type_标记数据类型 */
 				if (type == kIntegerType) type_ = "0\0";				/* 标号0：整形，标号1：字符串 */
 				else type_ = "1\0";
 				fp.write(type_.c_str(), 2);								/* 数据类型占2位，字段名20位 */
-				fp.write(name.c_str(),20);
+				fp.write(name.c_str(), 20);
 			}
 			fp.close();													/* 关闭文件 */
 			std::cout << "创建成功！" << endl;
@@ -148,7 +148,7 @@ bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
 	int field_id = Table::FindIndex(sql.GetField());
-	
+	return false;
 }
 
 /**
@@ -158,7 +158,7 @@ bool Table::SelectRecord(SQLDelete &sd)
 {
 	table_name = sd.GetTableName();
 	int field_id = Table::FindIndex(sd.GetField());
-
+	return false;
 }
 
 /**
@@ -168,6 +168,7 @@ bool Table::SelectRecord(SQLUpdate &su)
 {
 	table_name = su.GetTableName();
 	int field_id = Table::FindIndex(su.GetWhereField());
+	return false;
 }
 
 /**
@@ -182,8 +183,8 @@ bool Table::CreateRecord(SQLInsert &st)
 	{
 		std::vector<string> records__data;					/* records__data存储要插入的数据 */
 
-		/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
-		if (st.IsInputField())								
+															/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
+		if (st.IsInputField())
 		{/* 当插入的value指定了相应字段时 */
 			for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
 			{
@@ -202,7 +203,7 @@ bool Table::CreateRecord(SQLInsert &st)
 					if (st.GetFields().at(i) == fields[j].GetFieldName())	/* 匹配到同名字段key = 1 */
 					{
 						key = 1;
-						if (st.GetValues().at(i).GetValueType() == kNullType 
+						if (st.GetValues().at(i).GetValueType() == kNullType
 							|| st.GetValues().at(i).GetValueType() == fields[j].GetFieldType())/* 若数据类型也匹配，存入记录 */
 						{
 							records__data[j] = st.GetValues().at(i).GetValueData();
@@ -225,8 +226,8 @@ bool Table::CreateRecord(SQLInsert &st)
 				}
 
 				for (int i = 0; i < st.GetValues().size(); i++)				/* 按默认顺序插入value */
-				{	
-					if (st.GetValues().at(i).GetValueType() == kNullType 
+				{
+					if (st.GetValues().at(i).GetValueType() == kNullType
 						|| st.GetValues().at(i).GetValueType() == fields[i].GetFieldType())/* 若数据类型匹配 */
 					{
 						records__data[i] = st.GetValues().at(i).GetValueData();
@@ -268,7 +269,7 @@ bool Table::CreateRecord(SQLInsert &st)
 bool Table::DeleteRecord(SQLDelete &sd)
 {
 	table_name = sd.GetTableName();			/* 获取表单名称 */
-	if (UseTable())												
+	if (UseTable())
 	{/* 打开表单成功 */
 		if (!Table::SelectRecord(sd))
 		{
@@ -281,9 +282,9 @@ bool Table::DeleteRecord(SQLDelete &sd)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
 			 /* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
 				Record_id = select_id[i];
-				char records_no[1],record__data[255];
+				char records_no[1], record__data[255];
 				std::vector<string> records__data;
-				itoa(Record_id / record_num, records_no, 1);						
+				itoa(Record_id / record_num, records_no, 1);
 				std::string record_file = path + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
 
 				fstream fp;
@@ -291,13 +292,13 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				fp.seekg((Record_id%record_num - 1)*fields.size() * 255, ios::beg); /* 指针定位 */
 				for (int j = 0; j < fields.size(); j++)								/* 将原记录读入records__data */
 				{
-					fp.read(record__data, sizeof(char)* 255);
+					fp.read(record__data, sizeof(char) * 255);
 					std::string *r = new string();
 					records__data.push_back(*r);
 					records__data[j] = record__data;
 				}
 				fp.close();															/* 关闭读文件 */
-				
+
 				fp.open(record_file, std::ios::binary | std::ios::out);				/* 打开目标文件 */
 				fp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg); /* 定位到要更改的位置 */
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
@@ -331,7 +332,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			return false;
 		}
 		else {
-		/* ---------------------------------------------判断字长和字段数----------------------------------------------------- */
+			/* ---------------------------------------------判断字长和字段数----------------------------------------------------- */
 			if (fields.size() < su.GetNewField().size())		/* 判断更新格式是否匹配 */
 			{
 				return false;
@@ -345,8 +346,8 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				}
 			}
 
-			fstream fwp,frp;
-		/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
+			fstream fwp, frp;
+			/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 			int Record_id;										/* Record_id记录当前操作记录主键 */
 			for (int i = 0; i < select_id.size(); i++)
 			{
@@ -361,7 +362,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				frp.seekg((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 定位读文件指针 */
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
 				{
-					frp.read(record__data, sizeof(char)* 255);
+					frp.read(record__data, sizeof(char) * 255);
 					std::string *r1 = new string();
 					std::string *r2 = new string();
 					records__data1.push_back(*r1);
@@ -394,7 +395,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						return false;
 					}
 				}
-		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
+				/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
 				fwp.open(record_file.c_str(), std::ios::binary | std::ios::out);/* 打开写记录文件 */
 				fwp.seekp((Record_id%record_num - 1)*fields.size() * 255, ios::beg);/* 指针定位 */
 				for (int j = 0; j < fields.size(); j++)
@@ -403,7 +404,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 					if (fields[j].IsCreateIndex())				/* 当该字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
-						//indexs[index_id].UpdateNode(records__data2[j], records__data1[j]);/* 更新索引结点 */
+																		   //indexs[index_id].UpdateNode(records__data2[j], records__data1[j]);/* 更新索引结点 */
 					}
 				}
 				fwp.close();									/* 关闭写文件 */
@@ -411,7 +412,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			return true;										/* 更新成功 */
 		}
 	}
-	else{
+	else {
 		return false;											/* 打开表单文件失败，返回false */
 	}
 }
@@ -421,5 +422,5 @@ bool Table::UpdateRecord(SQLUpdate &su)
 */
 bool Table::CreateIndex(SQLCreateIndex &si)
 {
-	
+	return false;
 }

@@ -2,6 +2,8 @@
 #include "controller.h"
 #include "interpreter.h"
 
+int name_num_;
+
 int main()
 {
 	std::string str;

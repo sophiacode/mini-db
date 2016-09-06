@@ -2,15 +2,16 @@
 #include <iostream>
 
 Controller::Controller()
-	:current_database_(nullptr)
+	//:current_database_(nullptr)
 {
 	path_.clear();
+	is_use_database_ = false;
 }
 
 Controller::~Controller()
 {
-	for (auto iter = databases_.begin();iter != databases_.end();iter++) {
-		if (*iter != nullptr){
+	/*for (auto iter = databases_.begin();iter != databases_.end();iter++) {
+		if (*iter != nullptr) {
 			delete (*iter);
 			(*iter) = nullptr;
 		}
@@ -19,9 +20,10 @@ Controller::~Controller()
 	if (current_database_ != nullptr) {
 		delete current_database_;
 		current_database_ = nullptr;
-	}
+	}*/
 
 	path_.clear();
+	is_use_database_ = true;
 }
 
 bool Controller::CreateDatabase(SQLCreateDatabase *st)
@@ -52,8 +54,8 @@ bool Controller::CreateTable(SQLCreateTable *st)
 		std::cerr << "请先打开数据库." << std::endl;
 		return false;
 	}
-	
-	auto tables = current_database_-> GetTableName();
+
+	auto tables = current_database_->GetTableName();
 	Table * table = new Table(path_);
 	return table->CreateTable(*st);
 }
@@ -66,12 +68,12 @@ bool Controller::CreateIndex(SQLCreateIndex *st)
 		return false;
 	}
 
-	auto tables = current_database_-> GetTableName();
+	auto tables = current_database_->GetTableName();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
 		if (iter->GetTableName() == st->GetTableName())
 		{
-			return (*iter).CreateIndex(st);
+			return (*iter).CreateIndex(*st);
 		}
 	}
 

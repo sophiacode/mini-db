@@ -83,7 +83,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -118,25 +118,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BPlusTree.cpp" />
-    <ClCompile Include="BPlusTreeNode.cpp" />
+    <ClCompile Include="controller.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="IDPool.cpp" />
     <ClCompile Include="interpreter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemPool.cpp" />
     <ClCompile Include="sqlstatement.cpp" />
+    <ClCompile Include="table.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BPlusTree.h" />
     <ClInclude Include="BPlusTreeNode.h" />
     <ClInclude Include="controller.h" />
     <ClInclude Include="database.h" />
+    <ClInclude Include="global.h" />
     <ClInclude Include="IDPool.h" />
     <ClInclude Include="interpreter.h" />
     <ClInclude Include="MemPool.h" />
     <ClInclude Include="sqlstatement.h" />
     <ClInclude Include="sqltype.h" />
+    <ClInclude Include="table.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

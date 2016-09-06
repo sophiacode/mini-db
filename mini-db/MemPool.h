@@ -2,6 +2,8 @@
 #define _MEM_POOL_H_
 #include <deque>
 #include <vector>;
+
+#include "global.h"
 #include "BPlusTreeNode.h"
 
 using namespace std;
@@ -12,11 +14,11 @@ class MemPool
   deque<BPlusTreeNode<KEYTYPE>*>nodelist;
 public:\
   vector<BPlusTreeNode<KEYTYPE>*>cachelist;
-  BPlusTreeNode<KEYTYPE>* NewNode();
+  BPlusTreeNode<KEYTYPE>* NewNode(std::string path);
   void deleteNode(BPlusTreeNode<KEYTYPE> *p);
   void release();
-  MemPool();
-  ~MemPool();
+  MemPool() { ; }
+  ~MemPool() { ; }
 };
 
 
@@ -46,9 +48,9 @@ void MemPool<KEYTYPE>::deleteNode(BPlusTreeNode<KEYTYPE> *p)
 }
 
 template<class KEYTYPE>
-BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode()
+BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode(std::string path)
 {
-  BPlusTreeNode *p;
+  BPlusTreeNode<KEYTYPE> *p;
   if (nodelist.empty()){
     blocklist.push_back(p = new BPlusTreeNode<KEYTYPE>[1000]);
     for (int i = 0; i < 1000; i++, p++){
@@ -57,7 +59,7 @@ BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode()
   }
   p = nodelist.front();
   nodelist.pop_front();
-  new(p)BPlusTreeNode<KEYTYPE>();
+  new(p)BPlusTreeNode<KEYTYPE>(path);
   cachelist.push_back(p);
   return p;
 }

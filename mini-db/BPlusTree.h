@@ -1,8 +1,14 @@
 #ifndef _B_PLUS_TREE_H_
 #define _B_PLUS_TREE_H_
+
+#include <fstream>
+
+#include "global.h"
 #include "BPlusTreeNode.h"
 #include "MemPool.h"
-#include <fstream>
+
+
+
 using namespace std;
 
 
@@ -10,7 +16,7 @@ template<class KEYTYPE>
 class BPlusTree
 {
 
-private:
+public:
 
 
   MemPool<KEYTYPE> Pool;//内存池
@@ -60,12 +66,12 @@ public:
   /**
   *   \是否为主键
   */
-  bool isPrimareKey(){ return is_primare_key_ };
+  bool isPrimareKey() { return is_primare_key_; };
 
   /**
   *   \置为主键
   */
-  void SetPrimareKey(){ is_primare_key_ = true };
+  void SetPrimareKey() { is_primare_key_ = true; }
 
 
   /**
@@ -183,7 +189,7 @@ BPlusTreeNode<KEYTYPE> * BPlusTree<KEYTYPE>::FatherPtr(BPlusTreeNode<KEYTYPE> *_
     return nullptr;
   }
   else{
-    BPlusTreeNode<KEYTYPE>* p = Pool.NewNode();
+    BPlusTreeNode<KEYTYPE>* p = Pool.NewNode("");
     file_stream_.clear();
     file_stream_.open(_p->father_file_, ios::in | ios::oct | ios::binary);
     file_stream_.read((char*)(p), sizeof(*p));
@@ -202,7 +208,7 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SonPtr(BPlusTreeNode<KEYTYPE> *_p, i
     return nullptr;
   }
   else{
-    BPlusTreeNode<KEYTYPE>* p = Pool.NewNode();
+    BPlusTreeNode<KEYTYPE>* p = Pool.NewNode("");
     file_stream_.clear();
     file_stream_.open(_p->son_file_[_insert_index], ios::in | ios::oct | ios::binary);
     file_stream_.read((char*)(p), sizeof(*p));
@@ -270,11 +276,13 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
     }
   }
 
+
+
   while (p->key_num_ > BPlusTree_m){
-    q = Pool.NewNode();//分裂一个兄弟
+    q = Pool.NewNode("");//分裂一个兄弟
     r = FatherPtr(p);
     if (r == nullptr){//没有父亲就建立一个父亲(新根节点)
-      r = Pool.NewNode();
+      r = Pool.NewNode("");
       root_ = r;
       p->father_ = r;
       p->father_file_ = r->this_file_;
@@ -285,7 +293,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       r->son_file_[0] = p->this_file_;
     }
     p->key_num_ = q->key_num_ = p->key_num_ / 2;
-    for (int i = 0; i < q.key_num_; i++){
+    for (int i = 0; i < q->key_num_; i++){
       q->key_[i] = p->key_[i + p->key_num_];
       if (p->isleaf()){
         q->key_data_id[i] = p->key_data_id[i + p->key_num_];
@@ -293,7 +301,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       else{
         q->sonptr_[i] = p->sonptr_[i + p->key_num_];
         q->son_file_[i] = p->son_file_[i + p->key_num_];
-        t = SonPtr(q);
+        t = SonPtr(q,i);
         t->father_ = q;
         t->father_file_ = q->this_file_;
       }
@@ -367,7 +375,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
       flag_first = false;
     }
     else{
-      insert_index = -(r->BinarySearch(key));
+      insert_index = -(r->BinarySearch(_key));
       if (insert_index == 1){
         flag_first = true;
         next_first_key = r->key_[1];
@@ -446,7 +454,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
         t->father_file_ = p->this_file_;
         p->key_num_++;
         q->key_num_--;
-        for (int i = 0; i <q.key_num_; i--){
+        for (int i = 0; i <q->key_num_; i--){
           q->key_[i] = q->key_[i + 1];
           if (p->isleaf()){
             q->key_data_id[i] = q->key_data_id[i + 1];
@@ -497,8 +505,8 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
       }
       else if (insert_index < r->key_num_){//向右合并
         q = SonPtr(r, insert_index);
-        for (int i = q->key_num_ + p->key_num_ - 1; i >= p.key_num_; i--){
-          q->key_[i] = q->[i - q->key_num_ + 1];
+        for (int i = q->key_num_ + p->key_num_ - 1; i >= p->key_num_; i--){
+          q->key_[i] = q->key_[i - q->key_num_ + 1];
           if (q->isleaf()){
             q->key_data_id[i] = q->key_data_id[i - q->key_num_ + 1];
           }
@@ -507,7 +515,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
             q->son_file_[i] = q->son_file_[i - q->key_num_ + 1];
           }
         }
-        for (int i = 0; i < p.key_num_; i++){
+        for (int i = 0; i < p->key_num_; i++){
           q->key_[i] = p->key_[i];
           if (q->isleaf()){
             q->key_[i] = p->key_[i];
