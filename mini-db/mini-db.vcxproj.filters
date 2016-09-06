@@ -33,6 +33,12 @@
     <ClCompile Include="sqlstatement.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="MemPool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IDPool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="interpreter.h">
@@ -54,6 +60,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="controller.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MemPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IDPool.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

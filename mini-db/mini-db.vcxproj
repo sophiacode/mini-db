@@ -121,8 +121,10 @@
     <ClCompile Include="BPlusTree.cpp" />
     <ClCompile Include="BPlusTreeNode.cpp" />
     <ClCompile Include="database.cpp" />
+    <ClCompile Include="IDPool.cpp" />
     <ClCompile Include="interpreter.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MemPool.cpp" />
     <ClCompile Include="sqlstatement.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -130,7 +132,9 @@
     <ClInclude Include="BPlusTreeNode.h" />
     <ClInclude Include="controller.h" />
     <ClInclude Include="database.h" />
+    <ClInclude Include="IDPool.h" />
     <ClInclude Include="interpreter.h" />
+    <ClInclude Include="MemPool.h" />
     <ClInclude Include="sqlstatement.h" />
     <ClInclude Include="sqltype.h" />
   </ItemGroup>
