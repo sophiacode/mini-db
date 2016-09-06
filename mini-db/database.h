@@ -148,7 +148,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Index(std::string index_name,std::string field_name,ValueType type,std::string path);
+	Index(std::string index_name, std::string field_name, ValueType type, std::string path);
 
 	/**
 	*  \brief 析构函数
@@ -164,7 +164,7 @@ public:
 	//bool UpdateNode(std::string value);
 
 	std::string GetFieldName();
-private:  
+private:
 	BPlusTree<int> * bplustree_int_;               /* int类型索引的B+树 */
 	BPlusTree<std::string> * bplustree_string_;    /* string类型索引的B+树 */
 	std::string field_name_;                       /* 索引对应的字段名 */
@@ -211,7 +211,12 @@ public:
 	/**
 	*  \brief 创建表单
 	*/
-	bool Database::CreateTable(SQLCreateTable & st);
+	bool CreateTable(SQLCreateTable & st);
+
+	/**
+	*  \brief 打开表单
+	*/
+	bool UseTable(std::string DatabasePath);
 
 private:
 	std::string database_name;          /* 数据库名称 */
