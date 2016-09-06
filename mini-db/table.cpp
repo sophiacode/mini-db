@@ -30,6 +30,14 @@ Table::~Table()
 }
 
 /**
+*  \brief 重置表名
+*/
+void Table::SetTableName(std::string new_name)
+{
+	table_name = new_name;
+}
+
+/**
 *  \brief 打开目标表单，成功返回true，失败返回false
 */
 bool Table::UseTable()
@@ -176,8 +184,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
-	//int field_id = Table::FindIndex(sql.GetField());
-	Table::Display();
+	int field_id = Table::FindIndex(sql.GetField());
+	int id = indexs.at(field_id).SearchNode(sql.GetValue().GetValueData());
+	select_id.push_back(id);
+	//Table::Display();
 	return false;
 }
 
@@ -524,13 +534,22 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	}
 
 	ValueType type;
+	bool flag = false;
 	for (auto iter = fields.begin(); iter != fields.end(); iter++)
 	{
 		if (iter->GetFieldName() == si.GetField())
 		{
 			iter->SetIsCreateIndex(true);
 			type = iter->GetFieldType();
+			flag = true;
+			break;
 		}
+	}
+
+	if (flag == false)
+	{
+		std::cout << "字段" << si.GetField() << "不存在." << std::endl;
+		return false;
 	}
 
 	string index_path = path + "\\" + table_name + "\\";
@@ -540,7 +559,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 
 	indexs.push_back(temp);
 
-	return false;
+	return true;
 }
 
 /**
