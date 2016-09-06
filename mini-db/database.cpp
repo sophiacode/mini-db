@@ -152,7 +152,21 @@ std::string Database::GetDatabaseName()
 
 std::vector<Table> Database::GetTableName()
 {
-	return table_name;
+	return table_;
+}
+
+bool Database::CreateTable(SQLCreateTable & st)
+{
+
+	Table table(database_path);
+
+	if (table.CreateTable(st))
+	{
+		table_.push_back(table);
+		return true;
+	}
+	
+	return false;
 }
 
 /************Value************/
