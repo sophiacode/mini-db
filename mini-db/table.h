@@ -43,6 +43,16 @@ public:
 	std::vector<Field> GetTableFields();
 
 	/**
+	*  \brief 重置表名
+	*/
+	void SetTableName(std::string new_name);
+
+	/**
+	*  \brief 打开表单
+	*/
+	bool UseTable();
+
+	/**
 	*  \brief 增加记录
 	*/
 	bool CreateRecord(SQLInsert &st);
@@ -83,10 +93,6 @@ public:
 	bool Display();
 
 private:
-	/**
-	*  \brief 打开表单
-	*/
-	bool UseTable();
 
 	/**
 	*  \brief 找到字段对应的索引编号
