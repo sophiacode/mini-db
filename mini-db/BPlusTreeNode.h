@@ -1,15 +1,19 @@
 #ifndef _B_PLUS_TREE_NODE_H_
 #define _B_PLUS_TREE_NODE_H_
 #include <string>
+#include <sstream>
+#include <time.h>
+
+#include "global.h"
 //#include <bits/stdc++.h>
 using namespace std;
 const int BPlusTree_m = 3;
 const int MinBPlusTree_m = (BPlusTree_m + 1) / 2;
-extern int name_num_;//名字流水号
+
 template<class KEYTYPE>
 class BPlusTreeNode
 {
-private:
+public:
   bool is_leaf_;//判断是否是叶子节点
   int key_num_;//当前关键字个数 <= m-1;
   string this_file_;//当前节点文件地址
@@ -40,7 +44,7 @@ public:
   /**
   *   \是否为叶子节点
   */
-  bool isleaf(){return is_leaf_}
+	bool isleaf() { return is_leaf_; }
 
   /**
   *   \二分查找
@@ -51,6 +55,7 @@ public:
   */
   int BinarySearch(KEYTYPE _key);
 
+  BPlusTreeNode() = default;
 
   BPlusTreeNode(string _file_neme);
 
@@ -85,7 +90,7 @@ BPlusTreeNode<KEYTYPE>::BPlusTreeNode(string _file_neme)
   father_ = nullptr;
   brother_ = nullptr;
   for (int i = 0; i < BPlusTree_m + 1; i++){
-    sonptr_ = nullptr;
+    sonptr_[i] = nullptr;
   }
   timeflag = time(0) * 1000;
   name_num_ &= 0x1ff;

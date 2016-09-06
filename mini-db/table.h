@@ -7,6 +7,7 @@
 #define record_num 1000
 
 #include "database.h"
+#include "IDPool.h"
 
 /**
 *  \brief ±Ìµ•¿‡

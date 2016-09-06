@@ -4,8 +4,9 @@
 #include<vector>
 #include<string>
 
-#include"database.h"
-#include"sqltype.h"
+#include "global.h"
+#include "database.h"
+#include "sqltype.h"
 
 class SQLBase
 {
@@ -108,7 +109,7 @@ public:
 private:
 	std::string table_name_;
 	std::string field_;
-	Value value_;
+	Value * value_;
 	bool is_input_where_;
 };
 
@@ -139,7 +140,7 @@ private:
 	std::vector<std::string> new_fields_;
 	std::vector<Value> new_values_;
 	std::string where_field_;
-	Value where_value_;
+	Value * where_value_;
 };
 
 /* "SELECET FROM tablename WHERE field op value" */
@@ -158,7 +159,7 @@ public:
 private:
 	std::string table_name_;
 	std::string field_;
-	Value value_;
+	Value * value_;
 	OperatorType op_;
 };
 
