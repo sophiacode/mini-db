@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#define record_num 1000
+#define record_num 10000
 #define record_max 10000
 #define record_len 256
 

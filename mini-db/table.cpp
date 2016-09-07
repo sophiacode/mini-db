@@ -42,37 +42,54 @@ void Table::SetTableName(std::string new_name)
 bool Table::UseTable()
 {
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建命令打开表头文件 */
+	if (fields.size() != 0)										/* 若表单已经打开，返回true */
+	{
+		return true;
+	}
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::in);
-	if (!fp_fields.is_open())										/* 如果打开失败，则返回false */
+	if (!fp_fields.is_open())									/* 如果打开失败，则返回false */
 	{
 		std::cout << table_name_fields << endl;
 		return false;
 	}
 
-	char type[2], field_name[20],records_numb[4];
+	char is_index[2],type[2], field_name[20],records_numb[4];
 	fp_fields.read(records_numb, sizeof(char)* 4);				/* 读取当前记录数量 */
 	records_num = atoi(records_numb);
+	int i = 0;
 
-	if (fields.size() == 0)										/* 当表单不是第一次读入时 */
+	while (fp_fields.read(is_index, sizeof(char)* 2))			/* 读取字段对应的数据类型进入内存 */
 	{
-		while (fp_fields.read(type, sizeof(char)* 2))				/* 读取字段对应的数据类型进入内存 */
+		Field temp;
+		fp_fields.read(type, sizeof(char)* 2);
+		ValueType _type;
+		if (type[0] == '0') {
+			_type = kIntegerType;
+			temp.SetFieldType(kIntegerType);
+		}	/* 0-整型，1-字符串 */
+		else
 		{
-			Field temp;
-			if (type[0] == '0') temp.SetFieldType(kIntegerType);	/* 0-整型，1-字符串 */
-			else temp.SetFieldType(kStringType);
-			fp_fields.read(field_name, sizeof(char)* 20);			/* 读取字段名称进入内存 */
-			temp.SetFieldName(field_name);
-			fields.push_back(temp);
+			_type = kStringType;
+			temp.SetFieldType(kStringType);
 		}
-		fp_fields.close();											/* 关闭文件 */
+		fp_fields.read(field_name, sizeof(char)* 20);			/* 读取字段名称进入内存 */
+		temp.SetFieldName(field_name);
+		fields.push_back(temp);
 
-		fstream file_stream_;										/* 读入主键内存池 */
-		std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
-		file_stream_.open(pool_file, ios::out | ios::binary);
-		file_stream_.read((char*)(&idPool), sizeof(idPool));
-		file_stream_.close();
+		if (is_index[0] == '1')
+		{
+			Index * index = new Index("", field_name, _type, path + "\\" + table_name + "\\index\\" + field_name);
+			indexs.push_back(index);
+		}
 	}
+	fp_fields.close();											/* 关闭文件 */
+
+	fstream file_stream_;										/* 读入主键内存池 */
+	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
+	file_stream_.open(pool_file, ios::out | ios::binary);
+	file_stream_.read((char*)(&idPool), sizeof(idPool));
+	file_stream_.close();
 	return true;
 }
 
@@ -155,8 +172,11 @@ bool Table::CreateTable(SQLCreateTable &sql)
 				std::string name = fields[i].GetFieldName() + '\0';
 				ValueType type = fields[i].GetFieldType();				/* 获取字段对应的数据类型 */
 				std::string type_;										/* type_标记数据类型 */
+				std::string is_index = "0\0";							/* is_index标记是否存在索引 */
 				if (type == kIntegerType) type_ = "0\0";				/* 标号0：整形，标号1：字符串 */
 				else type_ = "1\0";
+				
+				fp.write(is_index.c_str(), 2);							/* 索引标记占2位 */
 				fp.write(type_.c_str(), 2);								/* 数据类型占2位，字段名20位 */
 				fp.write(name.c_str(), 20);
 			}
@@ -183,10 +203,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
-	/*int field_id = Table::FindIndex(sql.GetField());
-	int id = indexs.at(field_id).SearchNode(sql.GetValue().GetValueData());
-	select_id.push_back(id);*/
-	Table::Display();
+	int field_id = Table::FindIndex(sql.GetField());
+	int id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+	select_id.push_back(id);
+	//Table::Display();
 	return false;
 }
 
@@ -534,6 +554,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 
 	ValueType type;
 	bool flag = false;
+	int i = 0;
 	for (auto iter = fields.begin(); iter != fields.end(); iter++)
 	{
 		if (iter->GetFieldName() == si.GetField())
@@ -543,6 +564,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 			flag = true;
 			break;
 		}
+		i++;
 	}
 
 	if (flag == false)
@@ -554,10 +576,18 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	string index_path = path + "\\" + table_name + "\\index";
 	string cmd = "md " + index_path;
 	system(cmd.c_str());
-	string index_path = index_path + "\\" + si.GetIndex();
+	index_path = index_path + "\\" + si.GetField();
 	Index * temp = new Index(si.GetIndex(), si.GetField(), type, index_path);
 	
 	indexs.push_back(temp);
+
+	fstream fip;
+	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
+	std::string is_index = "1\0";							/* is_index标记是否存在索引 */
+	fip.open(table_name_fields.c_str());
+	fip.seekp(sizeof(char)*(i * 24 + 4), std::ios::beg);
+	fip.write(is_index.c_str(), sizeof(char)* 2);
+	fip.close();
 
 	std::cout << "索引" << si.GetIndex() << "建立成功." << std::endl;
 	return true;
