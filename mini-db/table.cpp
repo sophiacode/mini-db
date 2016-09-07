@@ -21,11 +21,19 @@ Table::Table(std::string new_path)
 */
 Table::~Table()
 {
-	fstream file_stream_;
+	fstream file_stream_,fp;
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 	file_stream_.open(pool_file.c_str(), ios::out | ios::binary);
 	file_stream_.write((char*)(&idPool), sizeof(idPool));
 	file_stream_.close();
+
+	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
+	fp.open(table_name_fields.c_str());
+	char records_numb[4];
+	itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
+	fp.seekp(0, ios::beg);
+	fp.write(records_numb, sizeof(char)* 4);
+	fp.close();											/* 关闭写表头文件 */
 }
 
 /**
@@ -51,7 +59,7 @@ bool Table::UseTable()
 	fp_fields.open(table_name_fields.c_str(), std::ios::in);
 	if (!fp_fields.is_open())									/* 如果打开失败，则返回false */
 	{
-		std::cout << table_name_fields << endl;
+		//std::cout << table_name_fields << endl;
 		return false;
 	}
 
@@ -147,6 +155,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 		if (!system(cmd.c_str()))
 		{
 			fields = sql.GetFields();				/* 获取表头数据 */
+			records_num = 0;
 
 			fstream fp;
 			std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
@@ -187,6 +196,11 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 			file_stream_.open(pool_file, ios::out | ios::binary);
 			file_stream_.close();
+
+			//ofstream fwp;
+			//std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
+			//fwp.open(table_name_records.c_str());
+			//fwp.close();
 
 			std::cout << "创建成功！" << endl;
 			return true;
@@ -365,13 +379,13 @@ bool Table::CreateRecord(SQLInsert &st)
 		}
 		fp.close();											/* 关闭写记录文件 */
 
-		fp.open(table_name_fields.c_str());
 		records_num++;										/* 插入成功，表单中记录总数加一 */
-		char records_numb[4];
-		itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
-		fp.seekp(0, ios::beg);
-		fp.write(records_numb, sizeof(char)* 4);
-		fp.close();											/* 关闭写表头文件 */
+		//fp.open(table_name_fields.c_str());
+		//char records_numb[4];
+		//itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
+		//fp.seekp(0, ios::beg);
+		//fp.write(records_numb, sizeof(char)* 4);
+		//fp.close();											/* 关闭写表头文件 */
 		std::cout << "插入成功！" << endl;
 		return true;										/* 返回成功 */
 	}
