@@ -83,12 +83,12 @@ bool Controller::CreateIndex(SQLCreateIndex *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).CreateIndex(*st);
+			return (*iter)->CreateIndex(*st);
 		}
 	}
 
@@ -163,12 +163,12 @@ bool Controller::Insert(SQLInsert *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).CreateRecord(*st);
+			return (*iter)->CreateRecord(*st);
 		}
 	}
 
@@ -192,12 +192,12 @@ bool Controller::Delete(SQLDelete *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).DeleteRecord(*st);
+			return (*iter)->DeleteRecord(*st);
 		}
 	}
 
@@ -224,12 +224,12 @@ bool Controller::Update(SQLUpdate *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).UpdateRecord(*st);
+			return (*iter)->UpdateRecord(*st);
 		}
 	}
 
@@ -254,12 +254,12 @@ bool Controller::Select(SQLSelect *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).SelectRecord(*st);
+			return (*iter)->SelectRecord(*st);
 		}
 	}
 
