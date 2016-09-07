@@ -135,6 +135,7 @@ std::string Database::UseDatabase(SQLUse &st)
 	strcpy(str, path.c_str());
 	if (!_access(str, 0))
 	{
+		UseTable(path);
 		std::cout << "打开成功！" << std::endl;
 
 		return path;
@@ -164,7 +165,7 @@ bool Database::UseTable(std::string DatabasePath)
 	fp.open(path.c_str(), std::ios::in);
 	if (!fp.is_open())
 	{
-		std::cout << "打开失败" << endl;
+		//std::cout << "打开失败" << endl;
 		fp.close();
 		return false;
 	}
@@ -176,10 +177,13 @@ bool Database::UseTable(std::string DatabasePath)
 			std::string table_name(table_name_);
 			Table table(DatabasePath);
 			table.SetTableName(table_name);
-			table_.push_back(table);
+			if (table.UseTable())
+			{
+				table_.push_back(table);
+			}
 			fp.close();
 		}
-		std::cout << "打开成功" << endl;
+		//std::cout << "打开成功" << endl;
 		return true;
 	}
 
