@@ -174,8 +174,8 @@ bool Database::UseTable(std::string DatabasePath)
 		while (fp.read(table_name_, sizeof(char) * 20))
 		{
 			std::string table_name(table_name_);
-			path = DatabasePath + "\\" + table_name;
-			Table table(path);
+			Table table(DatabasePath);
+			table.SetTableName(table_name);
 			table_.push_back(table);
 			fp.close();
 		}
