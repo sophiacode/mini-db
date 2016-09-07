@@ -129,6 +129,10 @@ void Interpreter::GetSQLType()
 	{
 		sql_type_ = kSQLSelect;
 	}
+	else if (sql_token_[0] == "display")
+	{
+		sql_type_ = kSQLDisplay;
+	}
 	else
 	{
 		sql_type_ = kSQLUndefined;
