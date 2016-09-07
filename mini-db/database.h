@@ -102,7 +102,7 @@ public:
 	/**
 	*  \brief 构造函数
 	*/
-	Field() { ; }
+	Field();
 
 	/**
 	*  \brief 析构函数
@@ -186,7 +186,7 @@ public:
 	/**
 	*  \brief 析构函数
 	*/
-	~Database() { ; }
+	~Database();
 
 	/**
 	*  \brief 创建数据库
@@ -206,7 +206,7 @@ public:
 	/**
 	*  \brief 获取表名
 	*/
-	std::vector<Table> GetTableName();
+	std::vector<Table *> GetTable();
 
 	/**
 	*  \brief 创建表单
@@ -220,7 +220,7 @@ public:
 
 private:
 	std::string database_name;          /* 数据库名称 */
-	std::vector<Table> table_;      /* 数据库中表单 */
+	std::vector<Table *> table_;      /* 数据库中表单 */
 	std::string database_path;          /* 数据库路径 */
 };
 #endif
