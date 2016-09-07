@@ -13,7 +13,8 @@ enum SQLType
 	kSQLDelete,            /* 删除记录 */
 	kSQLUpdate,            /* 更新记录 */
 	kSQLSelect,            /* 查询记录 */
-	kSQLCreateIndex        /* 创建索引 */
+	kSQLCreateIndex,        /* 创建索引 */
+	kSQLDisplay
 };
 
 /**

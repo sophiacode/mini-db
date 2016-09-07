@@ -184,10 +184,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
-	int field_id = Table::FindIndex(sql.GetField());
+	/*int field_id = Table::FindIndex(sql.GetField());
 	int id = indexs.at(field_id).SearchNode(sql.GetValue().GetValueData());
-	select_id.push_back(id);
-	//Table::Display();
+	select_id.push_back(id);*/
+	Table::Display();
 	return false;
 }
 
@@ -597,8 +597,8 @@ bool Table::Display()
 		for (int k = 0; k < records_num%record_num; k++)
 		{
 		
-			//std::cout << k+1 << endl;
-			for (int j = 0; j < fields.size(); j++)
+			std::cout << k+1 << endl;
+			for (int j = 0; j < fields.size(); j++) 
 			{
 				char record_data[record_len];
 				record_data[0] = '\0';
