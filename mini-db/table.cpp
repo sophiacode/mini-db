@@ -46,6 +46,7 @@ bool Table::UseTable()
 	{
 		return true;
 	}
+
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::in);
 	if (!fp_fields.is_open())									/* 如果打开失败，则返回false */
@@ -203,11 +204,33 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
-	int field_id = Table::FindIndex(sql.GetField());
-	int id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
-	select_id.push_back(id);
-	//Table::Display();
-	return false;
+	if (sql.IsInputWhere())
+	{
+		int id;												
+		int field_id = Table::FindIndex(sql.GetField());
+		if (field_id != -1)
+		{
+			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+		}
+		else {
+
+		}
+
+		if (id != -1)
+		{//存在符合条件的记录
+			Table::Display(id);
+			select_id.push_back(id);
+			return true;
+		}
+		else {//不存在符合条件的记录
+			std::cout << "不存在符合条件的记录！" << endl;
+			return false;
+		}
+	}
+	else {
+		Table::Display();
+		return true;
+	}
 }
 
 /**
@@ -397,7 +420,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				fp.close();															/* 关闭读文件 */
 
 				fp.open(record_file);												/* 打开目标文件 */
-				fp.seekp((Record_id%record_num)*fields.size() * record_len, ios::beg);     /* 定位到要更改的位置 */
+				fp.seekp((Record_id%record_num)*fields.size() * record_len, ios::beg);/* 定位到要更改的位置 */
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
 				{
 					fp.write(Null_str.c_str(), record_len);
@@ -644,6 +667,37 @@ bool Table::Display()
 	}
 	else {
 		std::cout << "打开表单失败！" << endl;
+		return false;
+	}
+}
+
+/**
+*  \brief 表格显示
+*/
+bool Table::Display(int id)
+{
+	std::string table_record = path + "\\" + table_name + "\\" + table_name + "_records_";
+	fstream frp;
+	if (UseTable())
+	{
+		char records_no[2];
+		itoa(id, records_no, 10);
+		std::string table_name_n = table_record + records_no;
+		frp.open(table_name_n.c_str(), std::ios::in);
+
+		frp.seekg(sizeof(char)*(id%record_num)*fields.size()*record_len, ios::beg);
+		for (int j = 0; j < fields.size(); j++)
+		{
+			char record_data[record_len];
+			record_data[0] = '\0';
+			frp.read(record_data, sizeof(char)* record_len);
+			//frp >> record_data;
+			std::cout << fields.at(j).GetFieldName() << ":" << record_data << "  " << endl;
+		}
+		return true;
+	}
+	else {
+		std::cout << "表单打开失败！" << endl;
 		return false;
 	}
 }
