@@ -88,9 +88,14 @@ public:
 	bool CreateIndex(SQLCreateIndex &si);
 
 	/**
-	*  \brief 表格显示
+	*  \brief 全表显示
 	*/
 	bool Display();
+
+	/**
+	*  \brief 记录显示
+	*/
+	bool Display(int id);
 
 private:
 
