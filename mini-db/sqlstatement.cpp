@@ -455,6 +455,7 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 
 SQLDelete::SQLDelete(std::vector<std::string> sql_token)
 {
+	value_ = new Value;
 	Parse(sql_token);
 }
 
@@ -463,6 +464,11 @@ SQLDelete::~SQLDelete()
 	table_name_.clear();
 	field_.clear();
 	is_input_where_ = false;
+	if (value_ != nullptr)
+	{
+		delete value_;
+		value_ = nullptr;
+	}
 }
 
 std::string SQLDelete::GetTableName()
@@ -565,6 +571,7 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 
 SQLUpdate::SQLUpdate(std::vector<std::string> sql_token)
 {
+	where_value_ = new Value;
 	Parse(sql_token);
 }
 
@@ -574,6 +581,12 @@ SQLUpdate::~SQLUpdate()
 	new_fields_.clear();
 	new_values_.clear();
 	where_field_.clear();
+
+	if (where_value_ != nullptr)
+	{
+		delete where_value_;
+		where_value_ = nullptr;
+	}
 }
 
 std::string SQLUpdate::GetTableName()
@@ -702,6 +715,11 @@ SQLSelect::~SQLSelect()
 	table_name_.clear();
 	field_.clear();
 	op_ = kOpUndefined;
+	if (value_ != nullptr)
+	{
+		delete value_;
+		value_ = nullptr;
+	}
 }
 
 std::string SQLSelect::GetTableName()

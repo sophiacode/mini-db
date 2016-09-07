@@ -203,10 +203,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
-	/*int field_id = Table::FindIndex(sql.GetField());
-	int id = indexs.at(field_id).SearchNode(sql.GetValue().GetValueData());
-	select_id.push_back(id);*/
-	Table::Display();
+	int field_id = Table::FindIndex(sql.GetField());
+	int id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+	select_id.push_back(id);
+	//Table::Display();
 	return false;
 }
 
@@ -576,7 +576,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	string index_path = path + "\\" + table_name + "\\index";
 	string cmd = "md " + index_path;
 	system(cmd.c_str());
-	string index_path = index_path + "\\" + si.GetField();
+	index_path = index_path + "\\" + si.GetField();
 	Index * temp = new Index(si.GetIndex(), si.GetField(), type, index_path);
 	
 	indexs.push_back(temp);

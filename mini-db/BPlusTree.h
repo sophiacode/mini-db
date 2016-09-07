@@ -657,14 +657,14 @@ int BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key)
   int insert_index;
   BPlusTreeNode<KEYTYPE> *p;
   p = SearchNode(_key);
-  if (p = nullptr){
+  if (p == nullptr){
     return -1;//ERROR£ºÃ»ÓÐÕÒµ½
   }
   insert_index = p->BinarySearch(_key);
   if (insert_index > 0){
     return -1;
   }
-  return p->key_data_id[-insert_index];
+  return p->key_data_id[-(insert_index)-1];
 }
 
 
