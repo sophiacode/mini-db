@@ -75,7 +75,7 @@ void Interpreter::GetSQLType()
 {
 	if (sql_token_.size() == 0)
 	{
-		std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+		std::cerr << "未识别到有效的SQL语句." << std::endl;
 		return;
 	}
 
@@ -86,7 +86,7 @@ void Interpreter::GetSQLType()
 		if (sql_token_[0].size() < 2)
 		{
 			sql_type_ = kSQLUndefined;
-			std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+			std::cerr << "未识别到有效的SQL语句." << std::endl;
 			return;
 		}
 		ToLower(sql_token_[1]);
@@ -105,7 +105,7 @@ void Interpreter::GetSQLType()
 		else
 		{
 			sql_type_ = kSQLUndefined;
-			std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+			std::cerr << "未识别到有效的SQL语句." << std::endl;
 			return;
 		}
 	}
@@ -129,14 +129,10 @@ void Interpreter::GetSQLType()
 	{
 		sql_type_ = kSQLSelect;
 	}
-	else if (sql_token_[0] == "display")
-	{
-		sql_type_ = kSQLDisplay;
-	}
 	else
 	{
 		sql_type_ = kSQLUndefined;
-		std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+		std::cerr << "未识别到有效的SQL语句." << std::endl;
 		return;
 	}
 }
