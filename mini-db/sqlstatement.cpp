@@ -135,7 +135,7 @@ void SQLCreateDatabase::Parse(std::vector<std::string> sql_token)
 		database_path_ = sql_token[3];
 	}
 	else if (sql_token.size() < 4) {
-		database_path_ = "Database/";
+		database_path_ = ".\\Database";
 	}
 	else {
 		std::cerr << "Create Database ÃüÁîÓï·¨´íÎó." << std::endl;
@@ -191,7 +191,7 @@ void SQLUse::Parse(std::vector<std::string> sql_token)
 		database_path_ = sql_token[2];
 	}
 	else if (sql_token.size() < 3) {
-		database_path_ = ".\\Database\\";
+		database_path_ = ".\\Database";
 	}
 	else {
 		std::cerr << "Use ÃüÁîÓï·¨´íÎó." << std::endl;
@@ -774,6 +774,7 @@ void SQLSelect::Parse(std::vector<std::string> sql_token)
 		if (++i >= sql_token.size())
 		{
 			is_input_where_ = false;
+			is_parse_succeed = true;
 			return;
 		}
 		ToLower(sql_token.at(i));
