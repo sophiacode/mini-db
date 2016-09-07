@@ -8,7 +8,6 @@
 
 using namespace std;
 
-
 /**
 *  \brief 构造函数
 */
@@ -84,7 +83,7 @@ int Table::FindIndex(std::string index_field_name)
 {
 	for (int i = 0; i < indexs.size(); i++)
 	{
-		if (index_field_name == indexs[i].GetFieldName())
+		if (index_field_name == indexs[i]->GetFieldName())
 		{
 			return i;
 		}
@@ -317,7 +316,7 @@ bool Table::CreateRecord(SQLInsert &st)
 				int index_id = FindIndex(fields[i].GetFieldName());/* 找到该字段index_id（索引对应编号） */
 				if (index_id != -1)
 				{
-					indexs[index_id].InsertNode(records__data[i].c_str(), Record_id);/* 插入索引结点 */
+					indexs[index_id]->InsertNode(records__data[i], Record_id);/* 插入索引结点 */
 				}
 			}
 		}
@@ -390,7 +389,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 							std::cout << "该字段不存在索引！" << endl;
 							return false;
 						}
-						indexs[index_id].DeleteNode(records__data[j]);				/* 删除对应结点 */
+						indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
 					}
 				}
 				fp.close();															/* 关闭写文件 */
@@ -552,13 +551,15 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 		return false;
 	}
 
-	string index_path = path + "\\" + table_name + "\\";
-	Index temp(si.GetIndex(), si.GetField(), type, index_path);
-	string cmd = "md " + index_path + "index";
+	string index_path = path + "\\" + table_name + "\\index";
+	string cmd = "md " + index_path;
 	system(cmd.c_str());
-
+	string index_path = index_path + "\\" + si.GetIndex();
+	Index * temp = new Index(si.GetIndex(), si.GetField(), type, index_path);
+	
 	indexs.push_back(temp);
 
+	std::cout << "索引" << si.GetIndex() << "建立成功." << std::endl;
 	return true;
 }
 

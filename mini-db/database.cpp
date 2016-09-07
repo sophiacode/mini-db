@@ -33,12 +33,12 @@ bool Record::Display(std::vector<Value> values_data, std::vector<Field> fields)
 {
 	for (int i = 0; i < fields.capacity(); i++)
 	{
-		
+
 		ValueType valuetype;
 		std::string valuedata;
 		valuetype = values_data[i].GetValueType();
 		valuedata = values_data[i].GetValueData();
-		if (valuetype ==kNullType)   //数据为空
+		if (valuetype == kNullType)   //数据为空
 			continue;
 		else
 		{
@@ -62,8 +62,13 @@ void Record::SetValue(std::vector<Value> values_data)
 	}
 }
 
-
 /**************Field*****************/
+Field::Field()
+	:is_create_index_(false)
+{
+	
+}
+
 std::string Field::GetFieldName()
 {
 	return field_name_;
@@ -95,6 +100,18 @@ void Field::SetIsCreateIndex(bool is_create_index)
 }
 
 /*************Database**************/
+Database::~Database()
+{
+	for (auto iter : table_)
+	{
+		if (iter != nullptr)
+		{
+			delete iter;
+			iter = nullptr;
+		}
+	}
+}
+
 bool Database::CreateDatabase(SQLCreateDatabase &st)
 {
 	std::string db_name;
@@ -135,6 +152,7 @@ std::string Database::UseDatabase(SQLUse &st)
 	strcpy(str, path.c_str());
 	if (!_access(str, 0))
 	{
+		UseTable(path);
 		std::cout << "打开成功！" << std::endl;
 
 		return path;
@@ -151,29 +169,66 @@ std::string Database::GetDatabaseName()
 	return database_name;
 }
 
-std::vector<Table> Database::GetTableName()
+std::vector<Table *> Database::GetTable()
 {
 	return table_;
+}
+
+bool Database::UseTable(std::string DatabasePath)
+{
+	fstream fp;
+	std::string path;
+	path = DatabasePath + "\\" + "table_name";
+	fp.open(path.c_str(), std::ios::in);
+	if (!fp.is_open())
+	{
+		//std::cout << "打开失败" << endl;
+		fp.close();
+		return false;
+	}
+	else
+	{
+		char table_name_[20];
+		while (fp.read(table_name_, sizeof(char) * 20))
+		{
+			std::string table_name(table_name_);
+			Table *table = new Table(DatabasePath);
+			table->SetTableName(table_name);
+			if (table->UseTable())
+			{
+				table_.push_back(table);
+			}
+			fp.close();
+		}
+		//std::cout << "打开成功" << endl;
+		return true;
+	}
+
 }
 
 bool Database::CreateTable(SQLCreateTable & st)
 {
 
-	Table table(database_path);
+	Table * table = new Table(database_path);
 
-	if (table.CreateTable(st))
+	if (table->CreateTable(st))
 	{
 		table_.push_back(table);
-
+		fstream fp;
+		std::string path;
+		std::string table_name_ = st.GetTableName();
+		path = database_path + "\\" + "table_name";   /*创建一个文件名为table_name的文件夹存放表名*/
+		fp.open(path.c_str(), std::ios::out);
+		fp.write(table_name_.c_str(), 20);
+		fp.close();
 		return true;
 	}
-	
 	return false;
 }
 
 /************Value************/
 
-Index::Index(std::string index_name, std::string field_name, ValueType type,std::string path)
+Index::Index(std::string index_name, std::string field_name, ValueType type, std::string path)
 {
 	index_name_ = index_name;
 	field_name_ = field_name;
@@ -212,7 +267,12 @@ bool Index::InsertNode(std::string value, int data_id)
 	if (type_ == kIntegerType)
 	{
 		int temp = atoi(value.c_str());
-		return bplustree_int_->InsertNode(temp, data_id);
+		if (bplustree_int_->InsertNode(temp, data_id))
+		{
+			bplustree_int_->DeleteCache();
+			return true;
+		}
+		return false;
 	}
 
 	else if (type_ == kStringType)
@@ -256,14 +316,14 @@ std::string Index::GetFieldName()
 
 /*bool Index::UpdateNode(std::string value)
 {
-	if (type_ == kIntegerType)
-	{
-		int temp = atoi(value.c_str());
-		return bplustree_int_->UpdateNode(temp);
-	}
+if (type_ == kIntegerType)
+{
+int temp = atoi(value.c_str());
+return bplustree_int_->UpdateNode(temp);
+}
 
-	else if (type_ == kStringType)
-	{
-		return bplustree_string_->UpdateNode(value);
-	}
+else if (type_ == kStringType)
+{
+return bplustree_string_->UpdateNode(value);
+}
 }*/

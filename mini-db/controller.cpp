@@ -34,16 +34,16 @@ bool Controller::CreateDatabase(SQLCreateDatabase *st)
 		return false;
 	}
 
-	Database * db = new Database();
+	/*Database * db = new Database();
 	if (db->CreateDatabase(*st))
 	{
 		databases_.push_back(db);
 		return true;
 	}
-	return false;
+	return false;*/
 
-	/*Database db;
-	return db.CreateDatabase(*st);*/
+	Database db;
+	return db.CreateDatabase(*st);
 }
 
 bool Controller::CreateTable(SQLCreateTable *st)
@@ -83,12 +83,12 @@ bool Controller::CreateIndex(SQLCreateIndex *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).CreateIndex(*st);
+			return (*iter)->CreateIndex(*st);
 		}
 	}
 
@@ -108,7 +108,7 @@ bool Controller::Use(SQLUse *st)
 		return false;
 	}
 
-	for (auto iter = databases_.begin();iter != databases_.end();iter++)
+	/*for (auto iter = databases_.begin();iter != databases_.end();iter++)
 	{
 		if ((*iter)->GetDatabaseName() == st->GetDatabaseName())
 		{
@@ -120,7 +120,7 @@ bool Controller::Use(SQLUse *st)
 			is_use_database_ = true;
 			return true;
 		}
-	}
+	}*/
 
 	/*Database db;
 	path_ = db.UseDatabase(*st);
@@ -134,6 +134,20 @@ bool Controller::Use(SQLUse *st)
 
 	is_use_database_ = true;
 	return true;*/
+
+	if (current_database_ != nullptr)
+	{
+		delete current_database_;
+		current_database_ = nullptr;
+	}
+	current_database_ = new Database;
+	path_ = current_database_->UseDatabase(*st);
+	if (path_.empty())
+	{
+		return false;
+	}
+	is_use_database_ = true;
+	return true;
 }
 
 bool Controller::Insert(SQLInsert *st)
@@ -149,12 +163,12 @@ bool Controller::Insert(SQLInsert *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).CreateRecord(*st);
+			return (*iter)->CreateRecord(*st);
 		}
 	}
 
@@ -178,12 +192,12 @@ bool Controller::Delete(SQLDelete *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).DeleteRecord(*st);
+			return (*iter)->DeleteRecord(*st);
 		}
 	}
 
@@ -210,12 +224,12 @@ bool Controller::Update(SQLUpdate *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).UpdateRecord(*st);
+			return (*iter)->UpdateRecord(*st);
 		}
 	}
 
@@ -240,12 +254,12 @@ bool Controller::Select(SQLSelect *st)
 		return false;
 	}
 
-	auto tables = current_database_->GetTableName();
+	auto tables = current_database_->GetTable();
 	for (auto iter = tables.begin();iter != tables.end();iter++)
 	{
-		if (iter->GetTableName() == st->GetTableName())
+		if ((*iter)->GetTableName() == st->GetTableName())
 		{
-			return (*iter).SelectRecord(*st);
+			return (*iter)->SelectRecord(*st);
 		}
 	}
 
