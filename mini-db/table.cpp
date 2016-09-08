@@ -35,8 +35,8 @@ Table::~Table()
 	fp.write(records_numb, sizeof(char)* 4);
 	fp.close();											/* 关闭写表头文件 */
 
-	fwp.close();
-	frp.close();
+	fwp.close();										/* 关闭写文件 */
+	frp.close();										/* 关闭写文件 */
 
 }
 

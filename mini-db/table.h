@@ -113,8 +113,8 @@ private:
 	std::vector<int> select_id;			 /* 记录select选中的id */
 	std::string path;					 /* 存储数据库路径 */
 	IDPool idPool;						 /* 主键内存池，用于申请新id */
-	ofstream fwp;
-	ifstream frp;
+	ofstream fwp;						 /* 记录文件写 */
+	ifstream frp;						 /* 记录文件读 */
 };
 
 #endif
