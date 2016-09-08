@@ -30,5 +30,10 @@ int main()
 		}
 	}
 
+	if (controller != nullptr)
+	{
+		delete controller;
+		controller = nullptr;
+	}
 	return 0;
 }
