@@ -209,8 +209,11 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
 			fwp.open(table_name_records.c_str());						/* 创建记录文件 */
 			fwp.close();
+
 			fwp.open(table_name_records.c_str(), ios::in);				/* 打开记录文件 */
-			frp.open(table_name_fields.c_str());
+			frp.open(table_name_records.c_str());
+
+			
 
 			std::cout << "创建成功！" << endl;
 			return true;
@@ -731,7 +734,7 @@ bool Table::Display(int id)
 		{
 			char record_data[record_len];
 			record_data[0] = '\0';
-			frp.sync();
+			//frp.sync();
 			frp.read(record_data, sizeof(char)* record_len);
 			//frp >> record_data;
 			std::cout << fields.at(j).GetFieldName() << ":" << record_data << "  " << endl;
