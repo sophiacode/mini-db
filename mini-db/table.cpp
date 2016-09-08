@@ -280,6 +280,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
+	select_id.clear();
 	if (sql.IsInputWhere())
 	{
 		int id;												
@@ -312,21 +313,67 @@ bool Table::SelectRecord(SQLSelect &sql)
 /**
 *  \brief Delete调用Select功能
 */
-bool Table::SelectRecord(SQLDelete &sd)
+bool Table::SelectRecord(SQLDelete &sql)
 {
-	table_name = sd.GetTableName();
-	int field_id = Table::FindIndex(sd.GetField());
-	return false;
+	table_name = sql.GetTableName();
+	select_id.clear();
+	if (sql.IsInputWhere())
+	{
+		int id;
+		int field_id = Table::FindIndex(sql.GetField());
+		if (field_id != -1)
+		{
+			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+		}
+		else {
+
+		}
+
+		if (id != -1)
+		{//存在符合条件的记录
+			//Table::Display(id);
+			select_id.push_back(id);
+			return true;
+		}
+		else {//不存在符合条件的记录
+			std::cout << "不存在符合条件的记录！" << endl;
+			return false;
+		}
+	}
+	else {
+		//Table::Display();
+		return true;
+	}
 }
 
 /**
 *  \brief Update调用Select功能
 */
-bool Table::SelectRecord(SQLUpdate &su)
+bool Table::SelectRecord(SQLUpdate &sql)
 {
-	table_name = su.GetTableName();
-	int field_id = Table::FindIndex(su.GetWhereField());
-	return false;
+	table_name = sql.GetTableName();
+	select_id.clear();
+	
+	int id;
+	int field_id = Table::FindIndex(sql.GetWhereField());
+	if (field_id != -1)
+	{
+		id = indexs.at(field_id)->SearchNode(sql.GetWhereValue().GetValueData());
+	}
+	else {
+		
+	}
+
+	if (id != -1)
+	{//存在符合条件的记录
+		//Table::Display(id);
+		select_id.push_back(id);
+		return true;
+	}
+	else {//不存在符合条件的记录
+		std::cout << "不存在符合条件的记录！" << endl;
+		return false;
+	}
 }
 
 /**
