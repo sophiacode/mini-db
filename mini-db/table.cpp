@@ -155,7 +155,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 	}
 
 	std::string cmd = "md " + path + "\\" + table_name;/* 构建命令创建表单文件夹 */
-	if (Table::UseTable())							/* 判断表单是否已经存在 */
+	if (fields.size()!=0)							/* 判断表单是否已经存在 */
 	{
 		std::cout << "已存在该表单！" << endl;
 		return false;
@@ -212,7 +212,9 @@ bool Table::CreateTable(SQLCreateTable &sql)
 
 			fwp.open(table_name_records.c_str(), ios::in);				/* 打开记录文件 */
 			frp.open(table_name_records.c_str());
-
+      if (!frp.is_open()){
+        cerr << "no" << endl; 
+      }
 			
 
 			std::cout << "创建成功！" << endl;
@@ -641,13 +643,14 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	fip.close();
 
 	int k = 0;
+  char record_field_data[record_len];
 	if (records_num != 0)
 	{
-		char record_field_data[record_len];
 		frp.seekg(record_len*i*sizeof(char), ios::beg);
-		while (frp.read(record_field_data, sizeof(char)*record_len))
+		while (k < records_num)
 		{
-			temp->InsertNode(record_field_data, k);
+      frp.read(record_field_data, sizeof(char)*record_len);
+      temp->InsertNode(record_field_data, k);
 			k++;
 			frp.seekg((k*fields.size()+i)*record_len*sizeof(char),ios::beg);
 		}
@@ -719,6 +722,8 @@ bool Table::Display()
 */
 bool Table::Display(int id)
 {
+  char record_data[record_len];
+  record_data[0] = '\0';
 	/*std::string table_record = path + "\\" + table_name + "\\" + table_name + "_records_";
 	fstream frp;*/
 	if (UseTable())
@@ -731,8 +736,6 @@ bool Table::Display(int id)
 		frp.seekg(sizeof(char)*id*fields.size()*record_len, ios::beg);
 		for (int j = 0; j < fields.size(); j++)
 		{
-			char record_data[record_len];
-			record_data[0] = '\0';
 			//frp.sync();
 			frp.read(record_data, sizeof(char)* record_len);
 			//frp >> record_data;
