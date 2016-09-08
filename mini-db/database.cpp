@@ -62,8 +62,13 @@ void Record::SetValue(std::vector<Value> values_data)
 	}
 }
 
-
 /**************Field*****************/
+Field::Field()
+	:is_create_index_(false)
+{
+	
+}
+
 std::string Field::GetFieldName()
 {
 	return field_name_;
@@ -95,6 +100,18 @@ void Field::SetIsCreateIndex(bool is_create_index)
 }
 
 /*************Database**************/
+Database::~Database()
+{
+	for (auto iter : table_)
+	{
+		if (iter != nullptr)
+		{
+			delete iter;
+			iter = nullptr;
+		}
+	}
+}
+
 bool Database::CreateDatabase(SQLCreateDatabase &st)
 {
 	std::string db_name;
@@ -135,6 +152,7 @@ std::string Database::UseDatabase(SQLUse &st)
 	strcpy(str, path.c_str());
 	if (!_access(str, 0))
 	{
+		UseTable(path);
 		std::cout << "打开成功！" << std::endl;
 
 		return path;
@@ -151,7 +169,7 @@ std::string Database::GetDatabaseName()
 	return database_name;
 }
 
-std::vector<Table> Database::GetTableName()
+std::vector<Table *> Database::GetTable()
 {
 	return table_;
 }
@@ -164,7 +182,7 @@ bool Database::UseTable(std::string DatabasePath)
 	fp.open(path.c_str(), std::ios::in);
 	if (!fp.is_open())
 	{
-		std::cout << "打开失败" << endl;
+		//std::cout << "打开失败" << endl;
 		fp.close();
 		return false;
 	}
@@ -174,12 +192,15 @@ bool Database::UseTable(std::string DatabasePath)
 		while (fp.read(table_name_, sizeof(char) * 20))
 		{
 			std::string table_name(table_name_);
-			path = DatabasePath + "\\" + table_name;
-			Table table(path);
-			table_.push_back(table);
+			Table *table = new Table(DatabasePath);
+			table->SetTableName(table_name);
+			if (table->UseTable())
+			{
+				table_.push_back(table);
+			}
 			fp.close();
 		}
-		std::cout << "打开成功" << endl;
+		//std::cout << "打开成功" << endl;
 		return true;
 	}
 
@@ -188,9 +209,9 @@ bool Database::UseTable(std::string DatabasePath)
 bool Database::CreateTable(SQLCreateTable & st)
 {
 
-	Table table(database_path);
+	Table * table = new Table(database_path);
 
-	if (table.CreateTable(st))
+	if (table->CreateTable(st))
 	{
 		table_.push_back(table);
 		fstream fp;
@@ -246,7 +267,12 @@ bool Index::InsertNode(std::string value, int data_id)
 	if (type_ == kIntegerType)
 	{
 		int temp = atoi(value.c_str());
-		return bplustree_int_->InsertNode(temp, data_id);
+		if (bplustree_int_->InsertNode(temp, data_id))
+		{
+			bplustree_int_->DeleteCache();
+			return true;
+		}
+		return false;
 	}
 
 	else if (type_ == kStringType)

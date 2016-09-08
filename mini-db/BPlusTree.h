@@ -690,7 +690,11 @@ int BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key)
   if (insert_index > 0){
     return -1;
   }
+<<<<<<< HEAD
   return p->key_data_id[(-insert_index) - 1];
+=======
+  return p->key_data_id[-(insert_index)-1];
+>>>>>>> refs/remotes/origin/master
 }
 
 
