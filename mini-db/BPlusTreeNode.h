@@ -14,19 +14,35 @@ template<class KEYTYPE>
 class BPlusTreeNode
 {
 public:
-  bool is_leaf_;//判断是否是叶子节点
-  int key_num_;//当前关键字个数 <= m-1;
-  string this_file_;//当前节点文件地址
-  BPlusTreeNode *father_;//父亲节点指针;
-  string father_file_;//父亲节点文件地址;
-  BPlusTreeNode *brother_;//哥哥节点指针;
-  string brother_file_;//哥哥节点文件地址;
-  BPlusTreeNode *sister_;//妹妹节点指针;
-  string sister_file_;//妹妹节点文件地址;
-  BPlusTreeNode *sonptr_[BPlusTree_m + 1];//子树指针;+1为了先添加后分裂，下同;
-  string son_file_[BPlusTree_m + 1];//子节点文件地址;
-  KEYTYPE key_[BPlusTree_m + 1];//关键字;
-  int key_data_id[BPlusTree_m + 1];//关键字在数据文件中的id;
+
+  //friend class BPlusTree;
+
+  bool is_leaf_;                                     //判断是否是叶子节点
+
+  int key_num_;                                      //当前关键字个数 <= m-1;
+
+  int this_file_;                                    //当前节点文件中位置;
+
+  BPlusTreeNode *father_;                            //父亲节点指针;
+
+  int father_file_;                                  //父亲节点文件中位置;
+
+  BPlusTreeNode *brother_;                           //哥哥节点指针;
+
+  int brother_file_;                                 //哥哥节点文件中位置;
+
+  BPlusTreeNode *sister_;                            //妹妹节点指针;
+
+  int sister_file_;                                  //妹妹节点文件中位置;
+
+  BPlusTreeNode *sonptr_[BPlusTree_m + 1];           //子树指针;+1为了先添加后分裂，下同;
+
+  int son_file_[BPlusTree_m + 1];                    //子节点文件中位置;
+
+  KEYTYPE key_[BPlusTree_m + 1];                     //关键字;
+
+  int key_data_id[BPlusTree_m + 1];                  //关键字在数据文件中的id;
+
 
   /**
   *   \数组中插入关键字,关键字，关键字对于id
@@ -57,17 +73,9 @@ public:
 
 
   /**
-  *   \默认无参构造函数
-  */
-  BPlusTreeNode() = default;
-
-
-  /**
   *   \构造函数
-  *
-  *   \传入文件路径
   */
-  BPlusTreeNode(string _file_neme);
+  BPlusTreeNode();
 
 
   /**
@@ -85,36 +93,32 @@ public:
 
 
 
+
+template<class KEYTYPE>
+BPlusTreeNode<KEYTYPE>::BPlusTreeNode()
+{
+  is_leaf_ = true;
+  key_num_ = 0;
+  father_ = nullptr;
+  father_file_ = -1;
+  brother_ = nullptr;
+  brother_file_ = -1;
+  sister_ = nullptr;
+  sister_file_ = -1;
+  for (int i = 0; i < BPlusTree_m + 1; i++){
+    sonptr_[i] = nullptr;
+    son_file_[i] = -1;
+  }
+  this_file_ = -1;
+}
+
+
 template<class KEYTYPE>
 BPlusTreeNode<KEYTYPE>::~BPlusTreeNode()
 {
 
 }
 
-
-
-template<class KEYTYPE>
-BPlusTreeNode<KEYTYPE>::BPlusTreeNode(string _file_neme)
-{
-  __int64 timeflag;
-  stringstream ss;
-  is_leaf_ = true;
-  key_num_ = 0;
-  father_ = nullptr;
-  brother_ = nullptr;
-  sister_ = nullptr;
-  for (int i = 0; i < BPlusTree_m + 1; i++){
-    sonptr_[i] = nullptr;
-  }
-  timeflag = time(0) * 1000;
-  name_num_ &= 0x1ff;
-  timeflag += name_num_;
-  name_num_++;
-  ss << timeflag;
-  ss >> this_file_;
-  ///////////////
-  this_file_ = _file_neme + "Index\\" + this_file_+".dbi";
-}
 
 
 template<class KEYTYPE>
