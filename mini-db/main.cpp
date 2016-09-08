@@ -23,7 +23,11 @@ int main()
 		{
 			str += c;
 		}
-		interpreter.SQLInterpret(str);
+		
+		if (interpreter.SQLInterpret(str) == false)
+		{
+			break;
+		}
 	}
 
 	return 0;

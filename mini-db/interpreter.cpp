@@ -25,7 +25,11 @@ bool Interpreter::SQLInterpret(std::string sql_statement)
 	SQLPretreatment();
 	SplitSQL();
 	GetSQLType();
-	return ParseSQL();
+	if (sql_type_ == kSQLQuit)
+	{
+		return false;
+	}
+	return true;
 }
 
 void Interpreter::SQLPretreatment()
@@ -129,6 +133,10 @@ void Interpreter::GetSQLType()
 	{
 		sql_type_ = kSQLSelect;
 	}
+	else if (sql_token_[0] == "quit")
+	{
+		sql_type_ = kSQLQuit;
+	}
 	else
 	{
 		sql_type_ = kSQLUndefined;
@@ -161,6 +169,8 @@ bool Interpreter::ParseSQL()
 		return controller_->Update(new SQLUpdate(sql_token_));
 	case kSQLSelect:
 		return controller_->Select(new SQLSelect(sql_token_));
+	case kSQLQuit:
+		return true;
 	case kSQLUndefined:
 		return false;
 	default:
