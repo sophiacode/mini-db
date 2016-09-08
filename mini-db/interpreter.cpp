@@ -25,6 +25,7 @@ bool Interpreter::SQLInterpret(std::string sql_statement)
 	SQLPretreatment();
 	SplitSQL();
 	GetSQLType();
+	ParseSQL();
 	if (sql_type_ == kSQLQuit)
 	{
 		return false;
