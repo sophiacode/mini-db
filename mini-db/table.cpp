@@ -21,6 +21,7 @@ Table::Table(std::string new_path)
 */
 Table::~Table()
 {
+	//std::cout << "~\(≧▽≦)/~" << endl;
 	fstream file_stream_,fp;
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 	file_stream_.open(pool_file.c_str(), ios::out | ios::binary);
@@ -59,8 +60,9 @@ bool Table::UseTable()
 		return true;
 	}
 
-	fwp.open(table_name_fields.c_str(), ios::in);
-	frp.open(table_name_fields.c_str());
+	std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
+	fwp.open(table_name_records.c_str(), ios::in);
+	frp.open(table_name_records.c_str());
 
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::in);
@@ -103,7 +105,7 @@ bool Table::UseTable()
 
 	fstream file_stream_;										/* 读入主键内存池 */
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
-	file_stream_.open(pool_file, ios::out | ios::binary);
+	file_stream_.open(pool_file, ios::in | ios::binary);
 	file_stream_.read((char*)(&idPool), sizeof(idPool));
 	file_stream_.close();
 	return true;
@@ -637,6 +639,19 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	fip.write(is_index.c_str(), sizeof(char)* 2);
 	fip.close();
 
+	int k = 0;
+	if (records_num != 0)
+	{
+		char record_field_data[record_len];
+		frp.seekg(i*record_len*sizeof(char), ios::beg);
+		while (frp.read(record_field_data, sizeof(char)*record_len))
+		{
+			temp->InsertNode(record_field_data, k);
+			k++;
+			frp.seekg((k*fields.size()+i)*record_len*sizeof(char),ios::beg);
+		}
+	}
+
 	std::cout << "索引" << si.GetIndex() << "建立成功." << std::endl;
 	return true;
 }
@@ -711,11 +726,12 @@ bool Table::Display(int id)
 		std::string table_name_n = table_record + records_no;
 		frp.open(table_name_n.c_str(), std::ios::in);*/
 
-		frp.seekg(sizeof(char)*(id%record_num)*fields.size()*record_len, ios::beg);
+		frp.seekg(sizeof(char)*id*fields.size()*record_len, ios::beg);
 		for (int j = 0; j < fields.size(); j++)
 		{
 			char record_data[record_len];
 			record_data[0] = '\0';
+			frp.sync();
 			frp.read(record_data, sizeof(char)* record_len);
 			//frp >> record_data;
 			std::cout << fields.at(j).GetFieldName() << ":" << record_data << "  " << endl;
