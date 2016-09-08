@@ -246,6 +246,23 @@ Index::Index(std::string index_name, std::string field_name, ValueType type, std
 	}
 }
 
+Index::Index(std::string index_name, std::string field_name, ValueType type)
+{
+	index_name_ = index_name;
+	field_name_ = field_name;
+	type_ = type;
+	if (type_ == kIntegerType)
+	{
+		bplustree_int_ = new BPlusTree<int>();
+		bplustree_string_ = nullptr;
+	}
+	if (type_ == kStringType)
+	{
+		bplustree_int_ = nullptr;
+		bplustree_string_ = new BPlusTree<string>();
+	}
+}
+
 Index::~Index()
 {
 	if (bplustree_int_ != nullptr)
@@ -314,7 +331,7 @@ std::string Index::GetFieldName()
 	return field_name_;
 }
 
-/*bool Index::UpdateNode(std::string value)
+ /*bool Index::UpdateNode(std::string value)
 {
 if (type_ == kIntegerType)
 {
