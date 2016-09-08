@@ -217,7 +217,11 @@ BPlusTree<KEYTYPE>::BPlusTree(string _file_name)
 template<class KEYTYPE>
 BPlusTree<KEYTYPE>::~BPlusTree()
 {
-
+  Pool.deleteNode(root_);
+  root_ = nullptr;
+  sqt_ = nullptr;
+  out_file_stream_.close();
+  in_file_stream_.close();
 }
 
 
@@ -255,6 +259,8 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SonPtr(BPlusTreeNode<KEYTYPE> *_p, i
     BPlusTreeNode<KEYTYPE>* p = Pool.NewNode();
     in_file_stream_.seekg(_p->son_file_[_insert_index] * sizeof(*_p), ios::beg);
     in_file_stream_.read((char*)(p), sizeof(*p));
+    p->father_ = _p;
+    p->father_file_ = _p->this_file_;
     return p;
   }
 }
@@ -271,6 +277,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
   KEYTYPE last_first_key;//查找之前的第一个key;
   BPlusTreeNode<KEYTYPE> *p, *q, *r, *t;
   p = SearchNode(_key);
+  Pool.RecordNode(root_);
   if (p->key_num_ == 0){//第一次数据输入特殊处理(这里p应该==root_)
     p->key_[0] = _key;
     p->key_data_id[0] = _data_id;
@@ -318,7 +325,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       else{
         flag_first = false;
       }
-      r->key_[insert_index] = _key;
+      r->key_[insert_index - 1] = _key;
       Pool.RecordNode(r);
     }
   }
@@ -341,6 +348,15 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       r->sonptr_[0] = p;
       r->son_file_[0] = p->this_file_;
     }
+    else{
+      insert_index = -(r->BinarySearch(p->key_[0]));
+      for (int i = insert_index - 1; i < r->key_num_; i++){
+        if (r->son_file_[i] == p->this_file_){
+          r->sonptr_[i] = p;
+          break;
+        }
+      }
+    }
     p->key_num_ = q->key_num_ = p->key_num_ / 2;
     for (int i = 0; i < q->key_num_; i++){
       q->key_[i] = p->key_[i + p->key_num_];
@@ -350,9 +366,10 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       else{
         q->sonptr_[i] = p->sonptr_[i + p->key_num_];
         q->son_file_[i] = p->son_file_[i + p->key_num_];
-        t = SonPtr(q,i);
+        t = SonPtr(q, i);
         t->father_ = q;
         t->father_file_ = q->this_file_;
+        Pool.RecordNode(t);
       }
     }
     if (p->isleaf()){
@@ -367,21 +384,22 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
     q->father_ = r;
     q->father_file_ = r->this_file_;
 
-    insert_index = r->BinarySearch(q->key_[0]);//重复可能有问题
-    if (!isPrimareKey()){
-      insert_index = abs(-insert_index);
-    }
-    if (insert_index > 0){
-      for (int i = r->key_num_; i >= insert_index; i--){
-        r->key_[i] = r->key_[i - 1];
-        r->sonptr_[i] = r->sonptr_[i - 1];
-        r->son_file_[i] = r->son_file_[i - 1];
+    insert_index = -(r->BinarySearch(p->key_[0]));//重复可能有问题
+    for (int i = insert_index - 1; i < r->key_num_; i++){
+      if (r->son_file_[i] == p->this_file_){
+        insert_index = i + 2;
+        break;
       }
-      r->key_[insert_index - 1] = q->key_[0];
-      r->sonptr_[insert_index - 1] = q;
-      r->son_file_[insert_index - 1] = q->this_file_;
-      r->key_num_++;
     }
+    for (int i = r->key_num_; i >= insert_index; i--){
+      r->key_[i] = r->key_[i - 1];
+      r->sonptr_[i] = r->sonptr_[i - 1];
+      r->son_file_[i] = r->son_file_[i - 1];
+    }
+    r->key_[insert_index - 1] = q->key_[0];
+    r->sonptr_[insert_index - 1] = q;
+    r->son_file_[insert_index - 1] = q->this_file_;
+    r->key_num_++;
     Pool.RecordNode(p);
     Pool.RecordNode(q);
     Pool.RecordNode(r);
@@ -401,6 +419,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
   BPlusTreeNode<KEYTYPE> *p, *q, *r, *t;
   p = SearchNode(_key);
   if (p->key_num_ == 0){//树为空
+    return false;
     //*************************
     //树为空（键值不存在）的 错误 说明
     //*************************
@@ -408,14 +427,15 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
   insert_index = -(p->BinarySearch(_key));
   if (insert_index > 0){
     if (insert_index == 1){
-      flag_first == true;
+      flag_first = true;
       next_first_key = p->key_[1];
     }
     p->key_num_--;
-    for (int i = insert_index - 1; i < (p->key_num_ - 1); i++){
+    for (int i = insert_index - 1; i < p->key_num_; i++){
       p->key_[i] = p->key_[i + 1];
       p->key_data_id[i] = p->key_data_id[i - 1];
     }
+    Pool.RecordNode(p);
   }
   else{
     return false;
@@ -438,13 +458,21 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
       else{
         flag_first = false;
       }
-      r->key_[insert_index] = _key;
+      r->key_[insert_index - 1] = p->key_[0];
+      Pool.RecordNode(r);
     }
   }
   while (p->key_num_ < MinBPlusTree_m){
     if (p == root_){
+      if (p->key_num_ == 0){
+        break;
+      }
       if (p->key_num_ == 1){
-        root_ = SonPtr(root_, 0);
+        p = SonPtr(root_, 0);
+        if (p == nullptr){
+          break;
+        }
+        root_ = p;
         root_->father_ = nullptr;
         root_->father_file_ = -1;
       }
@@ -480,6 +508,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
         t = SonPtr(p, 0);
         t->father_ = p;
         t->father_file_ = p->this_file_;
+        Pool.RecordNode(t);
         if (p->isleaf()){
           p->key_data_id[0] = q->key_data_id[q->key_num_];
         }
@@ -491,8 +520,11 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
         r->sonptr_[insert_index - 1] = p;
         r->son_file_[insert_index - 1] = p->this_file_;
       }
+      Pool.RecordNode(p);
+      Pool.RecordNode(q);
+      Pool.RecordNode(r);
     }
-    else if (insert_index < r->key_num_){//向右边借
+    if (borrow_flag==false && insert_index < r->key_num_){//向右边借
       q = SonPtr(r, insert_index);
       if (q->key_num_>MinBPlusTree_m){
         borrow_flag = true;
@@ -522,8 +554,11 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
         r->key_[insert_index] = q->key_[0];
         //应该完了
       }
+      Pool.RecordNode(p);
+      Pool.RecordNode(q);
+      Pool.RecordNode(r);
     }
-    if (borrow_flag == true){//两边都借不到  orz
+    if (borrow_flag == false){//两边都借不到  orz
       if (insert_index > 1){//向左合并
         q = SonPtr(r, insert_index - 2);
         for (int i = 0; i < p->key_num_; i++){
@@ -537,6 +572,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
             t = SonPtr(p, i);
             t->father_ = q;
             t->father_file_ = q->this_file_;
+            Pool.RecordNode(t);
           }
         }
         q->key_num_ += p->key_num_;
@@ -555,13 +591,12 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
             p->sister_->brother_ = p->brother_;
           }
         }
-        char ch[100];
-        strintss << p->this_file_;
-        strintss >> ch;
-        remove(ch);
+        id_Pool_.deleteNode(p->this_file_);
         p->this_file_ = -1;
         Pool.deleteNode(p);
         borrow_flag = false;
+        Pool.RecordNode(q);
+        Pool.RecordNode(r);
       }
       else if (insert_index < r->key_num_){//向右合并
         q = SonPtr(r, insert_index);
@@ -606,14 +641,14 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
           }
         }
         p->this_file_ = -1;
-        char ch[100];
-        strintss << p->this_file_;
-        strintss >> ch;
-        remove(ch);
+        id_Pool_.deleteNode(p->this_file_);
         p->this_file_ = -1;
         Pool.deleteNode(p);
         borrow_flag = false;
+        Pool.RecordNode(q);
+        Pool.RecordNode(r);
       }
+
     }
     p = r;
   }
@@ -658,6 +693,23 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SearchNode(KEYTYPE _key)
 {
   int insert_index;
   BPlusTreeNode<KEYTYPE> *p;
+  if (root_ == nullptr){
+    root_ = Pool.NewNode();
+    root_->this_file_ =  root_f_;
+    is_primare_key_ = false;//默认不是主键
+    out_file_stream_.close();
+    out_file_stream_.open(table_path_, ios::binary|ios::in);
+    if (!out_file_stream_.is_open()){
+      cerr << "打开文件 " << table_path_ << ".dbi 失败" << endl;
+    }
+    in_file_stream_.close();
+    in_file_stream_.open(table_path_, ios::binary);
+    if (!in_file_stream_.is_open()){
+      cerr << "打开文件 " << table_path_ << ".dbi 失败" << endl;
+    }
+    in_file_stream_.seekg(root_->this_file_*sizeof(*root_), ios::beg);
+    in_file_stream_.read((char*)(root_), sizeof(*root_));
+  }
   p = root_;
   while (!p->isleaf()){
     insert_index = p->BinarySearch(_key);
