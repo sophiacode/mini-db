@@ -13,8 +13,8 @@ class MemPool
   deque<BPlusTreeNode<KEYTYPE>*>blocklist;
   deque<BPlusTreeNode<KEYTYPE>*>nodelist;
 public:
-  deque<BPlusTreeNode<KEYTYPE>*>cachelist;
-  BPlusTreeNode<KEYTYPE>* NewNode(std::string path);
+  vector<BPlusTreeNode<KEYTYPE>*>cachelist;
+  BPlusTreeNode<KEYTYPE>* NewNode();
   void deleteNode(BPlusTreeNode<KEYTYPE> *p);
   void release();
   /**
@@ -52,7 +52,7 @@ void MemPool<KEYTYPE>::deleteNode(BPlusTreeNode<KEYTYPE> *p)
 }
 
 template<class KEYTYPE>
-BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode(std::string path)
+BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode()
 {
   BPlusTreeNode<KEYTYPE> *p;
   if (nodelist.empty()){
@@ -63,8 +63,7 @@ BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode(std::string path)
   }
   p = nodelist.front();
   nodelist.pop_front();
-  new(p)BPlusTreeNode<KEYTYPE>(path);
-  cachelist.push_back(p);
+  new(p)BPlusTreeNode<KEYTYPE>();
   return p;
 }
 
@@ -72,15 +71,12 @@ BPlusTreeNode<KEYTYPE>* MemPool<KEYTYPE>::NewNode(std::string path)
 template<class KEYTYPE>
 void MemPool<KEYTYPE>::RecordNode(BPlusTreeNode<KEYTYPE> *_p)
 {
-  bool flag = false;
   for (auto x : cachelist){
     if (x == _p){
-      flag = true;
+      return;
     }
   }
-  if (!flag){
-    cachelist.push_back(_p);
-  }
+  cachelist.push_back(_p);
 }
 
 #endif
