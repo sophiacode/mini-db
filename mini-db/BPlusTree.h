@@ -723,13 +723,13 @@ int BPlusTree<KEYTYPE>::DeleteCache()
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::ReadNodeFromFile(BPlusTreeNode<KEYTYPE> *_p)
 {
-  if (_p->this_file_.empty()){
-    return false;
-  }
-  file_stream_.clear();
-  file_stream_.open(_p->this_file_, ios::in | ios::binary);
-  file_stream_.read((char*)(_p), sizeof(*_p));
-  file_stream_.close();
+  //if (_p->this_file_.empty()){
+  //  return false;
+  //}
+  //file_stream_.clear();
+  //file_stream_.open(_p->this_file_, ios::in | ios::binary);
+  //file_stream_.read((char*)(_p), sizeof(*_p));
+  //file_stream_.close();
   return true;
 }
 
@@ -740,16 +740,16 @@ bool BPlusTree<KEYTYPE>::WriteNodeToFile(BPlusTreeNode<KEYTYPE> *_p)
   if (_p->this_file_.empty()){
     return false;
   }
-  file_stream_.clear();
-  file_stream_.open(_p->this_file_, ios::out | ios::binary);
-  _p->brother_ = nullptr;
-  _p->sister_ = nullptr;
-  _p->father_ = nullptr;
-  for (int i = 0; i < _p.key_num_; i++){
-    _p->sonptr_[i] = nullptr;
-  }
-  file_stream_.write((char*)(_p), sizeof(*_p));
-  file_stream_.close();
+  //file_stream_.clear();
+  //file_stream_.open(_p->this_file_, ios::out | ios::binary);
+  //_p->brother_ = nullptr;
+  //_p->sister_ = nullptr;
+  //_p->father_ = nullptr;
+  //for (int i = 0; i < _p.key_num_; i++){
+  //  _p->sonptr_[i] = nullptr;
+  //}
+  //file_stream_.write((char*)(_p), sizeof(*_p));
+  //file_stream_.close();
   return true;
 }
 
