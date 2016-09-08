@@ -631,8 +631,6 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	system(cmd.c_str());
 	index_path = index_path + "\\" + si.GetField();
 	Index * temp = new Index(si.GetIndex(), si.GetField(), type, index_path);
-	
-	indexs.push_back(temp);
 
 	fstream fip;
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
@@ -646,7 +644,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	if (records_num != 0)
 	{
 		char record_field_data[record_len];
-		frp.seekg(i*record_len*sizeof(char), ios::beg);
+		frp.seekg(record_len*i*sizeof(char), ios::beg);
 		while (frp.read(record_field_data, sizeof(char)*record_len))
 		{
 			temp->InsertNode(record_field_data, k);
@@ -654,6 +652,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 			frp.seekg((k*fields.size()+i)*record_len*sizeof(char),ios::beg);
 		}
 	}
+	indexs.push_back(temp);
 
 	std::cout << "索引" << si.GetIndex() << "建立成功." << std::endl;
 	return true;
