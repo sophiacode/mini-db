@@ -88,8 +88,8 @@ bool Table::UseTable()
 	}
 
 	std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
-	fwp.open(table_name_records.c_str(), ios::in);
-	frp.open(table_name_records.c_str());
+	fwp.open(table_name_records.c_str(), ios::in|ios::binary);
+	frp.open(table_name_records.c_str(),ios::binary);
 
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::in);
@@ -214,7 +214,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 
 			fstream fp;
 			std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
-			fp.open(table_name_fields, std::ios::out);					/* 创建表头文件 */
+			fp.open(table_name_fields, std::ios::out|ios::binary);					/* 创建表头文件 */
 
 			for (int i = 0; i < fields.size(); i++)						/* 判断是否有重名的字段 */
 			{
@@ -256,10 +256,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			file_stream_.close();
 
 			std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
-			fwp.open(table_name_records);								/* 创建记录文件 */
+			fwp.open(table_name_records,ios::binary);								/* 创建记录文件 */
 			fwp.close();
 
-			fwp.open(table_name_records, ios::in);						/* 打开记录文件 */
+			fwp.open(table_name_records, ios::in|ios::binary);						/* 打开记录文件 */
 			frp.open(table_name_records);
     /*  if (!frp.is_open()){
         cerr << "no" << endl; 
@@ -521,7 +521,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 		}
 		else {
 			int Record_id;					/* 搜索目标记录成功，Record_id记录当前要删除的记录主键 */
-			std::string Null_str = "";		/* 删除记录即为将记录置空 */
+			std::string Null_str = "\n";		/* 删除记录即为将记录置空 */
 			for (int i = 0; i < select_id.size(); i++)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
 				/* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
@@ -769,6 +769,7 @@ bool Table::Display()
 {
 	//std::string table_record = path + "\\" + table_name + "\\" + table_name + "_records_";
 	char record__data[record_len];
+	std::vector<string> record__datas;
 	if (Table::UseTable())
 	{
 		//fstream frp;
@@ -796,21 +797,36 @@ bool Table::Display()
 		std::string table_name_n = table_record + records_no;*/
 		//frp.open(table_name_n.c_str(), std::ios::in);
 		//frp.seekg(0, ios::beg);										/* 定位到文件开头 */
-		for (int k = 0; k < records_num; k++)
+		int k = 0, num = 0, i = 0;
+		while(k < records_num)
 		{
-		
-			std::cout << "No." << k + 1 << endl;
-
+			record__datas.clear();
+			bool key = false;
 			//frp.seekg(sizeof(char)*record_len*k*fields.size(), ios::beg);
 			for (int j = 0; j < fields.size(); j++) 
 			{
 				record__data[0] = '\0';
-				frp.seekg(sizeof(char)*true_len*(k*fields.size() + j), ios::beg);
+				frp.seekg(sizeof(char)*true_len*(i*fields.size() + j), ios::beg);
+				int asd = frp.tellg();
 				//frp.read(record__data, sizeof(char)* record_len);
 				frp >> record__data;
-				std::cout << fields.at(j).GetFieldName() << ":" << record__data << "  " <<endl;
+				record__datas.push_back(record__data);
+				if (record__data[0] != '\n')
+				{
+					key = true;
+				}
+				//std::cout << fields.at(j).GetFieldName() << ":" << record__data << "  " <<endl;
 			}
-			
+			if (key == true)
+			{
+				std::cout << "No." << k + 1 << endl;
+				for (int j = 0; j < fields.size(); j++)
+				{
+					std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
+				}
+				k++;
+			}	
+			i++;
 		}
 		//frp.close();
 		return true;
