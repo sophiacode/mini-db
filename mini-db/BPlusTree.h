@@ -88,6 +88,9 @@ public:
   ~BPlusTree();
 
 
+  bool CloseTree();
+
+
   /**
   *   \ÊÇ·ñÎªÖ÷¼ü
   */
@@ -216,6 +219,14 @@ BPlusTree<KEYTYPE>::BPlusTree(string _file_name)
 
 template<class KEYTYPE>
 BPlusTree<KEYTYPE>::~BPlusTree()
+{
+
+}
+
+
+
+template<class KEYTYPE>
+bool BPlusTree<KEYTYPE>::CloseTree()
 {
   Pool.deleteNode(root_);
   root_ = nullptr;
