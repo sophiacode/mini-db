@@ -27,9 +27,6 @@
     <ClCompile Include="sqlstatement.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MemPool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="IDPool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

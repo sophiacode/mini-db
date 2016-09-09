@@ -123,7 +123,6 @@
     <ClCompile Include="IDPool.cpp" />
     <ClCompile Include="interpreter.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MemPool.cpp" />
     <ClCompile Include="sqlstatement.cpp" />
     <ClCompile Include="table.cpp" />
   </ItemGroup>

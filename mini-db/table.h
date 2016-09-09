@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#define record_num 1000
+#define record_num 10000
 #define record_max 10000
 #define record_len 256
 
@@ -104,7 +104,7 @@ private:
 	int indexs_num;						 /* 表中已有索引数量 */
 	std::string table_name;				 /* 表单名称 */
 	std::vector<Field> fields;           /* 字段 */
-	std::vector<Index> indexs;           /* 索引 */
+	std::vector<Index *> indexs;         /* 索引 */
 	std::vector<int> select_id;			 /* 记录select选中的id */
 	std::string path;					 /* 存储数据库路径 */
 	IDPool idPool;						 /* 主键内存池，用于申请新id */
