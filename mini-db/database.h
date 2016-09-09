@@ -150,6 +150,8 @@ public:
 	*/
 	Index(std::string index_name, std::string field_name, ValueType type, std::string path);
 
+	Index(std::string index_name, std::string field_name, ValueType type);
+
 	/**
 	*  \brief 析构函数
 	*/
@@ -164,9 +166,12 @@ public:
 	//bool UpdateNode(std::string value);
 
 	std::string GetFieldName();
-private:
+
+public:
 	BPlusTree<int> * bplustree_int_;               /* int类型索引的B+树 */
 	BPlusTree<std::string> * bplustree_string_;    /* string类型索引的B+树 */
+
+private:
 	std::string field_name_;                       /* 索引对应的字段名 */
 	std::string index_name_;                       /* 索引名 */
 	ValueType type_;                               /* 索引类型 */

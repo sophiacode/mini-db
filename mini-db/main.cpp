@@ -23,8 +23,17 @@ int main()
 		{
 			str += c;
 		}
-		interpreter.SQLInterpret(str);
+		
+		if (interpreter.SQLInterpret(str) == false)
+		{
+			break;
+		}
 	}
 
+	if (controller != nullptr)
+	{
+		delete controller;
+		controller = nullptr;
+	}
 	return 0;
 }

@@ -125,7 +125,7 @@ void SQLCreateDatabase::SetDatabasePath(std::string database_path)
 void SQLCreateDatabase::Parse(std::vector<std::string> sql_token)
 {
 	if (sql_token.size() < 3) {
-		std::cerr << "SyntaxError:Please input the name of the database." << std::endl;
+		std::cerr << "Create Database ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -135,10 +135,10 @@ void SQLCreateDatabase::Parse(std::vector<std::string> sql_token)
 		database_path_ = sql_token[3];
 	}
 	else if (sql_token.size() < 4) {
-		database_path_ = "Database/";
+		database_path_ = ".\\Database";
 	}
 	else {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Create Database ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -181,7 +181,7 @@ void SQLUse::SetDatabasePath(std::string database_path)
 void SQLUse::Parse(std::vector<std::string> sql_token)
 {
 	if (sql_token.size() < 2) {
-		std::cerr << "SyntaxError:Please input the name of the database." << std::endl;
+		std::cerr << "Use ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -191,10 +191,10 @@ void SQLUse::Parse(std::vector<std::string> sql_token)
 		database_path_ = sql_token[2];
 	}
 	else if (sql_token.size() < 3) {
-		database_path_ = "Database/";
+		database_path_ = ".\\Database";
 	}
 	else {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Use ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -237,7 +237,7 @@ void SQLCreateTable::SetFields(std::vector<Field> fields)
 void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 {
 	if (sql_token.size() < 3 || sql_token[2] == "(") {
-		std::cerr << "SyntaxError:Please input the name of the table." << std::endl;
+		std::cerr << "Create Table ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -262,7 +262,7 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 					type = kStringType;
 				}
 				else {
-					std::cerr << "SyntaxError:Invalid Field." << std::endl;
+					std::cerr << "Create Table ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}
 
@@ -277,21 +277,21 @@ void SQLCreateTable::Parse(std::vector<std::string> sql_token)
 					break;
 				}
 				else {
-					std::cerr << "SyntaxError:Invalid Field." << std::endl;
+					std::cerr << "Create Table ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}	
 			}
 
 			if (++i < sql_token.size()) {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Create Table ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
 		} else {
-			std::cerr << "SynataxError:Invalid Field." << std::endl;
+			std::cerr << "Create Table ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 	} catch (std::out_of_range) {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Create Table ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -354,18 +354,18 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 	try {
 		ToLower(sql_token.at(i));
 		if (sql_token.at(i) != "into") {
-			std::cerr << "SyntaxError:Insert Error" << std::endl;
+			std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 	} catch (std::out_of_range) {
-		std::cerr << "SyntaxError:Insert Error" << std::endl;
+		std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
 	try {
 		table_name_ = sql_token.at(++i);
 	} catch (std::out_of_range) {
-		std::cerr << "SyntaxError:Please input the name of the table." << std::endl;
+		std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -382,7 +382,7 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 				} else if (sql_token.at(i) == ")") {
 					break;
 				} else {
-					std::cerr << "SyntaxError:Invalid Field." << std::endl;
+					std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}
 			}
@@ -392,11 +392,11 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 			if (sql_token.at(i) == "values") {
 				i++;
 			} else {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
 		} else {
-			std::cerr << "SyntaxError" << std::endl;
+			std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 
@@ -412,7 +412,7 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 				else {
 					MergeValue(sql_token, i);
 					if(ParseValue(sql_token.at(i), temp) == false) {
-						std::cerr << "SyntaxError" << std::endl;
+						std::cerr << "InsertÊ§°Ü£ºÖµÓë×Ö¶ÎµÄÀàÐÍ²»Æ¥Åä." << std::endl;
 						return;
 					}
 					values_.push_back(temp);
@@ -426,24 +426,24 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 					break;
 				}
 				else {
-					std::cerr << "SyntaxError" << std::endl;
+					std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}
 			}
 
 			if (++i < sql_token.size()) {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
 		}
 	} catch (std::out_of_range) {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Insert ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
 	if (is_input_field_ == true
 		&& fields_.size() != values_.size()) {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "InsertÊ§°Ü£º×Ö¶ÎÓëÖµµÄÊýÁ¿²»Í¬." << std::endl;
 		return;
 	}
 
@@ -455,6 +455,8 @@ void SQLInsert::Parse(std::vector<std::string> sql_token)
 
 SQLDelete::SQLDelete(std::vector<std::string> sql_token)
 {
+	value_ = new Value;
+	is_input_where_ = false;
 	Parse(sql_token);
 }
 
@@ -463,6 +465,11 @@ SQLDelete::~SQLDelete()
 	table_name_.clear();
 	field_.clear();
 	is_input_where_ = false;
+	if (value_ != nullptr)
+	{
+		delete value_;
+		value_ = nullptr;
+	}
 }
 
 std::string SQLDelete::GetTableName()
@@ -510,12 +517,12 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 			i++;
 		}
 		else {
-			std::cerr << "SyntaxError" << std::endl;
+			std::cerr << "Delete ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 	}
 	catch (std::out_of_range) {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Delete ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -532,28 +539,28 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 				if (sql_token.at(++i) == "=") {
 					MergeValue(sql_token, ++i);
 					if (ParseValue(sql_token.at(i), *value_) == false) {
-						std::cerr << "SyntaxError" << std::endl;
+						std::cerr << "DeleteÊ§°Ü£ºÖµÓë×Ö¶ÎµÄÀàÐÍ²»Æ¥Åä." << std::endl;
 						return;
 					}
 
 					if (++i < sql_token.size()) {
-						std::cerr << "SyntaxError" << std::endl;
+						std::cerr << "Delete ÃüÁîÓï·¨´íÎó." << std::endl;
 						return;
 					}
 				}
 				else {
-					std::cerr << "SyntaxError" << std::endl;
+					std::cerr << "Delete ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}
 				is_input_where_ = true;
 			}
 			else {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Delete ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
 		}
 		catch (std::out_of_range) {
-			std::cerr << "SyntaxError2" << std::endl;
+			std::cerr << "Delete ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 	}
@@ -565,6 +572,7 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 
 SQLUpdate::SQLUpdate(std::vector<std::string> sql_token)
 {
+	where_value_ = new Value;
 	Parse(sql_token);
 }
 
@@ -574,6 +582,12 @@ SQLUpdate::~SQLUpdate()
 	new_fields_.clear();
 	new_values_.clear();
 	where_field_.clear();
+
+	if (where_value_ != nullptr)
+	{
+		delete where_value_;
+		where_value_ = nullptr;
+	}
 }
 
 std::string SQLUpdate::GetTableName()
@@ -642,12 +656,12 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 				if (sql_token.at(++i) == "=") {
 					MergeValue(sql_token, ++i);
 					if (ParseValue(sql_token.at(i), temp_value) == false) {
-						std::cerr << "SyntaxError" << std::endl;
+						std::cerr << "UpdateÊ§°Ü£ºset×ÓÓï¾äÖÐµÄÖµÓë×Ö¶ÎµÄÀàÐÍ²»Æ¥Åä." << std::endl;
 						return;
 					}
 					new_values_.push_back(temp_value);
 				} else {
-					std::cerr << "SyntaxError" << std::endl;
+					std::cerr << "Update ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}
 
@@ -657,7 +671,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 				} else if (sql_token.at(i) == "where") {
 					break;
 				} else {
-					std::cerr << "SyntaxError" << std::endl;
+					std::cerr << "Update ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}		
 			} 
@@ -665,24 +679,24 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 			if (sql_token.at(++i) == "=") {
 				MergeValue(sql_token, ++i);
 				if (ParseValue(sql_token.at(i), *where_value_) == false) {
-					std::cerr << "SyntaxError" << std::endl;
+					std::cerr << "UpdateÊ§°Ü£ºwhere×ÓÓï¾äÖÐµÄÖµÓë×Ö¶ÎµÄÀàÐÍ²»Æ¥Åä." << std::endl;
 					return;
 				}
 
 				if (++i < sql_token.size()) {
-					std::cerr << "SyntaxError" << std::endl;
+					std::cerr << "Update ÃüÁîÓï·¨´íÎó." << std::endl;
 					return;
 				}
 			} else {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Update ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
 		} else {
-			std::cerr << "SyntaxError" << std::endl;
+			std::cerr << "Update ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 	} catch (std::out_of_range) {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Update ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -694,6 +708,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 SQLSelect::SQLSelect(std::vector<std::string> sql_token)
 {
 	value_ = new Value();
+	is_input_where_ = false;
 	Parse(sql_token);
 }
 
@@ -702,6 +717,11 @@ SQLSelect::~SQLSelect()
 	table_name_.clear();
 	field_.clear();
 	op_ = kOpUndefined;
+	if (value_ != nullptr)
+	{
+		delete value_;
+		value_ = nullptr;
+	}
 }
 
 std::string SQLSelect::GetTableName()
@@ -734,6 +754,11 @@ void SQLSelect::SetValue(Value value)
 	value_ = &value;
 }
 
+bool SQLSelect::IsInputWhere()
+{
+	return is_input_where_;
+}
+
 void SQLSelect::Parse(std::vector<std::string> sql_token)
 {
 	int i = 1;
@@ -742,29 +767,37 @@ void SQLSelect::Parse(std::vector<std::string> sql_token)
 		if (sql_token.at(i) == "from") {
 			table_name_ = sql_token.at(++i);
 		} else {
-			std::cerr << "SyntaxError" << std::endl;
+			std::cerr << "Select ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 
-		ToLower(sql_token.at(++i));
+		if (++i >= sql_token.size())
+		{
+			is_input_where_ = false;
+			is_parse_succeed = true;
+			return;
+		}
+		ToLower(sql_token.at(i));
 		if (sql_token.at(i) == "where") {
 			field_ = sql_token.at(++i);
 			if ((op_ = ParseOperator(sql_token.at(++i))) == kOpUndefined) {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Select ÃüÁîÓï·¨´íÎó." << std::endl;
 			}
 			MergeValue(sql_token,++i);
 			if (ParseValue(sql_token.at(i), *value_) == false) {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "SelectÊ§°Ü£ºÖµÓë×Ö¶ÎµÄÀàÐÍ²»Æ¥Åä." << std::endl;
 				return;
 			}
 
 			if (++i < sql_token.size()) {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Select ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
+
+			is_input_where_ = true;
 		}
 	} catch(std::out_of_range) {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Select ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 
@@ -828,20 +861,20 @@ void SQLCreateIndex::Parse(std::vector<std::string> sql_token)
 			if (sql_token.at(i) == "(" && sql_token.at(i+2) == ")" ) {
 				field_ = sql_token.at(++i);
 			} else {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Create Index ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
 
 			if (i+2 < sql_token.size()) {
-				std::cerr << "SyntaxError" << std::endl;
+				std::cerr << "Create Index ÃüÁîÓï·¨´íÎó." << std::endl;
 				return;
 			}
 		} else {
-			std::cerr << "SyntaxError" << std::endl;
+			std::cerr << "Create Index ÃüÁîÓï·¨´íÎó." << std::endl;
 			return;
 		}
 	} catch (std::out_of_range) {
-		std::cerr << "SyntaxError" << std::endl;
+		std::cerr << "Create Index ÃüÁîÓï·¨´íÎó." << std::endl;
 		return;
 	}
 

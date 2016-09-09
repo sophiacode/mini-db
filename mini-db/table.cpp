@@ -21,11 +21,51 @@ Table::Table(std::string new_path)
 */
 Table::~Table()
 {
-	fstream file_stream_;
+	//std::cout << "~\(≧▽≦)/~" << endl;
+	fstream file_stream_,fp;
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 	file_stream_.open(pool_file.c_str(), ios::out | ios::binary);
 	file_stream_.write((char*)(&idPool), sizeof(idPool));
 	file_stream_.close();
+
+	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
+	fp.open(table_name_fields.c_str());
+	char records_numb[4];
+	itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
+	fp.seekp(0, ios::beg);
+	fp.write(records_numb, sizeof(char)* 4);
+	fp.close();											/* 关闭写表头文件 */
+
+	fwp.close();										/* 关闭写文件 */
+	frp.close();										/* 关闭写文件 */
+
+
+	ofstream findex;
+	std::string sign;
+	std::string index_tree = path + "\\" + table_name + "\\index\\index_tree";
+	findex.open(index_tree, ios::binary);
+
+	for (auto iter : indexs)
+	{
+		if (iter != nullptr)
+		{
+			/*if (iter->bplustree_int_ != nullptr)
+			{
+				sign = "0\0";
+				findex.write(sign.c_str(), sizeof(char)* 2);
+				findex.write((char*)(iter->bplustree_int_), sizeof(*(iter->bplustree_int_)));
+			}
+			else if (iter->bplustree_string_ != nullptr)
+			{
+				sign = "1\0";
+				findex.write(sign.c_str(), sizeof(char)* 2);
+				findex.write((char*)(iter->bplustree_string_), sizeof(*(iter->bplustree_string_)));
+			}*/
+			delete iter;
+			iter = nullptr;
+		}
+	}
+	findex.close();
 }
 
 /**
@@ -46,11 +86,16 @@ bool Table::UseTable()
 	{
 		return true;
 	}
+
+	std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
+	fwp.open(table_name_records.c_str(), ios::in);
+	frp.open(table_name_records.c_str());
+
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::in);
 	if (!fp_fields.is_open())									/* 如果打开失败，则返回false */
 	{
-		std::cout << table_name_fields << endl;
+		//std::cout << table_name_fields << endl;
 		return false;
 	}
 
@@ -67,7 +112,7 @@ bool Table::UseTable()
 		if (type[0] == '0') {
 			_type = kIntegerType;
 			temp.SetFieldType(kIntegerType);
-		}	/* 0-整型，1-字符串 */
+		}														/* 0-整型，1-字符串 */
 		else
 		{
 			_type = kStringType;
@@ -79,15 +124,33 @@ bool Table::UseTable()
 
 		if (is_index[0] == '1')
 		{
-			Index * index = new Index("", field_name, _type, path + "\\" + table_name + "\\index\\" + field_name);
+			Index * index = new Index("", field_name, _type);
 			indexs.push_back(index);
 		}
 	}
 	fp_fields.close();											/* 关闭文件 */
 
+	ifstream findex;
+	std::string index_tree = path + "\\" + table_name + "\\index\\index_tree";
+	char sign[2];
+	findex.open(index_tree,ios::binary);
+	int index_no = 0;
+	for (auto iter : indexs)
+	{
+		findex.read(sign, sizeof(char)* 2);
+		if (sign[0] == '0')
+		{
+			findex.read((char*)(iter->bplustree_int_), sizeof(*(iter->bplustree_int_)));
+		}
+		else if (sign[0] == '1'){
+			findex.read((char*)(iter->bplustree_string_), sizeof(*(iter->bplustree_string_)));
+		}
+	}
+	findex.close();
+
 	fstream file_stream_;										/* 读入主键内存池 */
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
-	file_stream_.open(pool_file, ios::out | ios::binary);
+	file_stream_.open(pool_file, ios::in | ios::binary);
 	file_stream_.read((char*)(&idPool), sizeof(idPool));
 	file_stream_.close();
 	return true;
@@ -137,7 +200,8 @@ bool Table::CreateTable(SQLCreateTable &sql)
 	}
 
 	std::string cmd = "md " + path + "\\" + table_name;/* 构建命令创建表单文件夹 */
-	if (Table::UseTable())							/* 判断表单是否已经存在 */
+	std::string table = path + "\\" + table_name;
+	if (!_access(table.c_str(),0))							/* 判断表单是否已经存在 */
 	{
 		std::cout << "已存在该表单！" << endl;
 		return false;
@@ -146,10 +210,11 @@ bool Table::CreateTable(SQLCreateTable &sql)
 		if (!system(cmd.c_str()))
 		{
 			fields = sql.GetFields();				/* 获取表头数据 */
+			records_num = 0;
 
 			fstream fp;
 			std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
-			fp.open(table_name_fields.c_str(), std::ios::out);		/* 创建表头文件 */
+			fp.open(table_name_fields, std::ios::out);					/* 创建表头文件 */
 
 			for (int i = 0; i < fields.size(); i++)						/* 判断是否有重名的字段 */
 			{
@@ -163,16 +228,19 @@ bool Table::CreateTable(SQLCreateTable &sql)
 				}
 			}
 
-			char records_num[4];										/* 前4位写入记录数量 */
-			itoa(0, records_num, 10);
-			fp.write(records_num, 4);
-			
+			char records_numb[4];										/* 前4位写入记录数量 */
+			itoa(0, records_numb, 10);
+			fp.write(records_numb, 4);
+
+			std::string name;
+			ValueType type;												/* 获取字段对应的数据类型 */
+			std::string type_;											/* type_标记数据类型 */
+			std::string is_index;										/* is_index标记是否存在索引 */
 			for (int i = 0; i < fields.size(); i++)						/* 写入表头数据 */
 			{
-				std::string name = fields[i].GetFieldName() + '\0';
-				ValueType type = fields[i].GetFieldType();				/* 获取字段对应的数据类型 */
-				std::string type_;										/* type_标记数据类型 */
-				std::string is_index = "0\0";							/* is_index标记是否存在索引 */
+				name = fields[i].GetFieldName() + '\0';
+				type = fields[i].GetFieldType();						/* 获取字段对应的数据类型 */
+				is_index = "0\0";										/* is_index标记是否存在索引 */
 				if (type == kIntegerType) type_ = "0\0";				/* 标号0：整形，标号1：字符串 */
 				else type_ = "1\0";
 				
@@ -187,6 +255,15 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			file_stream_.open(pool_file, ios::out | ios::binary);
 			file_stream_.close();
 
+			std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
+			fwp.open(table_name_records);								/* 创建记录文件 */
+			fwp.close();
+
+			fwp.open(table_name_records, ios::in);						/* 打开记录文件 */
+			frp.open(table_name_records);
+    /*  if (!frp.is_open()){
+        cerr << "no" << endl; 
+      }*/
 			std::cout << "创建成功！" << endl;
 			return true;
 		}
@@ -203,31 +280,100 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
-	/*int field_id = Table::FindIndex(sql.GetField());
-	int id = indexs.at(field_id).SearchNode(sql.GetValue().GetValueData());
-	select_id.push_back(id);*/
-	Table::Display();
-	return false;
+	select_id.clear();
+	if (sql.IsInputWhere())
+	{
+		int id;												
+		int field_id = Table::FindIndex(sql.GetField());
+		if (field_id != -1)
+		{
+			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+		}
+		else {
+
+		}
+
+		if (id != -1)
+		{//存在符合条件的记录
+			Table::Display(id);
+			select_id.push_back(id);
+			return true;
+		}
+		else {//不存在符合条件的记录
+			std::cout << "不存在符合条件的记录！" << endl;
+			return false;
+		}
+	}
+	else {
+		Table::Display();
+		return true;
+	}
 }
 
 /**
 *  \brief Delete调用Select功能
 */
-bool Table::SelectRecord(SQLDelete &sd)
+bool Table::SelectRecord(SQLDelete &sql)
 {
-	table_name = sd.GetTableName();
-	int field_id = Table::FindIndex(sd.GetField());
-	return false;
+	table_name = sql.GetTableName();
+	select_id.clear();
+	if (sql.IsInputWhere())
+	{
+		int id;
+		int field_id = Table::FindIndex(sql.GetField());
+		if (field_id != -1)
+		{
+			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+		}
+		else {
+
+		}
+
+		if (id != -1)
+		{//存在符合条件的记录
+			//Table::Display(id);
+			select_id.push_back(id);
+			return true;
+		}
+		else {//不存在符合条件的记录
+			std::cout << "不存在符合条件的记录！" << endl;
+			return false;
+		}
+	}
+	else {
+		//Table::Display();
+		return true;
+	}
 }
 
 /**
 *  \brief Update调用Select功能
 */
-bool Table::SelectRecord(SQLUpdate &su)
+bool Table::SelectRecord(SQLUpdate &sql)
 {
-	table_name = su.GetTableName();
-	int field_id = Table::FindIndex(su.GetWhereField());
-	return false;
+	table_name = sql.GetTableName();
+	select_id.clear();
+	
+	int id;
+	int field_id = Table::FindIndex(sql.GetWhereField());
+	if (field_id != -1)
+	{
+		id = indexs.at(field_id)->SearchNode(sql.GetWhereValue().GetValueData());
+	}
+	else {
+		
+	}
+
+	if (id != -1)
+	{//存在符合条件的记录
+		//Table::Display(id);
+		select_id.push_back(id);
+		return true;
+	}
+	else {//不存在符合条件的记录
+		std::cout << "不存在符合条件的记录！" << endl;
+		return false;
+	}
 }
 
 /**
@@ -243,8 +389,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		std::vector<string> records__data;					/* records__data存储要插入的数据 */
 		for (int i = 0; i < fields.size(); i++)				/* 初始值置空 */
 		{
-			std::string temp = "";
-			records__data.push_back(temp);
+			records__data.push_back("");
 		}
 
 		/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
@@ -317,21 +462,23 @@ bool Table::CreateRecord(SQLInsert &st)
 		int Record_id = idPool.NewNode();					/* 获得新记录的主键 */
 		char records_no_[2];
 		itoa(Record_id / record_num, records_no_, 10);
-		std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no_;/* 构建表单记录文件名 */
-		std::string table_name_fields  = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
+		//std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no_;/* 构建表单记录文件名 */
+		//std::string table_name_fields  = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
 
-		fstream fp;
-		fp.open(table_name_records.c_str(),std::ios::app);/* 打开or创建记录文件 */
+		//fstream fp;
+		//fp.open(table_name_records.c_str(),ios::app);				/* 打开记录文件 */
 		/*long l = fp.tellp();
 		cout << l << endl;*/
-		fp.seekp((Record_id%record_num) * fields.size() * record_len, ios::beg); /* 指针定位，更改写入位置 */
+		//fwp.seekp((Record_id%record_num) * fields.size() * record_len, ios::beg); /* 指针定位，更改写入位置 */
 		/*l = fp.tellp();
 		cout << l << endl;*/
 
 		for (int i = 0; i < fields.size(); i++)
 		{
-			fp.write(records__data[i].c_str(), record_len);		/* 按字段顺序写入文件 */
-			if (fields[i].IsCreateIndex())					/* 当这个字段存在索引时，维护索引 */
+			fwp.seekp(((Record_id%record_num) * fields.size() + i) * record_len, ios::beg); /* 指针定位，更改写入位置 */
+			fwp.write(records__data[i].c_str(), record_len);	/* 按字段顺序写入文件 */
+			fwp.flush();
+			if (fields[i].IsCreateIndex())						/* 当这个字段存在索引时，维护索引 */
 			{
 				int index_id = FindIndex(fields[i].GetFieldName());/* 找到该字段index_id（索引对应编号） */
 				if (index_id != -1)
@@ -340,15 +487,15 @@ bool Table::CreateRecord(SQLInsert &st)
 				}
 			}
 		}
-		fp.close();											/* 关闭写记录文件 */
+		//fp.close();										/* 关闭写记录文件 */
 
-		fp.open(table_name_fields.c_str());
 		records_num++;										/* 插入成功，表单中记录总数加一 */
-		char records_numb[4];
-		itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
-		fp.seekp(0, ios::beg);
-		fp.write(records_numb, sizeof(char)* 4);
-		fp.close();											/* 关闭写表头文件 */
+		//fp.open(table_name_fields.c_str());
+		//char records_numb[4];
+		//itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
+		//fp.seekp(0, ios::beg);
+		//fp.write(records_numb, sizeof(char)* 4);
+		//fp.close();										/* 关闭写表头文件 */
 		std::cout << "插入成功！" << endl;
 		return true;										/* 返回成功 */
 	}
@@ -364,6 +511,7 @@ bool Table::CreateRecord(SQLInsert &st)
 bool Table::DeleteRecord(SQLDelete &sd)
 {
 	table_name = sd.GetTableName();			/* 获取表单名称 */
+	char record__data[record_len];
 	if (UseTable())
 	{/* 打开表单成功 */
 		if (!Table::SelectRecord(sd))
@@ -378,29 +526,28 @@ bool Table::DeleteRecord(SQLDelete &sd)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
 				/* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
 				Record_id = select_id[i];
-				char records_no[1], record__data[record_len];
+				//char records_no[1], record__data[record_len];
 				std::vector<string> records__data;
-				itoa(Record_id / record_num, records_no, 10);
-				std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
-				std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
+				//itoa(Record_id / record_num, records_no, 10);
+				//std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建目标文件名 */
+				//std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
 
-				fstream fp;
-				fp.open(record_file,  std::ios::in);								/* 打开读文件 */
-				fp.seekg((Record_id%record_num)*fields.size() * record_len, ios::beg);/* 指针定位 */
+				//fstream fp;
+				//fp.open(record_file,  std::ios::in);								/* 打开读文件 */
+				frp.seekg((Record_id%record_num)*fields.size() * record_len, ios::beg);/* 指针定位 */
 				for (int j = 0; j < fields.size(); j++)								/* 将原记录读入records__data */
 				{
-					fp.read(record__data, sizeof(char)* record_len);
-					std::string r;
-					records__data.push_back(r);
-					records__data[j] = record__data;
+					frp.read(record__data, sizeof(char)* record_len);
+					records__data.push_back(record__data);
 				}
-				fp.close();															/* 关闭读文件 */
+				//fp.close();															/* 关闭读文件 */
 
-				fp.open(record_file);												/* 打开目标文件 */
-				fp.seekp((Record_id%record_num)*fields.size() * record_len, ios::beg);     /* 定位到要更改的位置 */
+				//fp.open(record_file);												/* 打开目标文件 */
+				fwp.seekp((Record_id%record_num)*fields.size() * record_len, ios::beg);/* 定位到要更改的位置 */
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
 				{
-					fp.write(Null_str.c_str(), record_len);
+					fwp.write(Null_str.c_str(), record_len);
+					fwp.flush();
 					if (fields[j].IsCreateIndex())									/* 当对应字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());			/* 找到该字段对应的索引编号index_id */
@@ -412,15 +559,15 @@ bool Table::DeleteRecord(SQLDelete &sd)
 						indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
 					}
 				}
-				fp.close();															/* 关闭写文件 */
+				//fp.close();															/* 关闭写文件 */
 
-				fp.open(table_name_fields.c_str());
+				//fp.open(table_name_fields.c_str());
 				records_num--;										/* 插入成功，表单中记录总数减一 */
-				char records_numb[4];
-				itoa(records_num, records_numb, 10);				/* 将新的记录数据更新 */
-				fp.seekp(0, ios::beg);
-				fp.write(records_numb, sizeof(char)* 4);
-				fp.close();
+				//char records_numb[4];
+				//itoa(records_num, records_numb, 10);				/* 将新的记录数据更新 */
+				//fp.seekp(0, ios::beg);
+				//fp.write(records_numb, sizeof(char)* 4);
+				//fp.close();
 			}
 			std::cout << "删除成功！" << endl;
 			return true;					/* 修改成功，返回true */
@@ -438,6 +585,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 bool Table::UpdateRecord(SQLUpdate &su)
 {
 	table_name = su.GetTableName();								/* 获取表单名称 */
+	char record__data[record_len];
 	if (UseTable())												/* 打开表单文件夹 */
 	{
 		if (!Table::SelectRecord(su))							/* 搜索需要更新的记录 */
@@ -462,30 +610,29 @@ bool Table::UpdateRecord(SQLUpdate &su)
 				}
 			}
 
-			fstream fwp, frp;
+			//fstream fwp, frp;
 			/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 			int Record_id;										/* Record_id记录当前操作记录主键 */
 			for (int i = 0; i < select_id.size(); i++)
 			{
 				Record_id = select_id[i];
-				char records_no[1], record__data[record_len];			/* record__data记录一个字段的信息 */
+				//char records_no[1], record__data[record_len];	/* record__data记录一个字段的信息 */
 				std::vector<string> records__data1;				/* records__data1记录原有记录信息 */
 				std::vector<string> records__data2;				/* records__data2记录当前需要更改的记录信息 */
 
-				itoa(Record_id / record_num, records_no, 10);
-				std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
-				frp.open(record_file.c_str(),  std::ios::in); /* 打开读记录文件 */
+				//itoa(Record_id / record_num, records_no, 10);
+				//std::string record_file = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no;/* 构建记录文件名 */
+				//frp.open(record_file.c_str(),  std::ios::in); /* 打开读记录文件 */
 				frp.seekg((Record_id%record_num )*fields.size() * record_len, ios::beg);/* 定位读文件指针 */
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
 				{
+					std::string r1, r2;
 					frp.read(record__data, sizeof(char) * record_len);
-					std::string *r1 = new string();
-					std::string *r2 = new string();
-					records__data1.push_back(*r1);
-					records__data2.push_back(*r2);
+					records__data1.push_back(r1);
+					records__data2.push_back(r2);
 					records__data1[j] = record__data;
 				}
-				frp.close();													/* 关闭读文件 */
+				//frp.close();													/* 关闭读文件 */
 
 
 				for (int j = 0; j < su.GetNewField().size(); j++)
@@ -514,14 +661,17 @@ bool Table::UpdateRecord(SQLUpdate &su)
 					}
 				}
 				/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
-				fwp.open(record_file.c_str());/* 打开写记录文件 */
+				//fwp.open(record_file.c_str());/* 打开写记录文件 */
 				fwp.seekp((Record_id%record_num)*fields.size() * record_len, ios::beg);/* 指针定位 */
+
+				int index_id;
 				for (int j = 0; j < fields.size(); j++)
 				{
 					fwp.write(records__data2[j].c_str(), record_len);	/* 按照字段序列进行更改 */
+					fwp.flush();
 					if (fields[j].IsCreateIndex())				/* 当该字段存在索引时，对索引进行维护 */
 					{
-						int index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
+						index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
 						if (index_id == -1)
 						{
 							std::cout << "该字段不存在索引！" << endl;
@@ -530,7 +680,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						//indexs[index_id].UpdateNode(records__data2[j], records__data1[j]);/* 更新索引结点 */
 					}
 				}
-				fwp.close();									/* 关闭写文件 */
+				//fwp.close();									/* 关闭写文件 */
 			}
 			std::cout << "更新成功！" << endl;
 			return true;										/* 更新成功 */
@@ -576,10 +726,8 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	string index_path = path + "\\" + table_name + "\\index";
 	string cmd = "md " + index_path;
 	system(cmd.c_str());
-	string index_path = index_path + "\\" + si.GetField();
+	index_path = index_path + "\\" + si.GetField();
 	Index * temp = new Index(si.GetIndex(), si.GetField(), type, index_path);
-	
-	indexs.push_back(temp);
 
 	fstream fip;
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
@@ -588,6 +736,20 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	fip.seekp(sizeof(char)*(i * 24 + 4), std::ios::beg);
 	fip.write(is_index.c_str(), sizeof(char)* 2);
 	fip.close();
+
+	int k = 0;
+	char record_field_data[record_len];
+	if (records_num != 0)
+	{
+		while (k < records_num)
+		{
+			frp.seekg((k*fields.size() + i)*record_len*sizeof(char), ios::beg);
+			frp.read(record_field_data, sizeof(char)*record_len);
+			temp->InsertNode(record_field_data, k);
+			k++;
+		}
+	}
+	indexs.push_back(temp);
 
 	std::cout << "索引" << si.GetIndex() << "建立成功." << std::endl;
 	return true;
@@ -598,11 +760,12 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 */
 bool Table::Display()
 {
-	std::string table_record = path + "\\" + table_name + "\\" + table_name + "_records_";
+	//std::string table_record = path + "\\" + table_name + "\\" + table_name + "_records_";
+	char record__data[record_len];
 	if (Table::UseTable())
 	{
-		fstream frp;
-		for (int i = 0; i < records_num / record_num; i++)
+		//fstream frp;
+		/*for (int i = 0; i < records_num / record_num; i++)
 		{
 			char records_no[2];
 			itoa(i, records_no, 10);
@@ -619,31 +782,66 @@ bool Table::Display()
 				std::cout << ";" << endl;
 			}
 			frp.close();
-		}
+		}*/
 
-		char records_no[2];
+		/*char records_no[2];
 		itoa(records_num / record_num, records_no, 10);
-		std::string table_name_n = table_record + records_no;
-		frp.open(table_name_n.c_str(), std::ios::in);
-		for (int k = 0; k < records_num%record_num; k++)
+		std::string table_name_n = table_record + records_no;*/
+		//frp.open(table_name_n.c_str(), std::ios::in);
+		//frp.seekg(0, ios::beg);										/* 定位到文件开头 */
+		for (int k = 0; k < records_num; k++)
 		{
 		
-			std::cout << k+1 << endl;
+			std::cout << "No." << k + 1 << endl;
+
+			frp.seekg(sizeof(char)*record_len*k*fields.size(), ios::beg);
 			for (int j = 0; j < fields.size(); j++) 
 			{
-				char record_data[record_len];
-				record_data[0] = '\0';
-				frp.read(record_data, sizeof(char)* record_len);
+				record__data[0] = '\0';
+				frp.seekg(sizeof(char)*record_len*(k*fields.size() + j), ios::beg);
+				frp.read(record__data, sizeof(char)* record_len);
 				//frp >> record_data;
-				std::cout << fields.at(j).GetFieldName() << ":" << record_data << "  " <<endl;
+				std::cout << fields.at(j).GetFieldName() << ":" << record__data << "  " <<endl;
 			}
 			
 		}
-		frp.close();
+		//frp.close();
 		return true;
 	}
 	else {
 		std::cout << "打开表单失败！" << endl;
+		return false;
+	}
+}
+
+/**
+*  \brief 表格显示
+*/
+bool Table::Display(int id)
+{
+	char record_data[record_len];
+	//record_data[0] = '\0';
+	/*std::string table_record = path + "\\" + table_name + "\\" + table_name + "_records_";
+	fstream frp;*/
+	if (UseTable())
+	{
+		/*char records_no[2];
+		itoa(id, records_no, 10);
+		std::string table_name_n = table_record + records_no;
+		frp.open(table_name_n.c_str(), std::ios::in);*/
+
+		frp.seekg(sizeof(char)*id*fields.size()*record_len, ios::beg);
+		for (int j = 0; j < fields.size(); j++)
+		{
+			//frp.sync();
+			frp.read(record_data, sizeof(char)* record_len);
+			//frp >> record_data;
+			std::cout << fields.at(j).GetFieldName() << ":" << record_data << "  " << endl;
+		}
+		return true;
+	}
+	else {
+		std::cout << "表单打开失败！" << endl;
 		return false;
 	}
 }

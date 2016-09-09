@@ -25,7 +25,12 @@ bool Interpreter::SQLInterpret(std::string sql_statement)
 	SQLPretreatment();
 	SplitSQL();
 	GetSQLType();
-	return ParseSQL();
+	ParseSQL();
+	if (sql_type_ == kSQLQuit)
+	{
+		return false;
+	}
+	return true;
 }
 
 void Interpreter::SQLPretreatment()
@@ -75,7 +80,7 @@ void Interpreter::GetSQLType()
 {
 	if (sql_token_.size() == 0)
 	{
-		std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+		std::cerr << "未识别到有效的SQL语句." << std::endl;
 		return;
 	}
 
@@ -86,7 +91,7 @@ void Interpreter::GetSQLType()
 		if (sql_token_[0].size() < 2)
 		{
 			sql_type_ = kSQLUndefined;
-			std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+			std::cerr << "未识别到有效的SQL语句." << std::endl;
 			return;
 		}
 		ToLower(sql_token_[1]);
@@ -105,7 +110,7 @@ void Interpreter::GetSQLType()
 		else
 		{
 			sql_type_ = kSQLUndefined;
-			std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+			std::cerr << "未识别到有效的SQL语句." << std::endl;
 			return;
 		}
 	}
@@ -129,14 +134,14 @@ void Interpreter::GetSQLType()
 	{
 		sql_type_ = kSQLSelect;
 	}
-	else if (sql_token_[0] == "display")
+	else if (sql_token_[0] == "quit")
 	{
-		sql_type_ = kSQLDisplay;
+		sql_type_ = kSQLQuit;
 	}
 	else
 	{
 		sql_type_ = kSQLUndefined;
-		std::cerr << "SyntaxError:No Valid SQL Statement" << std::endl;
+		std::cerr << "未识别到有效的SQL语句." << std::endl;
 		return;
 	}
 }
@@ -165,6 +170,8 @@ bool Interpreter::ParseSQL()
 		return controller_->Update(new SQLUpdate(sql_token_));
 	case kSQLSelect:
 		return controller_->Select(new SQLSelect(sql_token_));
+	case kSQLQuit:
+		return true;
 	case kSQLUndefined:
 		return false;
 	default:

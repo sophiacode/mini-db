@@ -176,10 +176,10 @@ std::vector<Table *> Database::GetTable()
 
 bool Database::UseTable(std::string DatabasePath)
 {
-	fstream fp;
+	ifstream fp;
 	std::string path;
 	path = DatabasePath + "\\" + "table_name";
-	fp.open(path.c_str(), std::ios::in);
+	fp.open(path);
 	if (!fp.is_open())
 	{
 		//std::cout << "打开失败" << endl;
@@ -191,6 +191,7 @@ bool Database::UseTable(std::string DatabasePath)
 		char table_name_[20];
 		while (fp.read(table_name_, sizeof(char) * 20))
 		{
+			//fp.read(table_name_, sizeof(char)* 20);
 			std::string table_name(table_name_);
 			Table *table = new Table(DatabasePath);
 			table->SetTableName(table_name);
@@ -214,12 +215,13 @@ bool Database::CreateTable(SQLCreateTable & st)
 	if (table->CreateTable(st))
 	{
 		table_.push_back(table);
-		fstream fp;
+		ofstream fp;
 		std::string path;
 		std::string table_name_ = st.GetTableName();
 		path = database_path + "\\" + "table_name";   /*创建一个文件名为table_name的文件夹存放表名*/
-		fp.open(path.c_str(), std::ios::out);
-		fp.write(table_name_.c_str(), 20);
+		fp.open(path, std::ios::app);
+		fp.seekp(table_.size() * 20 * sizeof(char), ios::beg);
+		fp.write(table_name_.c_str(), 20*sizeof(char));
 		fp.close();
 		return true;
 	}
@@ -243,6 +245,23 @@ Index::Index(std::string index_name, std::string field_name, ValueType type, std
 	{
 		bplustree_int_ = nullptr;
 		bplustree_string_ = new BPlusTree<std::string>(path);
+	}
+}
+
+Index::Index(std::string index_name, std::string field_name, ValueType type)
+{
+	index_name_ = index_name;
+	field_name_ = field_name;
+	type_ = type;
+	if (type_ == kIntegerType)
+	{
+		bplustree_int_ = new BPlusTree<int>();
+		bplustree_string_ = nullptr;
+	}
+	if (type_ == kStringType)
+	{
+		bplustree_int_ = nullptr;
+		bplustree_string_ = new BPlusTree<string>();
 	}
 }
 
@@ -314,7 +333,7 @@ std::string Index::GetFieldName()
 	return field_name_;
 }
 
-/*bool Index::UpdateNode(std::string value)
+ /*bool Index::UpdateNode(std::string value)
 {
 if (type_ == kIntegerType)
 {
