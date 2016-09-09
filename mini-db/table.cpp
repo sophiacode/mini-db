@@ -288,20 +288,19 @@ bool Table::SelectRecord(SQLSelect &sql)
 		if (field_id != -1)
 		{
 			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+			if (id != -1)
+			{//存在符合条件的记录
+				Table::Display(id);
+				select_id.push_back(id);
+				return true;
+			}
+			else {//不存在符合条件的记录
+				std::cout << "不存在符合条件的记录！" << endl;
+				return false;
+			}
 		}
 		else {
-
-		}
-
-		if (id != -1)
-		{//存在符合条件的记录
-			Table::Display(id);
-			select_id.push_back(id);
-			return true;
-		}
-		else {//不存在符合条件的记录
-			std::cout << "不存在符合条件的记录！" << endl;
-			return false;
+			OrderSelect(sql);
 		}
 	}
 	else {
@@ -867,5 +866,61 @@ bool Table::Display(int id)
 	else {
 		std::cout << "表单打开失败！" << endl;
 		return false;
+	}
+}
+
+
+/*-----------------------------顺序查找--------------------------------------*/
+
+bool Table::OrderSelect(SQLSelect &st)
+{
+
+	std::string field = st.GetField();
+	Value value = st.GetValue();
+	OperatorType op = kOpEqual;
+	std::string value_data_;
+	int j;
+	int count = 0;
+	for (j = 0; j < fields.size(); j++)
+	{
+		if (fields.at(j).GetFieldName() == field)
+			break;
+	}
+	if (j == fields.size())
+	{
+		std::cout << "字段名不存在" << endl;
+		frp.close();
+		return false;
+	}
+	else
+	{
+		switch (op)
+		{
+		case kOpEqual:
+			char record_data[record_len];
+			for (int i = 0; i < records_num; i++)
+			{
+				frp.seekg(sizeof(char)*(i*fields.size() + j)*true_len, ios::beg);
+				frp >> record_data;
+				//frp.read(record_data, sizeof(char)*fields.size()*true_len);
+				std::string record_data_(record_data);
+				//value_data_ = record_data_.substr(j * true_len, true_len);
+				if (record_data_ == value.GetValueData())
+				{
+					count++;
+					Display(i);
+				}
+			}
+			break;
+		defalt:
+			return false;
+		}
+		if (!count)
+		{
+			frp.close();
+			return false;
+		}
+		frp.close();
+		return true;
 	}
 }
