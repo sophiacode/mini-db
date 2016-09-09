@@ -179,7 +179,7 @@ bool Database::UseTable(std::string DatabasePath)
 	ifstream fp;
 	std::string path;
 	path = DatabasePath + "\\" + "table_name";
-	fp.open(path);
+	fp.open(path,ios::binary);
 	if (!fp.is_open())
 	{
 		//std::cout << "´ò¿ªÊ§°Ü" << endl;
@@ -205,8 +205,7 @@ bool Database::UseTable(std::string DatabasePath)
 		filebuf *pbuf;
 		long int size;
 		char * buffer;
-	
-		fp.open("test.txt", ios::binary);
+
 		pbuf = fp.rdbuf();
 		size = pbuf->pubseekoff(0, ios::end, ios::in);
 		pbuf->pubseekpos(0, ios::in);
