@@ -188,8 +188,8 @@ bool Database::UseTable(std::string DatabasePath)
 	}
 	else
 	{
-		char table_name_[20];
-		while (fp.read(table_name_, sizeof(char) * 20))
+		std::string table_name;
+		/*while (fp.read(table_name_, sizeof(char) * 20))
 		{
 			//fp.read(table_name_, sizeof(char)* 20);
 			std::string table_name(table_name_);
@@ -201,7 +201,31 @@ bool Database::UseTable(std::string DatabasePath)
 			}
 			fp.close();
 		}
-		//std::cout << "打开成功" << endl;
+		std::cout << "打开成功" << endl;*/
+		filebuf *pbuf;
+		long int size;
+		char * buffer;
+	
+		fp.open("test.txt", ios::binary);
+		pbuf = fp.rdbuf();
+		size = pbuf->pubseekoff(0, ios::end, ios::in);
+		pbuf->pubseekpos(0, ios::in);
+		buffer = new char[size];
+		pbuf->sgetn(buffer, size);
+		std::string buffer_(buffer);
+
+		for (int i = 0; i < size / 20; i++)
+		{
+			table_name = buffer_.substr(i * 20, 20);
+			Table *table = new Table(DatabasePath);
+			table->SetTableName(table_name);
+			if (table->UseTable())
+			{
+				table_.push_back(table);
+			}
+		}
+
+		fp.close();
 		return true;
 	}
 
