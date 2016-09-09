@@ -176,10 +176,10 @@ std::vector<Table *> Database::GetTable()
 
 bool Database::UseTable(std::string DatabasePath)
 {
-	fstream fp;
+	ifstream fp;
 	std::string path;
 	path = DatabasePath + "\\" + "table_name";
-	fp.open(path.c_str(), std::ios::in);
+	fp.open(path);
 	if (!fp.is_open())
 	{
 		//std::cout << "打开失败" << endl;
@@ -188,9 +188,10 @@ bool Database::UseTable(std::string DatabasePath)
 	}
 	else
 	{
-		char table_name_[20];
-		while (fp.read(table_name_, sizeof(char) * 20))
+		std::string table_name;
+		/*while (fp.read(table_name_, sizeof(char) * 20))
 		{
+			//fp.read(table_name_, sizeof(char)* 20);
 			std::string table_name(table_name_);
 			Table *table = new Table(DatabasePath);
 			table->SetTableName(table_name);
@@ -200,7 +201,31 @@ bool Database::UseTable(std::string DatabasePath)
 			}
 			fp.close();
 		}
-		//std::cout << "打开成功" << endl;
+		std::cout << "打开成功" << endl;*/
+		filebuf *pbuf;
+		long int size;
+		char * buffer;
+	
+		fp.open("test.txt", ios::binary);
+		pbuf = fp.rdbuf();
+		size = pbuf->pubseekoff(0, ios::end, ios::in);
+		pbuf->pubseekpos(0, ios::in);
+		buffer = new char[size];
+		pbuf->sgetn(buffer, size);
+		std::string buffer_(buffer);
+
+		for (int i = 0; i < size / 20; i++)
+		{
+			table_name = buffer_.substr(i * 20, 20);
+			Table *table = new Table(DatabasePath);
+			table->SetTableName(table_name);
+			if (table->UseTable())
+			{
+				table_.push_back(table);
+			}
+		}
+
+		fp.close();
 		return true;
 	}
 
@@ -214,12 +239,13 @@ bool Database::CreateTable(SQLCreateTable & st)
 	if (table->CreateTable(st))
 	{
 		table_.push_back(table);
-		fstream fp;
+		ofstream fp;
 		std::string path;
 		std::string table_name_ = st.GetTableName();
 		path = database_path + "\\" + "table_name";   /*创建一个文件名为table_name的文件夹存放表名*/
-		fp.open(path.c_str(), std::ios::out);
-		fp.write(table_name_.c_str(), 20);
+		fp.open(path, std::ios::app);
+		fp.seekp(table_.size() * 20 * sizeof(char), ios::beg);
+		fp.write(table_name_.c_str(), 20*sizeof(char));
 		fp.close();
 		return true;
 	}
