@@ -522,7 +522,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 		}
 		else {
 			int Record_id;					/* 搜索目标记录成功，Record_id记录当前要删除的记录主键 */
-			std::string Null_str = "\n";		/* 删除记录即为将记录置空 */
+			std::string Null_str = "\a";		/* 删除记录即为将记录置空 */
 			for (int i = 0; i < select_id.size(); i++)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
 				/* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
@@ -560,7 +560,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 							std::cout << "该字段不存在索引！" << endl;
 							return false;
 						}
-						indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
+						//indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
 					}
 				}
 				//fp.close();															/* 关闭写文件 */
@@ -812,7 +812,7 @@ bool Table::Display()
 				//frp.read(record__data, sizeof(char)* record_len);
 				frp >> record__data;
 				record__datas.push_back(record__data);
-				if (record__data[0] != '\n')
+				if (record__data[0] != '\a')
 				{
 					key = true;
 				}
