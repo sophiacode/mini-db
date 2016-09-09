@@ -289,14 +289,28 @@ bool Table::SelectRecord(SQLSelect &sql)
 		int field_id = Table::FindIndex(sql.GetField());
 		if (field_id != -1)
 		{
-			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
-			if (id != -1)
-			{//存在符合条件的记录
-				Table::Display(id);
-				select_id.push_back(id);
+			//id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+			//if (id != -1)
+			//{//存在符合条件的记录
+			//	Table::Display(id);
+			//	select_id.push_back(id);
+			//	return true;
+			//}
+			//else {//不存在符合条件的记录
+			//	std::cout << "不存在符合条件的记录！" << endl;
+			//	return false;
+			//}
+
+			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id)==true)
+			{
+				for (auto iter:select_id)
+				{
+					Display(iter);
+				}
 				return true;
 			}
-			else {//不存在符合条件的记录
+			else
+			{
 				std::cout << "不存在符合条件的记录！" << endl;
 				return false;
 			}
