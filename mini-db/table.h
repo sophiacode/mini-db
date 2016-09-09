@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <io.h>
 
 #define record_num 10000
 #define record_max 10000
