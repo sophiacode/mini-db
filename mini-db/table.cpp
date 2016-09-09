@@ -49,7 +49,7 @@ Table::~Table()
 	{
 		if (iter != nullptr)
 		{
-			if (iter->bplustree_int_ != nullptr)
+			/*if (iter->bplustree_int_ != nullptr)
 			{
 				sign = "0\0";
 				findex.write(sign.c_str(), sizeof(char)* 2);
@@ -60,7 +60,7 @@ Table::~Table()
 				sign = "1\0";
 				findex.write(sign.c_str(), sizeof(char)* 2);
 				findex.write((char*)(iter->bplustree_string_), sizeof(*(iter->bplustree_string_)));
-			}
+			}*/
 			delete iter;
 			iter = nullptr;
 		}
@@ -761,7 +761,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 bool Table::Display()
 {
 	//std::string table_record = path + "\\" + table_name + "\\" + table_name + "_records_";
-	char record_data[record_len];
+	char record__data[record_len];
 	if (Table::UseTable())
 	{
 		//fstream frp;
@@ -788,17 +788,20 @@ bool Table::Display()
 		itoa(records_num / record_num, records_no, 10);
 		std::string table_name_n = table_record + records_no;*/
 		//frp.open(table_name_n.c_str(), std::ios::in);
-		frp.seekg(0, ios::beg);										/* 定位到文件开头 */
-		for (int k = 0; k < records_num%record_num; k++)
+		//frp.seekg(0, ios::beg);										/* 定位到文件开头 */
+		for (int k = 0; k < records_num; k++)
 		{
 		
-			std::cout << k+1 << endl;
+			std::cout << "No." << k + 1 << endl;
+
+			frp.seekg(sizeof(char)*record_len*k*fields.size(), ios::beg);
 			for (int j = 0; j < fields.size(); j++) 
 			{
-				//record_data[0] = '\0';
-				frp.read(record_data, sizeof(char)* record_len);
+				record__data[0] = '\0';
+				frp.seekg(sizeof(char)*record_len*(k*fields.size() + j), ios::beg);
+				frp.read(record__data, sizeof(char)* record_len);
 				//frp >> record_data;
-				std::cout << fields.at(j).GetFieldName() << ":" << record_data << "  " <<endl;
+				std::cout << fields.at(j).GetFieldName() << ":" << record__data << "  " <<endl;
 			}
 			
 		}
