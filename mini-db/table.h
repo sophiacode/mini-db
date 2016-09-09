@@ -100,6 +100,10 @@ public:
 	*/
 	bool Display(int id);
 
+	/**
+	*  \brief À≥–Ú≤È’“
+	*/
+	bool OrderSelect(SQLSelect &st);
 private:
 
 	/**
