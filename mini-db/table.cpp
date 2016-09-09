@@ -49,18 +49,20 @@ Table::~Table()
 	{
 		if (iter != nullptr)
 		{
-			/*if (iter->bplustree_int_ != nullptr)
+			if (iter->bplustree_int_ != nullptr)
 			{
+				iter->bplustree_int_->CloseTree();
 				sign = "0\0";
 				findex.write(sign.c_str(), sizeof(char)* 2);
 				findex.write((char*)(iter->bplustree_int_), sizeof(*(iter->bplustree_int_)));
 			}
 			else if (iter->bplustree_string_ != nullptr)
 			{
+				iter->bplustree_string_->CloseTree();
 				sign = "1\0";
 				findex.write(sign.c_str(), sizeof(char)* 2);
 				findex.write((char*)(iter->bplustree_string_), sizeof(*(iter->bplustree_string_)));
-			}*/
+			}
 			delete iter;
 			iter = nullptr;
 		}
