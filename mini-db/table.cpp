@@ -49,18 +49,20 @@ Table::~Table()
 	{
 		if (iter != nullptr)
 		{
-			/*if (iter->bplustree_int_ != nullptr)
+			if (iter->bplustree_int_ != nullptr)
 			{
+				iter->bplustree_int_->CloseTree();
 				sign = "0\0";
 				findex.write(sign.c_str(), sizeof(char)* 2);
 				findex.write((char*)(iter->bplustree_int_), sizeof(*(iter->bplustree_int_)));
 			}
 			else if (iter->bplustree_string_ != nullptr)
 			{
+				iter->bplustree_string_->CloseTree();
 				sign = "1\0";
 				findex.write(sign.c_str(), sizeof(char)* 2);
 				findex.write((char*)(iter->bplustree_string_), sizeof(*(iter->bplustree_string_)));
-			}*/
+			}
 			delete iter;
 			iter = nullptr;
 		}
@@ -287,21 +289,34 @@ bool Table::SelectRecord(SQLSelect &sql)
 		int field_id = Table::FindIndex(sql.GetField());
 		if (field_id != -1)
 		{
-			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+			//id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+			//if (id != -1)
+			//{//存在符合条件的记录
+			//	Table::Display(id);
+			//	select_id.push_back(id);
+			//	return true;
+			//}
+			//else {//不存在符合条件的记录
+			//	std::cout << "不存在符合条件的记录！" << endl;
+			//	return false;
+			//}
+
+			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id)==true)
+			{
+				for (auto iter:select_id)
+				{
+					Display(iter);
+				}
+				return true;
+			}
+			else
+			{
+				std::cout << "不存在符合条件的记录！" << endl;
+				return false;
+			}
 		}
 		else {
-
-		}
-
-		if (id != -1)
-		{//存在符合条件的记录
-			Table::Display(id);
-			select_id.push_back(id);
-			return true;
-		}
-		else {//不存在符合条件的记录
-			std::cout << "不存在符合条件的记录！" << endl;
-			return false;
+			OrderSelect(sql);
 		}
 	}
 	else {
@@ -521,7 +536,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 		}
 		else {
 			int Record_id;					/* 搜索目标记录成功，Record_id记录当前要删除的记录主键 */
-			std::string Null_str = "\n";		/* 删除记录即为将记录置空 */
+			std::string Null_str = "\a";		/* 删除记录即为将记录置空 */
 			for (int i = 0; i < select_id.size(); i++)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
 				/* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
@@ -559,7 +574,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 							std::cout << "该字段不存在索引！" << endl;
 							return false;
 						}
-						indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
+						//indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
 					}
 				}
 				//fp.close();															/* 关闭写文件 */
@@ -811,7 +826,7 @@ bool Table::Display()
 				//frp.read(record__data, sizeof(char)* record_len);
 				frp >> record__data;
 				record__datas.push_back(record__data);
-				if (record__data[0] != '\n')
+				if (record__data[0] != '\a')
 				{
 					key = true;
 				}
@@ -867,5 +882,61 @@ bool Table::Display(int id)
 	else {
 		std::cout << "表单打开失败！" << endl;
 		return false;
+	}
+}
+
+
+/*-----------------------------顺序查找--------------------------------------*/
+
+bool Table::OrderSelect(SQLSelect &st)
+{
+
+	std::string field = st.GetField();
+	Value value = st.GetValue();
+	OperatorType op = kOpEqual;
+	std::string value_data_;
+	int j;
+	int count = 0;
+	for (j = 0; j < fields.size(); j++)
+	{
+		if (fields.at(j).GetFieldName() == field)
+			break;
+	}
+	if (j == fields.size())
+	{
+		std::cout << "字段名不存在" << endl;
+		frp.close();
+		return false;
+	}
+	else
+	{
+		switch (op)
+		{
+		case kOpEqual:
+			char record_data[record_len];
+			for (int i = 0; i < records_num; i++)
+			{
+				frp.seekg(sizeof(char)*(i*fields.size() + j)*true_len, ios::beg);
+				frp >> record_data;
+				//frp.read(record_data, sizeof(char)*fields.size()*true_len);
+				std::string record_data_(record_data);
+				//value_data_ = record_data_.substr(j * true_len, true_len);
+				if (record_data_ == value.GetValueData())
+				{
+					count++;
+					Display(i);
+				}
+			}
+			break;
+		defalt:
+			return false;
+		}
+		if (!count)
+		{
+			frp.close();
+			return false;
+		}
+		frp.close();
+		return true;
 	}
 }
