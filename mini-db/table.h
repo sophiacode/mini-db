@@ -9,6 +9,7 @@
 #define record_num 10000
 #define record_max 10000
 #define record_len 256
+#define true_len   272
 
 #include "database.h"
 #include "IDPool.h"
