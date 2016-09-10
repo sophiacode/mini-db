@@ -93,6 +93,7 @@ bool Table::UseTable()
 	fwp.open(table_name_records.c_str(), ios::in|ios::binary);
 	frp.open(table_name_records.c_str(),ios::binary);
 
+	//cout << table_name_fields << endl;
 	fstream fp_fields;
 	fp_fields.open(table_name_fields.c_str(), std::ios::in);
 	if (!fp_fields.is_open())									/* 如果打开失败，则返回false */
