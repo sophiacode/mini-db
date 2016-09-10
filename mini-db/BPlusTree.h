@@ -385,14 +385,14 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
     Pool->RecordNode(p);
   }
   else{
-    insert_index = p->BinarySearch(_key);
+    insert_index = p->BinarySearchBack(_key);
     if (!isPrimareKey()){
       insert_index = abs(-insert_index);
     }
     if (insert_index > 0){
-      if (insert_index == 1){
+      if (insert_index == p->key_num_+1){
         flag_first = true;
-        last_first_key = p->key_[0];
+        last_first_key = p->key_[p->key_num_ - 1];
       }
       for (int i = p->key_num_; i >= insert_index; i--){
         p->key_[i] = p->key_[i - 1];
@@ -417,10 +417,10 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       flag_first = false;
     }
     else{
-      insert_index = -(r->BinarySearch(last_first_key));
-      if (insert_index == 1){
+      insert_index = -(r->BinarySearchBack(last_first_key));
+      if (insert_index == r->key_num_){
         flag_first = true;
-        last_first_key = r->key_[0];
+        last_first_key = r->key_[r->key_num_ - 1];
       }
       else{
         flag_first = false;
@@ -443,21 +443,22 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       p->father_ = r;
       p->father_file_ = r->this_file_;
       r->is_leaf_ = false;
-      r->key_[0] = p->key_[0];
+      r->key_[0] = p->key_[p->key_num_ - 1];
       r->key_num_++;
-      r->sonptr_[0] = p;
-      r->son_file_[0] = p->this_file_;
+      r->sonptr_[0] = q;
+      r->son_file_[0] = q->this_file_;
     }
     else{
-      insert_index = -(r->BinarySearch(p->key_[0]));
+      insert_index = -(r->BinarySearch(p->key_[p->key_num_ - 1]));
       for (int i = insert_index - 1; i < r->key_num_; i++){
         if (r->son_file_[i] == p->this_file_){
-          r->sonptr_[i] = p;
+          r->sonptr_[i] = q;
+          r->son_file_[i] = q->this_file_;
           break;
         }
       }
     }
-    p->key_num_ = q->key_num_ = p->key_num_ / 2;
+    p->key_num_ = q->key_num_ = p->key_num_ / 2;//分一半给兄弟
     for (int i = 0; i < q->key_num_; i++){
       q->key_[i] = p->key_[i + p->key_num_];
       if (p->isleaf()){
@@ -484,10 +485,10 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
     q->father_ = r;
     q->father_file_ = r->this_file_;
 
-    insert_index = -(r->BinarySearch(p->key_[0]));//重复可能有问题
+    insert_index = -(r->BinarySearch(q->key_[q->key_num_ - 1]));//p的最后一个键值加入到r中;
     for (int i = insert_index - 1; i < r->key_num_; i++){
-      if (r->son_file_[i] == p->this_file_){
-        insert_index = i + 2;
+      if (r->son_file_[i] ==  p->this_file_){
+        insert_index = i + 1;
         break;
       }
     }
@@ -496,9 +497,9 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
       r->sonptr_[i] = r->sonptr_[i - 1];
       r->son_file_[i] = r->son_file_[i - 1];
     }
-    r->key_[insert_index - 1] = q->key_[0];
-    r->sonptr_[insert_index - 1] = q;
-    r->son_file_[insert_index - 1] = q->this_file_;
+    r->key_[insert_index - 1] = p->key_[p->key_num_ - 1];
+    r->sonptr_[insert_index - 1] = p;
+    r->son_file_[insert_index - 1] = p->this_file_;
     r->key_num_++;
     Pool->RecordNode(p);
     Pool->RecordNode(q);
@@ -842,7 +843,7 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SearchNode(KEYTYPE _key)
   while (!p->isleaf()){
     insert_index = p->BinarySearch(_key);
     if (insert_index > 0){
-      if (insert_index == 1){
+      if (insert_index<=p->key_num_){
         p = SonPtr(p, insert_index - 1);
       }
       else{
@@ -902,7 +903,6 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key,vector<int>&_re_vector)
     if (flag){
       break;
     }
-
     p = SisterPtr(p);
   }
   return true;
