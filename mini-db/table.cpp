@@ -25,12 +25,12 @@ Table::~Table()
 	ofstream file_stream_,fp;
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 	file_stream_.open(pool_file.c_str(), ios::in |ios::out| ios::binary);
-  file_stream_.seekp(0, ios::beg);
+	file_stream_.seekp(0, ios::beg);
 	file_stream_.write((char*)(idPool), sizeof(*idPool));
 	file_stream_.close();
 
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
-	fp.open(table_name_fields.c_str());
+	fp.open(table_name_fields,ios::in);
 	char records_numb[4];
 	itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
 	fp.seekp(0, ios::beg);
@@ -105,11 +105,11 @@ bool Table::UseTable()
 
 	char is_index[2], type[2], field_name[20], records_numb[4], fields_numb[3];
 	fp_fields.seekg(0, ios::beg);
-	fp_fields >> fields_numb;									/* 读取字段数 */
-	int fields_num = atoi(fields_numb);
-	fp_fields.seekg(3, ios::beg);
 	fp_fields >> records_numb;									/* 读取当前记录数量 */
 	records_num = atoi(records_numb);
+	fp_fields.seekg(4, ios::beg);
+	fp_fields >> fields_numb;									/* 读取字段数 */
+	int fields_num = atoi(fields_numb);
 	int i = 0;
 
 	while (i <fields_num)										/* 读取字段对应的数据类型进入内存 */
@@ -241,11 +241,11 @@ bool Table::CreateTable(SQLCreateTable &sql)
 				}
 			}
 
-			char records_numb[4], fields_numb[3];						/* 前3位写入字段数，后4位写入记录数量 */
-			itoa(fields.size(), fields_numb, 10);
-			fp.write(fields_numb, 3);
+			char records_numb[4], fields_numb[3];						/* 后3位写入字段数，前4位写入记录数量 */
 			itoa(0, records_numb, 10);
 			fp.write(records_numb, 4);
+			itoa(fields.size(), fields_numb, 10);
+			fp.write(fields_numb, 3);
 
 			std::string name;
 			ValueType type;												/* 获取字段对应的数据类型 */
