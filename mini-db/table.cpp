@@ -114,7 +114,8 @@ bool Table::UseTable()
 
 	while (i <fields_num)										/* 读取字段对应的数据类型进入内存 */
 	{
-		fp_fields.read(is_index, sizeof(char)* 2);
+		fp_fields.seekg((7 + 24 * i)*sizeof(char), ios::beg);
+		fp_fields.read(is_index,sizeof(char)*2);
 		Field temp;
 		fp_fields.read(type, sizeof(char)* 2);
 		ValueType _type;
