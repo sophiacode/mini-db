@@ -261,13 +261,13 @@ Index::Index(std::string index_name, std::string field_name, ValueType type, std
 
 	if (type_ == kIntegerType)
 	{
-		bplustree_int_ = new BPlusTree<int>(path);
+		bplustree_int_ = new BPlusTree<int>(path+".dbi");
 		bplustree_string_ = nullptr;
 	}
 	if (type_ == kStringType)
 	{
 		bplustree_int_ = nullptr;
-		bplustree_string_ = new BPlusTree<std::string>(path);
+		bplustree_string_ = new BPlusTree<std::string>(path+".dbi");
 	}
 }
 
@@ -319,7 +319,12 @@ bool Index::InsertNode(std::string value, int data_id)
 
 	else if (type_ == kStringType)
 	{
-		return bplustree_string_->InsertNode(value, data_id);
+		if (bplustree_string_->InsertNode(value, data_id))
+		{
+			bplustree_string_->DeleteCache();
+			return true;
+		}
+		return false;
 	}
 }
 
@@ -348,6 +353,20 @@ int Index::SearchNode(std::string value)
 	else if (type_ == kStringType)
 	{
 		return bplustree_string_->SearchID(value);
+	}
+}
+
+bool Index::SearchNode(std::string value, std::vector<int> id)
+{
+	if (type_ == kIntegerType)
+	{
+		int temp = atoi(value.c_str());
+		return bplustree_int_->SearchID(temp,id);
+	}
+
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->SearchID(value,id);
 	}
 }
 
