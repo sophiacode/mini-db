@@ -48,6 +48,9 @@ IDPool::IDPool()
 
 IDPool::IDPool(string sPath)
 {
+  blocklist = 0;
+  nodelist_p = 0;
+  nowid = 0;
   out_file_stream_ = new ofstream();
   in_file_stream_ = new ifstream();
   for (int i = 0; i < sPath.size(); i++){
