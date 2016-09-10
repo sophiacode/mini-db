@@ -973,10 +973,8 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 		if (!count)
 		{
-			frp.close();
 			return false;
 		}
-		frp.close();
 		return true;
 	}
 }
