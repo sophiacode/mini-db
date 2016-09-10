@@ -179,7 +179,8 @@ bool Database::UseTable(std::string DatabasePath)
 	ifstream fp;
 	std::string path;
 	path = DatabasePath + "\\" + "table_name";
-	fp.open(path,ios::binary);
+
+	fp.open(path);
 	if (!fp.is_open())
 	{
 		//std::cout << "´ò¿ªÊ§°Ü" << endl;
@@ -208,16 +209,20 @@ bool Database::UseTable(std::string DatabasePath)
 
 		pbuf = fp.rdbuf();
 		size = pbuf->pubseekoff(0, ios::end, ios::in);
-		pbuf->pubseekpos(0, ios::in);
+		int database_num = size / 20;
+
+		/*pbuf->pubseekpos(0, ios::in);
 		buffer = new char[size];
 		pbuf->sgetn(buffer, size);
-		std::string buffer_(buffer);
+		std::string buffer_(buffer);*/
 
-		for (int i = 0; i < size / 20; i++)
+		char table_name_[20];
+		for (int i = 0; i < database_num; i++)
 		{
-			table_name = buffer_.substr(i * 20, 20);
+			fp.seekg(sizeof(char)*i*20, ios::beg);
+			fp >> table_name_;
 			Table *table = new Table(DatabasePath);
-			table->SetTableName(table_name);
+			table->SetTableName(table_name_);
 			if (table->UseTable())
 			{
 				table_.push_back(table);
