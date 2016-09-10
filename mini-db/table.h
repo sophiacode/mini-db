@@ -13,6 +13,8 @@
 
 #include "database.h"
 #include "IDPool.h"
+#include "sqlstatement.h"
+#include "sqltype.h"
 
 /**
 *  \brief 表单类
@@ -103,7 +105,7 @@ public:
 	/**
 	*  \brief 顺序查找
 	*/
-	bool OrderSelect(SQLSelect &st);
+	bool OrderSelect(string select_field, Value select_value, OperatorType select_op);
 private:
 
 	/**
