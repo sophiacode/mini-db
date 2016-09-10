@@ -22,10 +22,11 @@ Table::Table(std::string new_path)
 Table::~Table()
 {
 	//std::cout << "~\(≧▽≦)/~" << endl;
-	fstream file_stream_,fp;
+	ofstream file_stream_,fp;
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
-	file_stream_.open(pool_file.c_str(), ios::out | ios::binary);
-	file_stream_.write((char*)(&idPool), sizeof(idPool));
+	file_stream_.open(pool_file.c_str(), ios::in |ios::out| ios::binary);
+  file_stream_.seekp(0, ios::beg);
+	file_stream_.write((char*)(idPool), sizeof(*idPool));
 	file_stream_.close();
 
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
@@ -150,10 +151,12 @@ bool Table::UseTable()
 	}
 	findex.close();
 
-	fstream file_stream_;										/* 读入主键内存池 */
+  idPool = new IDPool();
+	ifstream file_stream_;										/* 读入主键内存池 */
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 	file_stream_.open(pool_file, ios::in | ios::binary);
-	file_stream_.read((char*)(&idPool), sizeof(idPool));
+  file_stream_.seekg(ios::beg);
+	file_stream_.read((char*)(idPool), sizeof(*idPool));
 	file_stream_.close();
 	return true;
 }
@@ -252,8 +255,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			}
 			fp.close();													/* 关闭文件 */
 
+      
 			fstream file_stream_;										/* 创建主键存储池的物理文件 */
 			std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
+      idPool = new IDPool(pool_file);
 			file_stream_.open(pool_file, ios::out | ios::binary);
 			file_stream_.close();
 
@@ -497,7 +502,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		}
 
 		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
-		int Record_id = idPool.NewNode();					/* 获得新记录的主键 */
+		int Record_id = idPool->NewNode();					/* 获得新记录的主键 */
 		//char records_no_[2];
 		//itoa(Record_id / record_num, records_no_, 10);
 		//std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records_" + records_no_;/* 构建表单记录文件名 */
