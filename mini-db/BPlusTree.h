@@ -828,7 +828,7 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key,vector<int>&_re_vector)
       p = nullptr;
     }
     else{
-      BPlusTreeNode<int>* _p = Pool->NewNode();
+      BPlusTreeNode<KEYTYPE>* _p = Pool->NewNode();
       in_file_stream_->seekg(p->sister_file_*sizeof(*_p), ios::beg);
       in_file_stream_->read((char*)(_p), sizeof(*p));
       p = _p;
