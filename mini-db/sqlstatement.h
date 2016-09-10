@@ -163,6 +163,7 @@ public:
 	void SetField(std::string field);
 	Value GetValue();
 	void SetValue(Value value);
+	OperatorType GetOperatorType();
 	bool IsInputWhere();
 	void Parse(std::vector<std::string> sql_token) override;
 private:
