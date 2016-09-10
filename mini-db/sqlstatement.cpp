@@ -724,6 +724,11 @@ SQLSelect::~SQLSelect()
 	}
 }
 
+OperatorType SQLSelect::GetOperatorType()
+{
+	return op_;
+}
+
 std::string SQLSelect::GetTableName()
 {
 	return table_name_;
