@@ -199,7 +199,10 @@ public:
 template<class KEYTYPE>
 BPlusTree<KEYTYPE>::BPlusTree()
 {
-
+  Pool = nullptr;
+  id_Pool_ = nullptr;
+  out_file_stream_ = nullptr;
+  in_file_stream_ = nullptr;
 }
 
 
@@ -233,7 +236,22 @@ BPlusTree<KEYTYPE>::BPlusTree(string _file_name)
 template<class KEYTYPE>
 BPlusTree<KEYTYPE>::~BPlusTree()
 {
-
+  if (Pool != nullptr){
+    delete Pool;
+    Pool = nullptr;
+  }
+  if (id_Pool_ != nullptr){
+    delete id_Pool_;
+    id_Pool_ = nullptr;
+  }
+  if (out_file_stream_ != nullptr){
+    delete out_file_stream_;
+    out_file_stream_ = nullptr;
+  }
+  if (in_file_stream_ != nullptr){
+    delete in_file_stream_;
+    in_file_stream_ = nullptr;
+  }
 }
 
 
