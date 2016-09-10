@@ -13,6 +13,8 @@
 
 #include "database.h"
 #include "IDPool.h"
+#include "sqlstatement.h"
+#include "sqltype.h"
 
 /**
 *  \brief 表单类
@@ -103,7 +105,7 @@ public:
 	/**
 	*  \brief 顺序查找
 	*/
-	bool OrderSelect(SQLSelect &st);
+	bool OrderSelect(string select_field, Value select_value, OperatorType select_op);
 private:
 
 	/**
@@ -119,7 +121,7 @@ private:
 	std::vector<Index *> indexs;         /* 索引 */
 	std::vector<int> select_id;			 /* 记录select选中的id */
 	std::string path;					 /* 存储数据库路径 */
-	IDPool idPool;						 /* 主键内存池，用于申请新id */
+	IDPool * idPool;						 /* 主键内存池，用于申请新id */
 	ofstream fwp;						 /* 记录文件写 */
 	ifstream frp;						 /* 记录文件读 */
 };
