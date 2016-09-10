@@ -4,7 +4,7 @@
 
 #include "database.h"
 #include "table.h"
-#include "sqlstatement.h"
+#include "sqltype.h"
 
 using namespace std;
 
@@ -284,10 +284,10 @@ bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
 	select_id.clear();
-	if (sql.IsInputWhere())
+	if (sql.IsInputWhere())																	/* 若select存在where子句，显示选中记录 */
 	{
 		int id;												
-		int field_id = Table::FindIndex(sql.GetField());
+		int field_id = Table::FindIndex(sql.GetField());									/* 查找字段对应的索引id */
 		if (field_id != -1)
 		{
 			//id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
@@ -302,9 +302,9 @@ bool Table::SelectRecord(SQLSelect &sql)
 			//	return false;
 			//}
 
-			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id)==true)
+			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id) == true)/* 依照索引查找 */
 			{
-				for (auto iter:select_id)
+				for (auto iter : select_id)						/* 查找成功 */
 				{
 					Display(iter);
 				}
@@ -312,15 +312,26 @@ bool Table::SelectRecord(SQLSelect &sql)
 			}
 			else
 			{
-				std::cout << "不存在符合条件的记录！" << endl;
+				std::cout << "不存在符合条件的记录！" << endl;	/* 查找失败 */
 				return false;
 			}
 		}
 		else {
-			OrderSelect(sql);
+			if (OrderSelect(sql.GetField(), sql.GetValue(), sql.GetOperatorType()))
+			{
+				for (auto iter : select_id)
+				{
+					Display(iter);
+				}
+				return true;
+			}
+			else {
+				std::cout << "不存在符合条件的记录！" << endl;
+				return false;
+			}
 		}
 	}
-	else {
+	else {/* select 不存在where子句，显示全表记录 */
 		Table::Display();
 		return true;
 	}
@@ -333,31 +344,39 @@ bool Table::SelectRecord(SQLDelete &sql)
 {
 	table_name = sql.GetTableName();
 	select_id.clear();
-	if (sql.IsInputWhere())
+	if (sql.IsInputWhere())								/* 若delete语句存在where子句 */
 	{
 		int id;
-		int field_id = Table::FindIndex(sql.GetField());
-		if (field_id != -1)
+		int field_id = Table::FindIndex(sql.GetField());/* 查找索引对应序号 */
+		if (field_id != -1)								/* 存在索引，按索引查找 */
 		{
-			id = indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData());
+			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id) == true)
+			{
+				return true;
+			}
+			else
+			{
+				std::cout << "不存在符合条件的记录！" << endl;
+				return false;
+			}
 		}
-		else {
+		else {											/* 不存在索引，顺序查找 */
+			if (OrderSelect(sql.GetField(), sql.GetValue(), kOpEqual))
+			{
+				return true;
+			}
+			else {
+				std::cout << "不存在符合条件的记录！" << endl;
+				return false;
+			}
+		}
 
-		}
-
-		if (id != -1)
-		{//存在符合条件的记录
-			//Table::Display(id);
-			select_id.push_back(id);
-			return true;
-		}
-		else {//不存在符合条件的记录
-			std::cout << "不存在符合条件的记录！" << endl;
-			return false;
-		}
 	}
 	else {
-		//Table::Display();
+		for (int i = 0; i < records_num; i++)		/* 不存在where子句，删除全表 */
+		{
+			select_id.push_back(i);
+		}
 		return true;
 	}
 }
@@ -371,24 +390,28 @@ bool Table::SelectRecord(SQLUpdate &sql)
 	select_id.clear();
 	
 	int id;
-	int field_id = Table::FindIndex(sql.GetWhereField());
+	int field_id = Table::FindIndex(sql.GetWhereField());	/* 查找索引对应编号id */
 	if (field_id != -1)
-	{
-		id = indexs.at(field_id)->SearchNode(sql.GetWhereValue().GetValueData());
+	{														/* 若存在索引，按索引查找 */
+		if (indexs.at(field_id)->SearchNode(sql.GetWhereValue().GetValueData(), select_id) == true)
+		{
+			return true;
+		}
+		else
+		{
+			std::cout << "不存在符合条件的记录！" << endl;
+			return false;
+		}
 	}
-	else {
-		
-	}
-
-	if (id != -1)
-	{//存在符合条件的记录
-		//Table::Display(id);
-		select_id.push_back(id);
-		return true;
-	}
-	else {//不存在符合条件的记录
-		std::cout << "不存在符合条件的记录！" << endl;
-		return false;
+	else {													/* 不存在索引，顺序查找 */
+		if (OrderSelect(sql.GetWhereField(), sql.GetWhereValue(), kOpEqual))
+		{
+			return true;
+		}
+		else {
+			std::cout << "不存在符合条件的记录！" << endl;
+			return false;
+		}
 	}
 }
 
@@ -575,7 +598,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 							std::cout << "该字段不存在索引！" << endl;
 							return false;
 						}
-						//indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
+						indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
 					}
 				}
 				//fp.close();															/* 关闭写文件 */
@@ -887,25 +910,28 @@ bool Table::Display(int id)
 }
 
 
-/*-----------------------------顺序查找--------------------------------------*/
-
-bool Table::OrderSelect(SQLSelect &st)
+/**
+*  \brief 顺序查找
+*/
+bool Table::OrderSelect(string select_field, Value select_value, OperatorType select_op)
 {
 
-	std::string field = st.GetField();
-	Value value = st.GetValue();
-	OperatorType op = kOpEqual;
-	std::string value_data_;
-	int j;
+	std::string field = select_field;
+	Value value = select_value;
+	OperatorType op = select_op;
+	char record_data[record_len];
+	int field_id = 0;
 	int count = 0;
-	for (j = 0; j < fields.size(); j++)
+
+	while (fields.at(field_id).GetFieldName() != field || fields.at(field_id).GetFieldType() != value.GetValueType())
 	{
-		if (fields.at(j).GetFieldName() == field)
-			break;
+		field_id++;
+		if (field_id >= fields.size()) break;
 	}
-	if (j == fields.size())
+
+	if (field_id == fields.size())
 	{
-		std::cout << "字段名不存在" << endl;
+		std::cout << "字段名不存在！" << endl;
 		frp.close();
 		return false;
 	}
@@ -914,24 +940,23 @@ bool Table::OrderSelect(SQLSelect &st)
 		switch (op)
 		{
 		case kOpEqual:
-			char record_data[record_len];
 			for (int i = 0; i < records_num; i++)
 			{
-				frp.seekg(sizeof(char)*(i*fields.size() + j)*true_len, ios::beg);
+				frp.seekg(sizeof(char)*(i*fields.size() + field_id)*true_len, ios::beg);
 				frp >> record_data;
 				//frp.read(record_data, sizeof(char)*fields.size()*true_len);
-				std::string record_data_(record_data);
 				//value_data_ = record_data_.substr(j * true_len, true_len);
-				if (record_data_ == value.GetValueData())
+				if (record_data == value.GetValueData())
 				{
+					select_id.push_back(i);
 					count++;
-					Display(i);
 				}
 			}
 			break;
 		defalt:
 			return false;
 		}
+
 		if (!count)
 		{
 			frp.close();
