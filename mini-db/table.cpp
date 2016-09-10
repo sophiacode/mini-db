@@ -103,13 +103,18 @@ bool Table::UseTable()
 		return false;
 	}
 
-	char is_index[2],type[2], field_name[20],records_numb[4];
-	fp_fields.read(records_numb, sizeof(char)* 4);				/* 读取当前记录数量 */
+	char is_index[2], type[2], field_name[20], records_numb[4], fields_numb[3];
+	fp_fields.seekg(0, ios::beg);
+	fp_fields >> fields_numb;									/* 读取字段数 */
+	int fields_num = atoi(fields_numb);
+	fp_fields.seekg(3, ios::beg);
+	fp_fields >> records_numb;									/* 读取当前记录数量 */
 	records_num = atoi(records_numb);
 	int i = 0;
 
-	while (fp_fields.read(is_index, sizeof(char)* 2))			/* 读取字段对应的数据类型进入内存 */
+	while (i <fields_num)										/* 读取字段对应的数据类型进入内存 */
 	{
+		fp_fields.read(is_index, sizeof(char)* 2);
 		Field temp;
 		fp_fields.read(type, sizeof(char)* 2);
 		ValueType _type;
@@ -131,7 +136,9 @@ bool Table::UseTable()
 			Index * index = new Index("", field_name, _type);
 			indexs.push_back(index);
 		}
+		i++;
 	}
+
 	fp_fields.close();											/* 关闭文件 */
 
 	ifstream findex;
@@ -234,7 +241,9 @@ bool Table::CreateTable(SQLCreateTable &sql)
 				}
 			}
 
-			char records_numb[4];										/* 前4位写入记录数量 */
+			char records_numb[4], fields_numb[3];						/* 前3位写入字段数，后4位写入记录数量 */
+			itoa(fields.size(), fields_numb, 10);
+			fp.write(fields_numb, 3);
 			itoa(0, records_numb, 10);
 			fp.write(records_numb, 4);
 
