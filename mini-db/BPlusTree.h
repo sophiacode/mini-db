@@ -210,7 +210,7 @@ template<class KEYTYPE>
 BPlusTree<KEYTYPE>::BPlusTree(string _file_name)
 {
   Pool = new MemPool<KEYTYPE>();
-  id_Pool_ = new IDPool();
+  id_Pool_ = new IDPool(_file_name+"d");
   out_file_stream_ = new ofstream();
   in_file_stream_ = new ifstream();
   for (int i = 0; i < _file_name.size(); i++){
@@ -816,15 +816,21 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SearchNode(KEYTYPE _key)
     id_Pool_ = new IDPool();
     out_file_stream_ = new ofstream();
     in_file_stream_ = new ifstream();
+    int fspath = strlen(table_path_);
+    table_path_[fspath] = 'd';
+    table_path_[fspath + 1] = '\0';
+    ifstream fs(table_path_, ios::binary);
+    table_path_[fspath] = '\0';
+    fs.seekg(ios::beg);
+    fs.read((char*)(&id_Pool_), sizeof(id_Pool_));
+    fs.close();
     root_ = Pool->NewNode();
     root_->this_file_ =  root_f_;
     is_primare_key_ = false;//默认不是主键
-    out_file_stream_->close();
     out_file_stream_->open(table_path_, ios::binary|ios::in);
     if (!out_file_stream_->is_open()){
       cerr << "打开文件 " << table_path_ << " 失败" << endl;
     }
-    in_file_stream_->close();
     in_file_stream_->open(table_path_, ios::binary);
     if (!in_file_stream_->is_open()){
       cerr << "打开文件 " << table_path_ << " 失败" << endl;
