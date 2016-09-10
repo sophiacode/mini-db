@@ -24,7 +24,7 @@ Controller::~Controller()
 	}
 
 	path_.clear();
-	is_use_database_ = true;
+	is_use_database_ = false;
 }
 
 bool Controller::CreateDatabase(SQLCreateDatabase *st)
@@ -92,7 +92,7 @@ bool Controller::CreateIndex(SQLCreateIndex *st)
 		}
 	}
 
-	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
+	std::cerr << "表 " << st->GetTableName() << " 不存在." << std::endl;
 	return false;
 
 	
@@ -142,8 +142,12 @@ bool Controller::Use(SQLUse *st)
 	}
 	current_database_ = new Database;
 	path_ = current_database_->UseDatabase(*st);
+	
 	if (path_.empty())
 	{
+		delete current_database_;
+		current_database_ = nullptr;
+
 		return false;
 	}
 	is_use_database_ = true;
@@ -172,7 +176,7 @@ bool Controller::Insert(SQLInsert *st)
 		}
 	}
 
-	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
+	std::cerr << "表 " << st->GetTableName() << " 不存在." << std::endl;
 	return false;
 
 	//Table table(path_);
@@ -201,7 +205,7 @@ bool Controller::Delete(SQLDelete *st)
 		}
 	}
 
-	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
+	std::cerr << "表 " << st->GetTableName() << " 不存在." << std::endl;
 	return false;
 
 	
@@ -233,7 +237,7 @@ bool Controller::Update(SQLUpdate *st)
 		}
 	}
 
-	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
+	std::cerr << "表 " << st->GetTableName() << " 不存在." << std::endl;
 	return false;
 
 
@@ -263,7 +267,7 @@ bool Controller::Select(SQLSelect *st)
 		}
 	}
 
-	std::cerr << "表" << st->GetTableName() << "不存在." << std::endl;
+	std::cerr << "表 " << st->GetTableName() << " 不存在." << std::endl;
 	return false;
 
 	
