@@ -903,19 +903,7 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key,vector<int>&_re_vector)
       break;
     }
 
-    if (p->sister_ != nullptr){
-      p = p->sister_;
-    }
-    else if (p->sister_file_ == -1){
-      p = nullptr;
-    }
-    else{
-      BPlusTreeNode<KEYTYPE>* _p = Pool->NewNode();
-      in_file_stream_->seekg(p->sister_file_*sizeof(*_p), ios::beg);
-      in_file_stream_->read((char*)(_p), sizeof(*p));
-      p = _p;
-      Pool->deleteNode(p);
-    }
+    p = SisterPtr(p);
   }
   return true;
 }

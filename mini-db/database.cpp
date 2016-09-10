@@ -361,7 +361,7 @@ int Index::SearchNode(std::string value)
 	}
 }
 
-bool Index::SearchNode(std::string value, std::vector<int> id)
+bool Index::SearchNode(std::string value, std::vector<int>& id)
 {
 	if (type_ == kIntegerType)
 	{

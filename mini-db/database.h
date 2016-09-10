@@ -163,7 +163,7 @@ public:
 
 	int SearchNode(std::string value);
 
-	bool SearchNode(std::string value, std::vector<int> id);
+	bool SearchNode(std::string value, std::vector<int>& id);
 
 	//bool UpdateNode(std::string value);
 
