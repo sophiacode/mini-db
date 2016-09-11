@@ -165,7 +165,7 @@ public:
 
 	bool SearchNode(std::string value, std::vector<int>& id);
 
-	//bool UpdateNode(std::string value);
+  bool UpdateNode(std::string new_value, std::string old_value);
 
 	std::string GetFieldName();
 

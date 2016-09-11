@@ -6,7 +6,7 @@ int name_num_;
 
 int main()
 {
-  freopen("order.txt", "r", stdin);
+  //freopen("order.txt", "r", stdin);
 	std::string str;
 	char c;
 	Controller * controller = new Controller();

@@ -177,7 +177,7 @@ public:
   *
   *   \接口：键值
   */
-  bool UpDataNode(KEYTYPE _old_key, KEYTYPE _new_key);
+  bool UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key);
 
 
   /**
@@ -185,7 +185,7 @@ public:
   *
   *   \接口：旧键，新键，id
   */
-  bool UpDataNode(KEYTYPE _old_key, KEYTYPE _new_key, int _data_id);
+  bool UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, int _data_id);
 };
 
 
@@ -826,7 +826,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key, int _data_id)
 
 
 template<class KEYTYPE>
-bool BPlusTree<KEYTYPE>::UpDataNode(KEYTYPE _old_key, KEYTYPE _new_key, int _data_id)
+bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, int _data_id)
 {
   if (DeleteNode(_old_key, _data_id)){
     InsertNode(_new_key, _data_id);
@@ -837,13 +837,13 @@ bool BPlusTree<KEYTYPE>::UpDataNode(KEYTYPE _old_key, KEYTYPE _new_key, int _dat
 
 
 template<class KEYTYPE>
-bool BPlusTree<KEYTYPE>::UpDataNode(KEYTYPE _old_key, KEYTYPE _new_key)
+bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key)
 {
   vector<int> data_id;
-  if (SearchID(_key, data_id)){
+  if (SearchID(_old_key, data_id)){
     for (auto x : data_id){
       DeleteNode(_old_key, x);
-      InsertNode(_new_key,x)
+      InsertNode(_new_key, x);
     }
     return true;
   }
