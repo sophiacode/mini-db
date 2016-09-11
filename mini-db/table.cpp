@@ -361,7 +361,6 @@ bool Table::SelectRecord(SQLDelete &sql)
 	select_id.clear();
 	if (sql.IsInputWhere())								/* 若delete语句存在where子句 */
 	{
-		int id;
 		int field_id = Table::FindIndex(sql.GetField());/* 查找索引对应序号 */
 		if (field_id != -1)								/* 存在索引，按索引查找 */
 		{
@@ -555,6 +554,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		}
 
 		records_num++;										/* 插入成功，表单中记录总数加一 */
+		std::cout << "插入成功！" << endl;
 		return true;										/* 返回成功 */
 	}
 	else {
