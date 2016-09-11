@@ -707,6 +707,14 @@ bool Table::UpdateRecord(SQLUpdate &su)
 								|| su.GetNewValue().at(j).GetValueType() == kNullType)
 							{
 								records__data2[k] = su.GetNewValue().at(j).GetValueData();
+                if (fields[k].IsCreateIndex())
+                {
+                  int index_id = FindIndex(fields[j].GetFieldName());
+                  if (index_id != -1)
+                  {
+                    indexs[index_id]->UpdateNode(records__data2[index_id], records__data1[index_id]);
+                  }
+                }
 							}
 							else {
 								std::cout << "数据类型不匹配！" << endl;
@@ -730,16 +738,17 @@ bool Table::UpdateRecord(SQLUpdate &su)
 					fwp.seekp((Record_id*fields.size() + j) * true_len, ios::beg);/* 指针定位 */
 					fwp.write(records__data2[j].c_str(), record_len*sizeof(char));	/* 按照字段序列进行更改 */
 					fwp.flush();
-					if (fields[j].IsCreateIndex())				/* 当该字段存在索引时，对索引进行维护 */
-					{
-						index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
-						if (index_id == -1)
-						{
-							std::cout << "该字段不存在索引！" << endl;
-							return false;
-						}
-						//indexs[index_id].UpdateNode(records__data2[j], records__data1[j]);/* 更新索引结点 */
-					}
+
+					//if (fields[j].IsCreateIndex())				/* 当该字段存在索引时，对索引进行维护 */
+					//{
+					//	index_id = FindIndex(fields[j].GetFieldName());/* 找到字段对应索引的编号index_id */
+					//	/*if (index_id == -1)
+					//	{
+					//		std::cout << "该字段不存在索引！" << endl;
+					//		return false;
+					//	}*/
+					//	indexs[index_id]->UpdateNode(records__data2[index_id], records__data1[index_id]);/* 更新索引结点  新、旧*/
+					//}
 				}
 				//fwp.close();									/* 关闭写文件 */
 			}
