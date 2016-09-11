@@ -797,7 +797,7 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	}
 
 	string index_path = path + "\\" + table_name + "\\index";
-	if (!_access(index_path.c_str(), 0))
+	if (_access(index_path.c_str(), 0))
 	{
 		string cmd = "md " + index_path;
 		system(cmd.c_str());
