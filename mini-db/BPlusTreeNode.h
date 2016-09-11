@@ -71,6 +71,14 @@ public:
   */
   int BinarySearch(KEYTYPE _key);
 
+  /**
+  *   \二分查找定位在最后一个命中
+  *
+  *   \返回正数为插入位置，负数表示已经存在，命中位置的相反数
+  *
+  *   \位置从1开始
+  */
+  int BinarySearchBack(KEYTYPE _key);
 
   /**
   *   \构造函数
@@ -161,6 +169,40 @@ void BPlusTreeNode<KEYTYPE>::ArrayInsert(KEYTYPE _key, BPlusTreeNode<KEYTYPE> *_
     this->key_num_++;
   }
 }
+
+
+template<class KEYTYPE>
+int BPlusTreeNode<KEYTYPE>::BinarySearchBack(KEYTYPE _key)
+{
+  int op, ed, mid;
+  op = 0;
+  ed = this->key_num_ - 1;
+  while (op <= ed){
+    mid = (op + ed + 1) / 2;
+    if (this->key_[mid] == _key){
+      if (op <= ed){
+        op = mid;
+      }
+      if (op >= ed){
+        return -(mid + 1);//命中
+      }
+    }
+    if (_key < this->key_[mid]){
+      ed = mid - 1;
+    }
+    if (_key > this->key_[mid]){
+      op = mid + 1;
+    }
+  }
+  //未命中情况
+  if (_key < this->key_[mid]){
+    return mid + 1;
+  }
+  if (_key > this->key_[mid]){
+    return mid + 2;
+  }
+}
+
 
 template<class KEYTYPE>
 int BPlusTreeNode<KEYTYPE>::BinarySearch(KEYTYPE _key)

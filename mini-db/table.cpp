@@ -550,7 +550,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		//fp.seekp(0, ios::beg);
 		//fp.write(records_numb, sizeof(char)* 4);
 		//fp.close();										/* 关闭写表头文件 */
-		std::cout << "插入成功！" << endl;
+		//std::cout << "插入成功！" << endl;
 		return true;										/* 返回成功 */
 	}
 	else {
@@ -974,10 +974,10 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 		if (!count)
 		{
-			frp.close();
+			//frp.close();
 			return false;
 		}
-		frp.close();
+		//frp.close();
 		return true;
 	}
 }
