@@ -123,7 +123,7 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 
 	if (!access(path.c_str(), 0))    //数据库已经存在
 	{
-		std::cerr << "数据库已存在！" << std::endl;
+		std::cerr << "数据库" << db_name << "已存在！" << std::endl;
 		return false;
 	}
 	else
@@ -132,8 +132,17 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 		database_name = db_name;
 		path = "md " + db_path + "\\" + db_name;
 		system(path.c_str());
-		std::cout << "创建成功！" << std::endl;
-		return true;
+		path = db_path + "\\" + db_name;
+		if (!access(path.c_str(), 0))    //数据库创建成功
+		{
+			std::cout << "数据库" << db_name << "创建成功！" << std::endl;
+			return true;
+		}
+		else
+		{
+			std::cout << "数据库" << db_name<< "创建失败！" << std::endl;
+			return false;
+		}
 	}
 }
 
@@ -152,14 +161,20 @@ std::string Database::UseDatabase(SQLUse &st)
 	strcpy(str, path.c_str());
 	if (!_access(str, 0))
 	{
-		UseTable(path);
-		std::cout << "打开成功！" << std::endl;
-
-		return path;
+		if (UseTable(path))
+		{
+			std::cout << "打开成功！" << std::endl;
+			return path;
+		}
+		else
+		{
+			std::cerr << "找不到数据库" << db_name << "！" << std::endl;
+			return "\0";
+		}
 	}
 	else
 	{
-		std::cerr << "打开失败！" << std::endl;
+		std::cerr << "数据库" << db_name << "打开失败！" << std::endl;
 		return "\0";
 	}
 }
@@ -183,7 +198,6 @@ bool Database::UseTable(std::string DatabasePath)
 	fp.open(path);
 	if (!fp.is_open())
 	{
-		//std::cout << "打开失败" << endl;
 		fp.close();
 		return false;
 	}
@@ -380,16 +394,17 @@ std::string Index::GetFieldName()
 	return field_name_;
 }
 
- /*bool Index::UpdateNode(std::string value)
+bool Index::UpdateNode(std::string new_value,std::string old_value)
 {
 if (type_ == kIntegerType)
 {
-int temp = atoi(value.c_str());
-return bplustree_int_->UpdateNode(temp);
+int newkey = atoi(new_value.c_str());
+int oldkey = atoi(old_value.c_str());
+return bplustree_int_->UpdateNode(oldkey,newkey);
 }
 
 else if (type_ == kStringType)
 {
-return bplustree_string_->UpdateNode(value);
+return bplustree_string_->UpdateNode(old_value,new_value);
 }
-}*/
+}
