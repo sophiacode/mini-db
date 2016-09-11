@@ -147,6 +147,7 @@ bool Controller::Use(SQLUse *st)
 	{
 		delete current_database_;
 		current_database_ = nullptr;
+		is_use_database_ = false;
 
 		return false;
 	}
