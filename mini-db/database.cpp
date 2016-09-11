@@ -380,16 +380,17 @@ std::string Index::GetFieldName()
 	return field_name_;
 }
 
- /*bool Index::UpdateNode(std::string value)
+bool Index::UpdateNode(std::string new_value,std::string old_value)
 {
 if (type_ == kIntegerType)
 {
-int temp = atoi(value.c_str());
-return bplustree_int_->UpdateNode(temp);
+int newkey = atoi(new_value.c_str());
+int oldkey = atoi(old_value.c_str());
+return bplustree_int_->UpdateNode(oldkey,newkey);
 }
 
 else if (type_ == kStringType)
 {
-return bplustree_string_->UpdateNode(value);
+return bplustree_string_->UpdateNode(old_value,new_value);
 }
-}*/
+}
