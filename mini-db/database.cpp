@@ -285,7 +285,7 @@ Index::Index(std::string index_name, std::string field_name, ValueType type, std
 
 	if (type_ == kIntegerType)
 	{
-		bplustree_int_ = new BPlusTree<int>(path+".dbi");
+		bplustree_int_ = new BPlusTree<USER_INT>(path+".dbi");
 		bplustree_string_ = nullptr;
 	}
 	if (type_ == kStringType)
@@ -302,7 +302,7 @@ Index::Index(std::string index_name, std::string field_name, ValueType type)
 	type_ = type;
 	if (type_ == kIntegerType)
 	{
-		bplustree_int_ = new BPlusTree<int>();
+		bplustree_int_ = new BPlusTree<USER_INT>();
 		bplustree_string_ = nullptr;
 	}
 	if (type_ == kStringType)
@@ -328,7 +328,7 @@ Index::~Index()
 
 }
 
-bool Index::InsertNode(std::string value, int data_id)
+bool Index::InsertNode(std::string value, USER_INT data_id)
 {
 	if (type_ == kIntegerType)
 	{
@@ -356,7 +356,7 @@ bool Index::DeleteNode(std::string value)
 {
 	if (type_ == kIntegerType)
 	{
-		int temp = atoi(value.c_str());
+		USER_INT temp = atoi(value.c_str());
 		return bplustree_int_->DeleteNode(temp);
 	}
 
@@ -370,7 +370,7 @@ int Index::SearchNode(std::string value)
 {
 	if (type_ == kIntegerType)
 	{
-		int temp = atoi(value.c_str());
+		USER_INT temp = atoi(value.c_str());
 		return bplustree_int_->SearchID(temp);
 	}
 
@@ -380,11 +380,11 @@ int Index::SearchNode(std::string value)
 	}
 }
 
-bool Index::SearchNode(std::string value, std::vector<int>& id)
+bool Index::SearchNode(std::string value, std::vector<USER_INT>& id)
 {
 	if (type_ == kIntegerType)
 	{
-		int temp = atoi(value.c_str());
+		USER_INT temp = atoi(value.c_str());
 		return bplustree_int_->SearchID(temp,id);
 	}
 
@@ -403,8 +403,8 @@ bool Index::UpdateNode(std::string new_value,std::string old_value)
 {
 if (type_ == kIntegerType)
 {
-int newkey = atoi(new_value.c_str());
-int oldkey = atoi(old_value.c_str());
+USER_INT newkey = atoi(new_value.c_str());
+USER_INT oldkey = atoi(old_value.c_str());
 return bplustree_int_->UpdateNode(oldkey,newkey);
 }
 

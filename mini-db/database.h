@@ -157,20 +157,20 @@ public:
 	*/
 	~Index();
 
-	bool InsertNode(std::string value, int data_id);
+	bool InsertNode(std::string value, USER_INT data_id);
 
 	bool DeleteNode(std::string value);
 
 	int SearchNode(std::string value);
 
-	bool SearchNode(std::string value, std::vector<int>& id);
+	bool SearchNode(std::string value, std::vector<USER_INT>& id);
 
-  bool UpdateNode(std::string new_value, std::string old_value);
+    bool UpdateNode(std::string new_value, std::string old_value);
 
 	std::string GetFieldName();
 
 public:
-	BPlusTree<int> * bplustree_int_;               /* int类型索引的B+树 */
+	BPlusTree<USER_INT> * bplustree_int_;               /* int类型索引的B+树 */
 	BPlusTree<std::string> * bplustree_string_;    /* string类型索引的B+树 */
 
 private:

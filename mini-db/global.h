@@ -26,3 +26,4 @@ class SQLUpdate;
 class SQLSelect;
 
 extern int name_num_;  //Ãû×ÖÁ÷Ë®ºÅ
+typedef int USER_INT;
