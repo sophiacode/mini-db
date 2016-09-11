@@ -135,6 +135,11 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 		path = db_path + "\\" + db_name;
 		if (!access(path.c_str(), 0))    //数据库创建成功
 		{
+			ofstream fp;
+			std::string path_;
+			path_ = database_path + "\\" + "table_name";   /*创建一个名为table_name的文件存放表名*/
+			fp.open(path_, std::ios::out);
+			fp.close();
 			std::cout << "数据库" << db_name << "创建成功！" << std::endl;
 			return true;
 		}
@@ -260,7 +265,7 @@ bool Database::CreateTable(SQLCreateTable & st)
 		ofstream fp;
 		std::string path;
 		std::string table_name_ = st.GetTableName();
-		path = database_path + "\\" + "table_name";   /*创建一个文件名为table_name的文件夹存放表名*/
+		path = database_path + "\\" + "table_name";  
 		fp.open(path, std::ios::app);
 		fp.seekp(table_.size() * 20 * sizeof(char), ios::beg);
 		fp.write(table_name_.c_str(), 20*sizeof(char));
