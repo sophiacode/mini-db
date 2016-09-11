@@ -797,8 +797,11 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	}
 
 	string index_path = path + "\\" + table_name + "\\index";
-	string cmd = "md " + index_path;
-	system(cmd.c_str());
+	if (!_access(index_path.c_str(), 0))
+	{
+		string cmd = "md " + index_path;
+		system(cmd.c_str());
+	}
 	index_path = index_path + "\\" + si.GetField();
 	Index * temp = new Index(si.GetIndex(), si.GetField(), type, index_path);
 
