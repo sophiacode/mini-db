@@ -309,7 +309,7 @@ bool Table::SelectRecord(SQLSelect &sql)
 				{
 					if (fields.at(i).GetFieldType() != sql.GetValue().GetValueType())
 					{
-						std::cout << "数据类型不符合！" << endl;
+						std::cout << "数据类型无法匹配！" << endl;
 						return false;
 					}
 				}
@@ -341,7 +341,6 @@ bool Table::SelectRecord(SQLSelect &sql)
 				return true;
 			}
 			else {
-				std::cout << "不存在符合条件的记录！" << endl;
 				return false;
 			}
 		}
@@ -392,16 +391,36 @@ bool Table::SelectRecord(SQLDelete &sql)
 				return true;
 			}
 			else {
-				std::cout << "不存在符合条件的记录！" << endl;
 				return false;
 			}
 		}
 
 	}
 	else {
-		for (USER_INT i = 0; i < records_num; i++)		/* 不存在where子句，删除全表 */
+		char record__data[record_len];
+		USER_INT k = 0, i = 0;
+		while (k < records_num)
 		{
-			select_id.push_back(i);
+			bool key = false;
+			for (int j = 0; j < fields.size(); j++)
+			{
+				record__data[0] = '\0';
+				frp.seekg(sizeof(char)*true_len*(i*fields.size() + j), ios::beg);
+				frp.read(record__data, sizeof(char)* record_len);
+				//frp >> record__data;
+				if (record__data[0] != '\a')
+				{
+					key = true;
+					break;
+				}
+			}
+
+			if (key == true)
+			{
+				select_id.push_back(i);
+				k++;
+			}
+			i++;
 		}
 		return true;
 	}
@@ -447,7 +466,6 @@ bool Table::SelectRecord(SQLUpdate &sql)
 			return true;
 		}
 		else {
-			std::cout << "不存在符合条件的记录！" << endl;
 			return false;
 		}
 	}
@@ -574,7 +592,6 @@ bool Table::DeleteRecord(SQLDelete &sd)
 	{/* 打开表单成功 */
 		if (!Table::SelectRecord(sd))
 		{
-			std::cout << "搜索失败！" << endl;
 			return false;					/* 搜索目标记录失败，返回false */
 		}
 		else {
@@ -633,7 +650,6 @@ bool Table::UpdateRecord(SQLUpdate &su)
 	{
 		if (!Table::SelectRecord(su))							/* 搜索需要更新的记录 */
 		{
-			std::cout << "搜索失败！" << endl;
 			return false;
 		}
 		else {
@@ -654,7 +670,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			}
 
 			/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
-			USER_INT Record_id;										/* Record_id记录当前操作记录主键 */
+			USER_INT Record_id;									/* Record_id记录当前操作记录主键 */
 			for (USER_INT i = 0; i < select_id.size(); i++)
 			{
 				Record_id = select_id[i];
@@ -824,7 +840,7 @@ bool Table::Display()
 
 			if (key == true)
 			{
-				std::cout << "No." << k + 1 << endl;
+				std::cout << "------ No." << k+1 << " ------" << endl;
 				for (int j = 0; j < fields.size(); j++)
 				{
 					std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
@@ -850,12 +866,12 @@ bool Table::Display(USER_INT id,USER_INT iter)
 	char record_data[record_len];
 	if (UseTable())
 	{
+		std::cout << "------ No." << iter+1 << " ------" << endl;
 		for (int j = 0; j < fields.size(); j++)
 		{
 			frp.seekg(sizeof(char)*(j + id*fields.size())*true_len, ios::beg);
 			frp.read(record_data, sizeof(char)* record_len);
 			//frp >> record_data;
-			std::cout << "------ No." << iter << " ------" << endl;
 			std::cout << fields.at(j).GetFieldName() << ":" << record_data << "  " << endl;
 		}
 		return true;
@@ -888,7 +904,7 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 	if (field_id == fields.size())
 	{
-		std::cout << "字段名不存在！" << endl;
+		std::cout << "字段名或数据类型无法匹配！" << endl;
 		frp.close();
 		return false;
 	}
@@ -910,11 +926,13 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 			}
 			break;
 		default:
+			std::cout << "操作符匹配失败！" << endl;
 			return false;
 		}
 
 		if (!count)
 		{
+			std::cout << "不存在符合条件的数据！" << endl;
 			return false;
 		}
 
