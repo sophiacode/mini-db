@@ -1010,9 +1010,10 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
     return SearchID(_key, _re_vector);
   }
   int insert_index;
+  int flag_insert_front,flag_insert_back;
   bool flag = false;
-  BPlusTreeNode<KEYTYPE> *p;
-  p = SearchNode(_key);
+  BPlusTreeNode<KEYTYPE> *p, *q;
+  q = p = SearchNode(_key);
   if (p == nullptr){
     return false;//ERROR£∫√ª”–’“µΩ
   }
@@ -1022,19 +1023,21 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
     }
   }
   insert_index = -(p->BinarySearch(_key));
+  flag_insert_front = insert_index - 1;
   if (insert_index < 0){
     return false;
   }
-  //> >=  < <= == !=
+  //> >=  < <=  !=
+  flag_insert_back = -1;
   while (p != nullptr){
-    if (op == kOpGreterOrEqual||op == kOpGreater){
+    if (op == kOpGreterOrEqual || op == kOpLessOrEqual){
       for (int i = insert_index - 1; i < p->key_num_; i++){
-        if (p->key_[i] == _key&&op == kOpGreterOrEqual){
-            _re_vector.push_back(p->key_data_id[i]);
+        if (p->key_[i] == _key){
+          _re_vector.push_back(p->key_data_id[i]);
         }
         else{
           flag = true;
-          _re_vector.push_back(p->key_data_id[i]);
+          flag_insert_back = i;
           break;
         }
       }
@@ -1044,7 +1047,25 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
       p = SisterPtr(p);
       insert_index = 1;
     }
-    
+  }
+  while (p != nullptr){
+    if (op == kOpGreater || op == kOpNotEqual){
+      for (int i = flag_insert_back - 1; i < p->key_num_; i++){
+        _re_vector.push_back(p->key_data_id[i]);
+      }
+      p = SisterPtr(p);
+      flag_insert_back = 1;
+    }
+  }
+  p = q;
+  while (p != nullptr){
+    if (op == kOpLess || op == kOpNotEqual){
+      for (int i = flag_insert_front - 1; i >= 0; i--){
+        _re_vector.push_back(p->key_data_id[i]);
+      }
+      p = BrotherPtr(p);
+      flag_insert_front = p->key_num_;;
+    }
   }
   return true;
 }
