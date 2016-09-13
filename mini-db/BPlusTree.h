@@ -929,6 +929,11 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT>&_re_vector)
   if (p == nullptr){
     return false;//ERROR：没有找到
   }
+  if (p == root_){
+	  if (p->key_num_ == 0){
+		  return false;//ERROR：树为空;
+	  }
+  }
   insert_index = -(p->BinarySearch(_key));
   if (insert_index < 0){
     return false;
