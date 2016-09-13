@@ -10,6 +10,8 @@ using namespace std;
 const int BPlusTree_m = 3;
 const int MinBPlusTree_m = (BPlusTree_m + 1) / 2;
 
+
+
 template<class KEYTYPE>
 class BPlusTreeNode
 {
@@ -19,29 +21,29 @@ public:
 
   bool is_leaf_;                                     //判断是否是叶子节点
 
-  int key_num_;                                      //当前关键字个数 <= m-1;
+  USER_INT key_num_;                                      //当前关键字个数 <= m-1;
 
-  int this_file_;                                    //当前节点文件中位置;
+  USER_INT this_file_;                                    //当前节点文件中位置;
 
   BPlusTreeNode *father_;                            //父亲节点指针;
 
-  int father_file_;                                  //父亲节点文件中位置;
+  USER_INT father_file_;                                  //父亲节点文件中位置;
 
   BPlusTreeNode *brother_;                           //哥哥节点指针;
 
-  int brother_file_;                                 //哥哥节点文件中位置;
+  USER_INT brother_file_;                                 //哥哥节点文件中位置;
 
   BPlusTreeNode *sister_;                            //妹妹节点指针;
 
-  int sister_file_;                                  //妹妹节点文件中位置;
+  USER_INT sister_file_;                                  //妹妹节点文件中位置;
 
   BPlusTreeNode *sonptr_[BPlusTree_m + 1];           //子树指针;+1为了先添加后分裂，下同;
 
-  int son_file_[BPlusTree_m + 1];                    //子节点文件中位置;
+  USER_INT son_file_[BPlusTree_m + 1];                    //子节点文件中位置;
 
   KEYTYPE key_[BPlusTree_m + 1];                     //关键字;
 
-  int key_data_id[BPlusTree_m + 1];                  //关键字在数据文件中的id;
+  USER_INT key_data_id[BPlusTree_m + 1];                  //关键字在数据文件中的id;
 
 
   /**

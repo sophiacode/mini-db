@@ -29,13 +29,13 @@ public:
   BPlusTreeNode<KEYTYPE> *root_;//根节点
 
 
-  int root_f_;//根节点在文件中的位置
+  USER_INT root_f_;//根节点在文件中的位置
 
 
   BPlusTreeNode<KEYTYPE> *sqt_;//叶子节点根;
 
 
-  int sqt_f_;//叶子根节点在文件中的位置
+  USER_INT sqt_f_;//叶子根节点在文件中的位置
 
 
   ofstream *out_file_stream_;//写入文件流
@@ -130,7 +130,7 @@ public:
   *
   *   \接口：键值，该键值对应于文件中的id
   */
-  bool InsertNode(KEYTYPE _key, int _data_id);
+  bool InsertNode(KEYTYPE _key, USER_INT _data_id);
 
   
   /**
@@ -146,7 +146,7 @@ public:
   *
   *   \接口：键值
   */
-  bool DeleteNode(KEYTYPE _key, int _data_id);
+  bool DeleteNode(KEYTYPE _key, USER_INT _data_id);
 
 
   /**
@@ -161,7 +161,7 @@ public:
   *
   *   \接口：键值
   */
-  int SearchID(KEYTYPE _key);
+  USER_INT SearchID(KEYTYPE _key);
 
 
   /**
@@ -169,7 +169,7 @@ public:
   *
   *   \接口：键值,id的vector引用
   */
-  bool SearchID(KEYTYPE _key,vector<int> &_re_vector);
+  bool SearchID(KEYTYPE _key, vector<USER_INT> &_re_vector);
 
 
   /**
@@ -185,7 +185,7 @@ public:
   *
   *   \接口：旧键，新键，id
   */
-  bool UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, int _data_id);
+  bool UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, USER_INT _data_id);
 };
 
 
@@ -369,7 +369,7 @@ BPlusTreeNode<KEYTYPE> * BPlusTree<KEYTYPE>::BrotherPtr(BPlusTreeNode<KEYTYPE> *
 
 
 template<class KEYTYPE>
-bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
+bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, USER_INT _data_id)
 {
   int insert_index;
   bool flag_first = false;//是否插入到第一个位置
@@ -519,7 +519,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, int _data_id)
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
 {
-  vector<int> data_id;
+	vector<USER_INT> data_id;
   if (SearchID(_key, data_id)){
     for (auto x : data_id){
       DeleteNode(_key, x);
@@ -531,7 +531,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
 
 
 template<class KEYTYPE>
-bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key, int _data_id)
+bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key, USER_INT _data_id)
 {
   bool borrow_flag;//借节点成功标记;
   int insert_index;
@@ -826,7 +826,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key, int _data_id)
 
 
 template<class KEYTYPE>
-bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, int _data_id)
+bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, USER_INT _data_id)
 {
   if (DeleteNode(_old_key, _data_id)){
     InsertNode(_new_key, _data_id);
@@ -839,7 +839,7 @@ bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, int _dat
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key)
 {
-  vector<int> data_id;
+	vector<USER_INT> data_id;
   if (SearchID(_old_key, data_id)){
     for (auto x : data_id){
       DeleteNode(_old_key, x);
@@ -903,7 +903,7 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SearchNode(KEYTYPE _key)
 
 
 template<class KEYTYPE>
-int BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key)
+USER_INT BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key)
 {
   int insert_index;
   BPlusTreeNode<KEYTYPE> *p;
@@ -920,7 +920,7 @@ int BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key)
 
 
 template<class KEYTYPE>
-bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key,vector<int>&_re_vector)
+bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT>&_re_vector)
 {
   int insert_index;
   bool flag = false;
@@ -928,6 +928,11 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key,vector<int>&_re_vector)
   p = SearchNode(_key);
   if (p == nullptr){
     return false;//ERROR：没有找到
+  }
+  if (p == root_){
+	  if (p->key_num_ == 0){
+		  return false;//ERROR：树为空;
+	  }
   }
   insert_index = -(p->BinarySearch(_key));
   if (insert_index < 0){
