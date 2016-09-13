@@ -38,9 +38,7 @@ public:
 	SQLCreateDatabase(std::vector<std::string> sql_token);
 	~SQLCreateDatabase();
 	std::string GetDatabaseName();
-	void SetDatabaseName(std::string database_name);
 	std::string GetDatabasePath();
-	void SetDatabasePath(std::string database_path);
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string database_name_;
@@ -54,9 +52,7 @@ public:
 	SQLUse(std::vector<std::string> sql_token);
 	~SQLUse();
 	std::string GetDatabaseName();
-	void SetDatabaseName(std::string database_name);
 	std::string GetDatabasePath();
-	void SetDatabasePath(std::string database_path);
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string database_name_;
@@ -70,9 +66,7 @@ public:
 	SQLCreateTable(std::vector<std::string> sql_token);
 	~SQLCreateTable();
 	std::string GetTableName();
-	void SetTableName(std::string table_name);
 	std::vector<Field> GetFields();
-	void SetFields(std::vector<Field> fields);
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string table_name_;
@@ -86,11 +80,8 @@ public:
 	SQLInsert(std::vector<std::string> sql_token);
 	~SQLInsert();
 	std::string GetTableName();
-	void SetTableName(std::string table_name);
 	std::vector<std::string> GetFields();
-	void SetFields(std::vector<std::string> fields);
 	std::vector<Value> GetValues();
-	void SetValues(std::vector<Value> values);
 	bool IsInputField();
 	void Parse(std::vector<std::string> sql_token) override;
 private:
@@ -107,11 +98,9 @@ public:
 	SQLDelete(std::vector<std::string> sql_token);
 	~SQLDelete();
 	std::string GetTableName();
-	void SetTableName(std::string table_name);
 	std::string GetField();
-	void SetField(std::string field);
 	Value GetValue();
-	void SetValue(Value value);
+	OperatorType GetOperatorType();
 	bool IsInputWhere();
 	void Parse(std::vector<std::string> sql_token) override;
 private:
@@ -119,6 +108,7 @@ private:
 	std::string field_;
 	Value * value_;
 	bool is_input_where_;
+	OperatorType op_;
 };
 
 /* "UPDATE tablename SET field1=value1, field2=value2, ... WHERE field=value;" */
@@ -128,20 +118,11 @@ public:
 	SQLUpdate(std::vector<std::string> sql_token);
 	~SQLUpdate();
 	std::string GetTableName();
-	void SetTableName(std::string table_name);
-
 	std::vector<std::string> GetNewField();
-	void SetNewField(std::vector<std::string> new_fields);
-
 	std::vector<Value> GetNewValue();
-	void SetNewValue(std::vector<Value> new_values);
-
 	std::string GetWhereField();
-	void SetWhereField(std::string where_field);
-
 	Value GetWhereValue();
-	void SetWhereValue(Value where_value);
-
+	OperatorType GetOperatorType();
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string table_name_;
@@ -149,6 +130,7 @@ private:
 	std::vector<Value> new_values_;
 	std::string where_field_;
 	Value * where_value_;
+	OperatorType op_;
 };
 
 /* "SELECET FROM tablename WHERE field op value" */
@@ -158,11 +140,8 @@ public:
 	SQLSelect(std::vector<std::string> sql_token);
 	~SQLSelect();
 	std::string GetTableName();
-	void SetTableName(std::string table_name);
 	std::string GetField();
-	void SetField(std::string field);
 	Value GetValue();
-	void SetValue(Value value);
 	OperatorType GetOperatorType();
 	bool IsInputWhere();
 	void Parse(std::vector<std::string> sql_token) override;
@@ -181,11 +160,8 @@ public:
 	SQLCreateIndex(std::vector<std::string> sql_token);
 	~SQLCreateIndex();
 	std::string GetTableName();
-	void SetTableName(std::string table_name);
 	std::string GetField();
-	void SetField(std::string field);
 	std::string GetIndex();
-	void SetIndex(std::string index);
 	void Parse(std::vector<std::string> sql_token) override;
 private:
 	std::string table_name_;

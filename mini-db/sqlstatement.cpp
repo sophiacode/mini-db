@@ -107,19 +107,9 @@ std::string SQLCreateDatabase::GetDatabaseName()
 	return database_name_;
 }
 
-void SQLCreateDatabase::SetDatabaseName(std::string database_name)
-{
-	database_name_ = database_name;
-}
-
 std::string SQLCreateDatabase::GetDatabasePath()
 {
 	return database_path_;
-}
-
-void SQLCreateDatabase::SetDatabasePath(std::string database_path)
-{
-	database_path_ = database_path;
 }
 
 void SQLCreateDatabase::Parse(std::vector<std::string> sql_token)
@@ -163,19 +153,9 @@ std::string SQLUse::GetDatabaseName()
 	return database_name_;
 }
 
-void SQLUse::SetDatabaseName(std::string database_name)
-{
-	database_name_ = database_name;
-}
-
 std::string SQLUse::GetDatabasePath()
 {
 	return database_path_;
-}
-
-void SQLUse::SetDatabasePath(std::string database_path)
-{
-	database_path_ = database_path;
 }
 
 void SQLUse::Parse(std::vector<std::string> sql_token)
@@ -219,19 +199,9 @@ std::string SQLCreateTable::GetTableName()
 	return table_name_;
 }
 
-void SQLCreateTable::SetTableName(std::string table_name)
-{
-	table_name_ = table_name;
-}
-
 std::vector<Field> SQLCreateTable::GetFields()
 {
 	return fields_;
-}
-
-void SQLCreateTable::SetFields(std::vector<Field> fields)
-{
-	fields_ = fields;
 }
 
 void SQLCreateTable::Parse(std::vector<std::string> sql_token)
@@ -318,29 +288,14 @@ std::string SQLInsert::GetTableName()
 	return table_name_;
 }
 
-void SQLInsert::SetTableName(std::string table_name)
-{
-	table_name_ = table_name;
-}
-
 std::vector<std::string> SQLInsert::GetFields()
 {
 	return fields_;
 }
 
-void SQLInsert::SetFields(std::vector<std::string> fields)
-{
-	fields_ = fields;
-}
-
 std::vector<Value> SQLInsert::GetValues()
 {
 	return values_;
-}
-
-void SQLInsert::SetValues(std::vector<Value> values)
-{
-	values_ = values;
 }
 
 bool SQLInsert::IsInputField()
@@ -477,19 +432,9 @@ std::string SQLDelete::GetTableName()
 	return table_name_;
 }
 
-void SQLDelete::SetTableName(std::string table_name)
-{
-	table_name = table_name_;
-}
-
 std::string SQLDelete::GetField()
 {
 	return field_;
-}
-
-void SQLDelete::SetField(std::string field)
-{
-	field_ = field;
 }
 
 Value SQLDelete::GetValue()
@@ -497,9 +442,9 @@ Value SQLDelete::GetValue()
 	return *value_;
 }
 
-void SQLDelete::SetValue(Value value)
+OperatorType SQLDelete::GetOperatorType()
 {
-	value_ = &value;
+	return op_;
 }
 
 bool SQLDelete::IsInputWhere()
@@ -536,7 +481,7 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 			ToLower(sql_token.at(i));
 			if (sql_token.at(i) == "where") {
 				field_ = sql_token.at(++i);
-				if (sql_token.at(++i) == "=") {
+				if((op_=ParseOperator(sql_token.at(++i)))!=kOpUndefined) {
 					MergeValue(sql_token, ++i);
 					if (ParseValue(sql_token.at(i), *value_) == false) {
 						std::cerr << "Delete失败：值与字段的类型不匹配." << std::endl;
@@ -595,19 +540,9 @@ std::string SQLUpdate::GetTableName()
 	return table_name_;
 }
 
-void SQLUpdate::SetTableName(std::string table_name)
-{
-	table_name_ = table_name;
-}
-
 std::vector<std::string> SQLUpdate::GetNewField()
 {
 	return new_fields_;
-}
-
-void SQLUpdate::SetNewField(std::vector<std::string> new_fields)
-{
-	new_fields_ = new_fields;
 }
 
 std::vector<Value> SQLUpdate::GetNewValue()
@@ -615,19 +550,9 @@ std::vector<Value> SQLUpdate::GetNewValue()
 	return new_values_;
 }
 
-void SQLUpdate::SetNewValue(std::vector<Value> new_values)
-{
-	new_values_ = new_values;
-}
-
 std::string SQLUpdate::GetWhereField()
 {
 	return where_field_;
-}
-
-void SQLUpdate::SetWhereField(std::string where_field)
-{
-	where_field_ = where_field;
 }
 
 Value SQLUpdate::GetWhereValue()
@@ -635,9 +560,9 @@ Value SQLUpdate::GetWhereValue()
 	return *where_value_;
 }
 
-void SQLUpdate::SetWhereValue(Value where_value)
+OperatorType SQLUpdate::GetOperatorType()
 {
-	where_value_ = &where_value;
+	return op_;
 }
 
 void SQLUpdate::Parse(std::vector<std::string> sql_token)
@@ -676,7 +601,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 				}		
 			} 
 			where_field_ = sql_token.at(++i);
-			if (sql_token.at(++i) == "=") {
+			if ((op_ = ParseOperator(sql_token.at(++i))) != kOpUndefined) {
 				MergeValue(sql_token, ++i);
 				if (ParseValue(sql_token.at(i), *where_value_) == false) {
 					std::cerr << "Update失败：where子语句中的值与字段的类型不匹配." << std::endl;
@@ -734,29 +659,14 @@ std::string SQLSelect::GetTableName()
 	return table_name_;
 }
 
-void SQLSelect::SetTableName(std::string table_name)
-{
-	table_name_ = table_name;
-}
-
 std::string SQLSelect::GetField()
 {
 	return field_;
 }
 
-void SQLSelect::SetField(std::string field)
-{
-	field_ = field;
-}
-
 Value SQLSelect::GetValue()
 {
 	return *value_;
-}
-
-void SQLSelect::SetValue(Value value)
-{
-	value_ = &value;
 }
 
 bool SQLSelect::IsInputWhere()
@@ -828,29 +738,14 @@ std::string SQLCreateIndex::GetTableName()
 	return table_name_;
 }
 
-void SQLCreateIndex::SetTableName(std::string table_name)
-{
-	table_name_ = table_name;
-}
-
 std::string SQLCreateIndex::GetField()
 {
 	return field_;
 }
 
-void SQLCreateIndex::SetField(std::string field)
-{
-	field_ = field;
-}
-
 std::string SQLCreateIndex::GetIndex()
 {
 	return index_;
-}
-
-void SQLCreateIndex::SetIndex(std::string index)
-{
-	index_ = index;
 }
 
 void SQLCreateIndex::Parse(std::vector<std::string> sql_token)
