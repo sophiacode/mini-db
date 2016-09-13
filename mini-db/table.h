@@ -6,9 +6,10 @@
 #include <fstream>
 #include <io.h>
 
-#define record_num 10000
-#define record_max 10000
+#define record_max 1000000
 #define record_len 256
+#define int_len    10
+#define true_int   16
 #define true_len   272
 
 #include "database.h"
@@ -100,7 +101,7 @@ public:
 	/**
 	*  \brief 记录显示
 	*/
-	bool Display(int id);
+	bool Display(USER_INT id,USER_INT iter);
 
 	/**
 	*  \brief 顺序查找
@@ -114,14 +115,15 @@ private:
 	int FindIndex(std::string index_field_name);
 
 private:
-	int records_num;				     /* 表中已有数据数量 */
+	USER_INT records_num;				 /* 表中已有数据数量 */
+	USER_INT record_leng;				 /* 一条记录的实际长度 */
 	int indexs_num;						 /* 表中已有索引数量 */
 	std::string table_name;				 /* 表单名称 */
 	std::vector<Field> fields;           /* 字段 */
 	std::vector<Index *> indexs;         /* 索引 */
-	std::vector<int> select_id;			 /* 记录select选中的id */
+	std::vector<USER_INT> select_id;	 /* 记录select选中的id */
 	std::string path;					 /* 存储数据库路径 */
-	IDPool * idPool;						 /* 主键内存池，用于申请新id */
+	IDPool * idPool;					 /* 主键内存池，用于申请新id */
 	ofstream fwp;						 /* 记录文件写 */
 	ifstream frp;						 /* 记录文件读 */
 };
