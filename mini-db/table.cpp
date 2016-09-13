@@ -309,7 +309,7 @@ bool Table::SelectRecord(SQLSelect &sql)
 				{
 					if (fields.at(i).GetFieldType() != sql.GetValue().GetValueType())
 					{
-						std::cout << "数据类型不符合！" << endl;
+						std::cout << "数据类型无法匹配！" << endl;
 						return false;
 					}
 				}
@@ -592,7 +592,6 @@ bool Table::DeleteRecord(SQLDelete &sd)
 	{/* 打开表单成功 */
 		if (!Table::SelectRecord(sd))
 		{
-			std::cout << "不存在符合条件的记录！" << endl;
 			return false;					/* 搜索目标记录失败，返回false */
 		}
 		else {
@@ -651,7 +650,6 @@ bool Table::UpdateRecord(SQLUpdate &su)
 	{
 		if (!Table::SelectRecord(su))							/* 搜索需要更新的记录 */
 		{
-			std::cout << "不存在符合条件的记录！" << endl;
 			return false;
 		}
 		else {
@@ -842,7 +840,7 @@ bool Table::Display()
 
 			if (key == true)
 			{
-				std::cout << "No." << k + 1 << endl;
+				std::cout << "------ No." << k+1 << " ------" << endl;
 				for (int j = 0; j < fields.size(); j++)
 				{
 					std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
@@ -868,7 +866,7 @@ bool Table::Display(USER_INT id,USER_INT iter)
 	char record_data[record_len];
 	if (UseTable())
 	{
-		std::cout << "------ No." << iter << " ------" << endl;
+		std::cout << "------ No." << iter+1 << " ------" << endl;
 		for (int j = 0; j < fields.size(); j++)
 		{
 			frp.seekg(sizeof(char)*(j + id*fields.size())*true_len, ios::beg);
@@ -934,6 +932,7 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 		if (!count)
 		{
+			std::cout << "不存在符合条件的数据！" << endl;
 			return false;
 		}
 
