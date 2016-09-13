@@ -122,6 +122,7 @@ private:
 	std::vector<Field> fields;           /* 字段 */
 	std::vector<Index *> indexs;         /* 索引 */
 	std::vector<USER_INT> select_id;	 /* 记录select选中的id */
+	std::vector<USER_INT> real_id;		 /* 有效id存放池 */
 	std::string path;					 /* 存储数据库路径 */
 	IDPool * idPool;					 /* 主键内存池，用于申请新id */
 	ofstream fwp;						 /* 记录文件写 */
