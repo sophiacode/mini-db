@@ -11,57 +11,49 @@
 
 
 /**
- *  \brief 数据类型
- */
+*  \brief 数据类型
+*/
 enum ValueType
 {
-	kIntegerType,     /* 整数形 */
-	kStringType,      /* 字符串型 */
-	kNullType         /* 数据为空 */
+	kIntegerType,
+	kStringType,
+	kNullType
 };
 
 /**
- *  \brief 值类
- */
+*  \brief 值类
+*/
 class Value
 {
 public:
 	/**
- 	 *  \brief 构造函数
-	 */
+	*  \brief 构造函数
+	*/
 	Value() { ; }
 
 	/**
-	 *  \brief 析构函数
-	 */
+	*  \brief 析构函数
+	*/
 	~Value() { ; }
 
 	/**
-	 *  \brief 获取Value的值
-	 *
-	 *  \return Value的值
-	 */
+	*  \brief 获取Value的值
+	*/
 	std::string GetValueData();
 
 	/**
-	 *  \brief 获取Value的类型
-	 *
-	 *  \return Value的类型
-	 */
+	*  \brief 获取Value的类型
+	*/
 	ValueType GetValueType();
 
 	/**
-	 *  \brief 重置Value
-	 *
-	 *  \param new_data Value的新值 Value的新数据类型
-	 */
+	*  \brief 重置Value
+	*/
 	void SetValue(std::string new_data, ValueType new_type);
 
 	/**
-	 *  \brief 重置Value的值
-	 *
-	 *  \param new_data Value的新值
-	 */
+	*  \brief 重置Value的值
+	*/
 	void SetValuedata(std::string new_data);
 
 
@@ -71,35 +63,29 @@ private:
 };
 
 /**
- *  \brief 记录类
- */
+*  \brief 记录类
+*/
 class Record
 {
 public:
 	/**
- 	 *  \brief 构造函数
-	 */
+	*  \brief 构造函数
+	*/
 	Record() { ; }
 
 	/**
-	 *  \brief 析构函数
-	 */
+	*  \brief 析构函数
+	*/
 	~Record() { ; }
 
 	/**
-	 *  \brief 显示记录
-	 *
-	 *  \param values_data 一条记录中的值数组 fields 字段数组
-	 *
-	 *  \return 成功返回true 失败返回false
-	 */
+	*  \brief 显示记录
+	*/
 	bool Display(std::vector<Value> values_data, std::vector<Field> fields);
 
 	/**
-	 *  \brief 设置Value的值
-	 *
-	 *  \param values_data 新值的数组
-	 */
+	*  \brief 设置Value的值
+	*/
 	void SetValue(std::vector<Value> values_data);
 
 private:
@@ -108,61 +94,43 @@ private:
 };
 
 /**
- *  \brief 字段类
- */
+*  \brief 字段类
+*/
 class Field
 {
 public:
 	/**
- 	 *  \brief 构造函数
-	 */
+	*  \brief 构造函数
+	*/
 	Field();
 
 	/**
-	 *  \brief 析构函数
-	 */
+	*  \brief 析构函数
+	*/
 	~Field() { ; }
 
 	/**
-	 *  \brief 获取字段名
-	 *
-	 *  \return 字段名
-	 */
+	*  \brief 获取字段名
+	*/
 	std::string GetFieldName();
 
 	/**
-	 *  \brief 获取字段数据类型
-	 *
-	 *  \return 字段数据类型
-	 */
+	*  \brief 获取字段数据类型
+	*/
 	ValueType GetFieldType();
 
 	/**
-	 *  \brief 更改字段名
-	 *
-	 *  \param new_name 新的字段名
-	 */
+	*  \brief 更改字段名
+	*/
 	void SetFieldName(std::string new_name);
 
 	/**
-	 *  \brief 更改字段数据类型
-	 *
-	 *  \param new_type 新的字段数据类型
-	 */
+	*  \brief 更改字段数据类型
+	*/
 	void SetFieldType(ValueType new_type);
-	
-	/**
-	 *  \brief 判断该字段是否建立索引
-	 *
-	 *  \return 已经建立返回true 未建立返回false
-	 */
+
 	bool IsCreateIndex();
 
-	/**
-	 *  \brief 标记该字段是否已经建立索引
-	 *
-	 *  \param 标识是否建立索引
-	 */
 	void SetIsCreateIndex(bool is_create_index);
 
 private:
@@ -172,48 +140,27 @@ private:
 };
 
 /**
- *  \brief 索引类
- */
+*  \brief 索引类
+*/
 class Index
 {
 public:
 	/**
-	 *  \brief 构造函数
-	 */
+	*  \brief 构造函数
+	*/
 	Index(std::string index_name, std::string field_name, ValueType type, std::string path);
 
 	Index(std::string index_name, std::string field_name, ValueType type);
 
 	/**
-	 *  \brief 析构函数
-	 */
+	*  \brief 析构函数
+	*/
 	~Index();
 
-	/**
-	*  \brief 插入节点
-	*
-	*  \param value 节点的值 data_id 节点的id
-	*
-	*  \return 插入成功返回true 插入失败返回false
-	*/
 	bool InsertNode(std::string value, USER_INT data_id);
 
-	/**
-	*  \brief 删除节点
-	*
-	*  \param value 节点的值
-	*
-	*  \return 删除成功返回true 插入失败返回false
-	*/
 	bool DeleteNode(std::string value);
 
-	/**
-	*  \brief 查找节点
-	*
-	*  \param value 节点的值
-	*
-	*  \return 节点的id
-	*/
 	int SearchNode(std::string value);
 
 	bool SearchNode(std::string value, std::vector<USER_INT>& id);
@@ -237,8 +184,8 @@ private:
 };
 
 /**
- *  \brief 数据库类
- */
+*  \brief 数据库类
+*/
 class Database
 {
 public:
@@ -254,51 +201,31 @@ public:
 
 	/**
 	*  \brief 创建数据库
-	*
-	*  \param sql建立数据库
-	*
-	*  \return 创建成功返回true 失败返回false
 	*/
 	bool CreateDatabase(SQLCreateDatabase &st);
 
 	/**
-	*  \brief 打开数据库
-	*
-	*  \param sql打开数据库
-	*
-	*  \return 数据库路径
+	*  \brief 打开数据库,并返回当前数据库的路径
 	*/
 	std::string UseDatabase(SQLUse &st);
 
 	/**
 	*  \brief 获取数据库名称
-	*
-	*  \return 数据库名称
 	*/
 	std::string GetDatabaseName();
 
 	/**
 	*  \brief 获取表名
-	*
-	*  \return 表名
 	*/
 	std::vector<Table *> GetTable();
 
 	/**
-	*  \brief 创建表单，并存储表名
-	*
-	*  \param sql创建表
-	*
-	*  \return 创建成功返回true 失败返回false
+	*  \brief 创建表单
 	*/
 	bool CreateTable(SQLCreateTable & st);
 
 	/**
-	*  \brief 打开数据库中的表
-	*
-	*  \param  数据库路径
-	*
-	*  \return 打开成功返回true 失败返回false
+	*  \brief 打开表单
 	*/
 	bool UseTable(std::string DatabasePath);
 
