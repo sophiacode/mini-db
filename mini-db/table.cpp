@@ -1014,13 +1014,53 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 		while (k < records_num)
 		{
+			i = real_id.at(k);
 			frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
 			frp.read(record__data, length*sizeof(char));
 
 			switch (op)
 			{
 			case kOpEqual:
-
+				if (record__data == value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpGreater:
+				if (record__data > value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpLess:
+				if (record__data < value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpNotEqual:
+				if (record__data != value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpGreterOrEqual:
+				if (record__data >= value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpLessOrEqual:
+				if (record__data <= value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
 				break;
 			default:
 				std::cout << "²Ù×÷·ûÆ¥ÅäÊ§°Ü£¡" << endl;
