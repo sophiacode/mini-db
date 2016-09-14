@@ -732,7 +732,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 			USER_INT Record_id;									/* Record_id记录当前操作记录主键 */
 			USER_INT offset;
-			frp.sync();
+			//frp.sync();
 			for (USER_INT i = 0; i < select_id.size(); i++)
 			{
 				Record_id = select_id[i];
@@ -907,7 +907,7 @@ bool Table::Display()
 	if (Table::UseTable())
 	{
 		USER_INT k = 0, offset = 0, i = 0;
-		frp.sync();
+		//frp.sync();
 		while(k < records_num)
 		{
 			record__datas.clear();
@@ -965,7 +965,7 @@ bool Table::Display(USER_INT id,USER_INT iter)
 	char record__data[record_len];
 	if (UseTable())
 	{
-		frp.sync();
+		//frp.sync();
 		std::cout << "------ No." << iter+1 << " ------" << endl;
 		USER_INT offset = 0;
 		for (int j = 0; j < fields.size(); j++)
@@ -990,7 +990,6 @@ bool Table::Display(USER_INT id,USER_INT iter)
 		return false;
 	}
 }
-
 
 /**
 *  \brief 顺序查找
