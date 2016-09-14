@@ -63,12 +63,29 @@ bool SQLBase::ParseValue(std::string sql, Value & value)
 	}
 	else if (sql.at(0) == '\''&&sql.at(size - 1) == '\'') {
 		std::string temp = sql.substr(1, size - 2)+"$";
-		int len = temp.size();
-		for (int i = 0;i < len;i++)
+		int pos = -1;
+		for (int i = 0;i < temp.size();i++)
 		{
-			
+			if (temp[i] == '*' || temp[i] == '?')
+			{
+				pos = i;
+			}
 		}
-		value.SetValue(sql.substr(1, size - 2), kStringType);
+
+		if (pos == -1 )
+		{
+			value.SetValue(temp, kStringType);
+		}
+		else if (pos == temp.size() - 2)
+		{
+			value.SetValue(temp, kStringType);
+		}
+		else
+		{
+			std::string sub1 = temp.substr(0, pos + 1);
+			std::string sub2 = temp.substr(pos + 1, temp.size() - 1);
+			value.SetValue(sub2 + sub1, kStringType);
+		}
 		return true;
 	}
 	else {
