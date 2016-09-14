@@ -327,7 +327,9 @@ bool Table::SelectRecord(SQLSelect &sql)
 				}
 			}
 
-			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id) == true)/* 依照索引查找 */
+			if (indexs.at(field_id)->
+				SearchNode(sql.GetValue().GetValueData(), 
+					       select_id, sql.GetOperatorType()) == true)/* 依照索引查找 */
 			{
 				for (USER_INT iter = 0; iter < select_id.size();iter++)						/* 查找成功 */
 				{
@@ -387,7 +389,9 @@ bool Table::SelectRecord(SQLDelete &sql)
 				}
 			}
 
-			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id) == true)
+			if (indexs.at(field_id)->
+				SearchNode(sql.GetValue().GetValueData(),
+					select_id, sql.GetOperatorType()) == true)
 			{
 				return true;
 			}
@@ -462,7 +466,9 @@ bool Table::SelectRecord(SQLUpdate &sql)
 			}
 		}
 
-		if (indexs.at(field_id)->SearchNode(sql.GetWhereValue().GetValueData(), select_id) == true)
+		if (indexs.at(field_id)->
+			SearchNode(sql.GetWhereValue().GetValueData(),
+				select_id, sql.GetOperatorType()) == true)
 		{
 			return true;
 		}
