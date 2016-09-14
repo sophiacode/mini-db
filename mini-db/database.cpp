@@ -370,7 +370,15 @@ int Index::SearchNode(std::string value)
 {
 	if (type_ == kIntegerType)
 	{
-		USER_INT temp = atoi(value.c_str());
+		USER_INT temp;
+		if (value == "")
+		{
+			temp = -0x3fffffff;
+		}
+		else
+		{
+			temp = atoi(value.c_str());
+		}
 		return bplustree_int_->SearchID(temp);
 	}
 
