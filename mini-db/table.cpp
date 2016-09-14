@@ -991,7 +991,6 @@ bool Table::Display(USER_INT id,USER_INT iter)
 	}
 }
 
-
 /**
 *  \brief À≥–Ú≤È’“
 */
