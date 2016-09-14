@@ -327,7 +327,9 @@ bool Table::SelectRecord(SQLSelect &sql)
 				}
 			}
 
-			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id) == true)/* “¿’’À˜“˝≤È’“ */
+			if (indexs.at(field_id)->
+				SearchNode(sql.GetValue().GetValueData(), 
+					       select_id, sql.GetOperatorType()) == true)/* “¿’’À˜“˝≤È’“ */
 			{
 				for (USER_INT iter = 0; iter < select_id.size();iter++)						/* ≤È’“≥…π¶ */
 				{
@@ -387,7 +389,9 @@ bool Table::SelectRecord(SQLDelete &sql)
 				}
 			}
 
-			if (indexs.at(field_id)->SearchNode(sql.GetValue().GetValueData(), select_id) == true)
+			if (indexs.at(field_id)->
+				SearchNode(sql.GetValue().GetValueData(),
+					select_id, sql.GetOperatorType()) == true)
 			{
 				return true;
 			}
@@ -462,7 +466,9 @@ bool Table::SelectRecord(SQLUpdate &sql)
 			}
 		}
 
-		if (indexs.at(field_id)->SearchNode(sql.GetWhereValue().GetValueData(), select_id) == true)
+		if (indexs.at(field_id)->
+			SearchNode(sql.GetWhereValue().GetValueData(),
+				select_id, sql.GetOperatorType()) == true)
 		{
 			return true;
 		}
@@ -1014,13 +1020,53 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 		while (k < records_num)
 		{
+			i = real_id.at(k);
 			frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
 			frp.read(record__data, length*sizeof(char));
 
 			switch (op)
 			{
 			case kOpEqual:
-
+				if (record__data == value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpGreater:
+				if (record__data > value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpLess:
+				if (record__data < value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpNotEqual:
+				if (record__data != value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpGreterOrEqual:
+				if (record__data >= value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
+				break;
+			case kOpLessOrEqual:
+				if (record__data <= value.GetValueData())
+				{
+					select_id.push_back(i);
+					count++;
+				}
 				break;
 			default:
 				std::cout << "≤Ÿ◊˜∑˚∆•≈‰ ß∞‹£°" << endl;

@@ -165,12 +165,14 @@ public:
 
 	bool SearchNode(std::string value, std::vector<USER_INT>& id);
 
+	bool SearchNode(std::string value, std::vector<USER_INT>& id, OperatorType op);
+
     bool UpdateNode(std::string new_value, std::string old_value);
 
 	std::string GetFieldName();
 
 public:
-	BPlusTree<USER_INT> * bplustree_int_;               /* int类型索引的B+树 */
+	BPlusTree<USER_INT> * bplustree_int_;          /* int类型索引的B+树 */
 	BPlusTree<std::string> * bplustree_string_;    /* string类型索引的B+树 */
 
 private:
