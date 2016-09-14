@@ -169,6 +169,8 @@ public:
 
     bool UpdateNode(std::string new_value, std::string old_value);
 
+	bool ShowAllId(std::vector<USER_INT> &id);
+
 	std::string GetFieldName();
 
 public:

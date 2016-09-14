@@ -443,3 +443,15 @@ else if (type_ == kStringType)
 return bplustree_string_->UpdateNode(old_value,new_value);
 }
 }
+
+bool Index::ShowAllId(std::vector<USER_INT>& id)
+{
+	if (type_ == kIntegerType)
+	{
+		return bplustree_int_->ShowAllId(id);
+	}
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->ShowAllId(id);
+	}
+}
