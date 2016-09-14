@@ -997,9 +997,9 @@ bool Table::Display(USER_INT id,USER_INT iter)
 */
 bool Table::OrderSelect(string select_field, Value select_value, OperatorType select_op)
 {
+	real_id.clear();
+	indexs.at(0)->ShowAllId(real_id);
 
-	std::cout << "false!" << endl;
-	return false;
 	std::string field = select_field;
 	Value value = select_value;
 	OperatorType op = select_op;
@@ -1038,7 +1038,7 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 		while (k < records_num)
 		{
-			i = real_id.at(k);
+			i = real_id.at(k++);
 			frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
 			frp.read(record__data, length*sizeof(char));
 
