@@ -86,7 +86,7 @@ bool SQLBase::ParseValue(std::string sql, Value & value)
 			std::string sub2 = temp.substr(pos + 1, temp.size() - 1);
 			value.SetValue(sub2 + sub1, kStringType);
 		}*/
-		value.SetValue(sql.substr(1, size - 1),kStringType);
+		value.SetValue(sql.substr(1, size - 2),kStringType);
 		return true;
 	}
 	else {
