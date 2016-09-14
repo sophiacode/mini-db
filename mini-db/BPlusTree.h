@@ -7,7 +7,7 @@
 #include "BPlusTreeNode.h"
 #include "MemPool.h"
 #include "IDPool.h"
-
+#include "sqltype.h"
 
 using namespace std;
 
@@ -170,6 +170,22 @@ public:
   *   \接口：键值,id的vector引用
   */
   bool SearchID(KEYTYPE _key, vector<USER_INT> &_re_vector);
+
+
+  /**
+  *   \查找所有id
+  *
+  *   \接口：id的vector引用
+  */
+  bool ShowAllId(vector<USER_INT> &_re_vector);
+
+
+  /**
+  *   \查找符合关系式子关键字的id
+  *
+  *   \接口：键值,id的vector引用，大小关系的枚举
+  */
+  bool SearchID(KEYTYPE _key, vector<int> &_re_vector, OperatorType op);
 
 
   /**
@@ -953,6 +969,103 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT>&_re_vector)
     }
     p = SisterPtr(p);
     insert_index = 1;
+  }
+  return true;
+}
+
+
+
+template<class KEYTYPE>
+bool BPlusTree<KEYTYPE>::ShowAllId(vector<USER_INT> &_re_vector)
+{
+  if (sqt_ != nullptr){
+    p = sqt_;
+  }
+  else{
+    if (sqt_f_ == -1){
+      return false;
+    }
+    BPlusTreeNode<KEYTYPE>* p = Pool->NewNode();
+    in_file_stream_->seekg(sqt_f_*sizeof(*p), ios::beg);
+    in_file_stream_->read((char*)(p), sizeof(*p));
+  }
+  sqt_ = p;
+  while (p != nullptr){
+    for (int i = 0; i < p->key_num_; i++){
+      _re_vector.push_back(p->key_data_id[i]);
+    }
+    p = SisterPtr(p);
+  }
+  return true;
+}
+
+
+template<class KEYTYPE>
+bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, OperatorType op)
+{
+  if (op == kOpUndefined){
+    return false;
+  }
+  if (op == kOpEqual){
+    return SearchID(_key, _re_vector);
+  }
+  int insert_index;
+  int flag_insert_front,flag_insert_back;
+  bool flag = false;
+  BPlusTreeNode<KEYTYPE> *p, *q;
+  q = p = SearchNode(_key);
+  if (p == nullptr){
+    return false;//ERROR：没有找到
+  }
+  if (p == root_){
+    if (p->key_num_ == 0){
+      return false;//ERROR：树为空;
+    }
+  }
+  insert_index = -(p->BinarySearch(_key));
+  flag_insert_front = insert_index - 1;
+  if (insert_index < 0){
+    return false;
+  }
+  //> >=  < <=  !=
+  flag_insert_back = -1;
+  while (p != nullptr){
+    if (op == kOpGreterOrEqual || op == kOpLessOrEqual){
+      for (int i = insert_index - 1; i < p->key_num_; i++){
+        if (p->key_[i] == _key){
+          _re_vector.push_back(p->key_data_id[i]);
+        }
+        else{
+          flag = true;
+          flag_insert_back = i;
+          break;
+        }
+      }
+      if (flag){
+        break;
+      }
+      p = SisterPtr(p);
+      insert_index = 1;
+    }
+  }
+  while (p != nullptr){
+    if (op == kOpGreater || op == kOpNotEqual){
+      for (int i = flag_insert_back - 1; i < p->key_num_; i++){
+        _re_vector.push_back(p->key_data_id[i]);
+      }
+      p = SisterPtr(p);
+      flag_insert_back = 1;
+    }
+  }
+  p = q;
+  while (p != nullptr){
+    if (op == kOpLess || op == kOpNotEqual){
+      for (int i = flag_insert_front - 1; i >= 0; i--){
+        _re_vector.push_back(p->key_data_id[i]);
+      }
+      p = BrotherPtr(p);
+      flag_insert_front = p->key_num_;;
+    }
   }
   return true;
 }

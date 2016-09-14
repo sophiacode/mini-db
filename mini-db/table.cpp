@@ -33,7 +33,7 @@ Table::~Table()
 	char records_numb[10];
 	itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
 	fp.seekp(0, ios::beg);
-	fp.write(records_numb, sizeof(char)* 5);
+	fp.write(records_numb, sizeof(char)* 11);
     fp.flush();
 	fp.close();											/* 关闭写表头文件 */
 
@@ -846,11 +846,13 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	index_path = index_path + "\\" + si.GetField();
 	Index * temp = new Index(si.GetIndex(), si.GetField(), type, index_path);
 
-	fstream fip;
+	ofstream fip;
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
 	std::string is_index = "1\0";							/* is_index标记是否存在索引 */
-	fip.open(table_name_fields.c_str());
+	fip.open(table_name_fields,ios::in|ios::binary);
+	fip.seekp((32 + 24 * i)*sizeof(char), ios::beg);
 	fip.write(is_index.c_str(), sizeof(char)* 2);
+	fip.flush();
 	fip.close();
 
 	int k = 0;
@@ -972,6 +974,8 @@ bool Table::Display(USER_INT id,USER_INT iter)
 bool Table::OrderSelect(string select_field, Value select_value, OperatorType select_op)
 {
 
+	std::cout << "false!" << endl;
+	return false;
 	std::string field = select_field;
 	Value value = select_value;
 	OperatorType op = select_op;
