@@ -394,6 +394,20 @@ bool Index::SearchNode(std::string value, std::vector<USER_INT>& id)
 	}
 }
 
+bool Index::SearchNode(std::string value, std::vector<USER_INT>& id, OperatorType op)
+{
+	if (type_ == kIntegerType)
+	{
+		USER_INT temp = atoi(value.c_str());
+		return bplustree_int_->SearchID(temp, id, op);
+	}
+
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->SearchID(value, id, op);
+	}
+}
+
 std::string Index::GetFieldName()
 {
 	return field_name_;
