@@ -978,6 +978,7 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT>&_re_vector)
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::ShowAllId(vector<USER_INT> &_re_vector)
 {
+  BPlusTreeNode<KEYTYPE> *p;
   if (sqt_ != nullptr){
     p = sqt_;
   }
@@ -1027,10 +1028,9 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
   if (insert_index < 0){
     return false;
   }
-  //> >=  < <=  !=
   flag_insert_back = -1;
   while (p != nullptr){
-    if (op == kOpGreterOrEqual || op == kOpLessOrEqual){
+    if (op == kOpGreterOrEqual && op == kOpLessOrEqual){
       for (int i = insert_index - 1; i < p->key_num_; i++){
         if (p->key_[i] == _key){
           _re_vector.push_back(p->key_data_id[i]);
@@ -1056,6 +1056,9 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
       p = SisterPtr(p);
       flag_insert_back = 1;
     }
+    else{
+      break;
+    }
   }
   p = q;
   while (p != nullptr){
@@ -1065,6 +1068,9 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
       }
       p = BrotherPtr(p);
       flag_insert_front = p->key_num_;;
+    }
+    else{
+      break;
     }
   }
   return true;
