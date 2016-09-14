@@ -56,7 +56,18 @@ void SQLBase::MergeValue(std::vector<std::string> & sql_token, int pos)
 bool SQLBase::ParseValue(std::string sql, Value & value)
 {
 	auto size = sql.size();
-	if (sql.at(0) == '\''&&sql.at(size - 1) == '\'') {
+	if (sql == "\NULL")
+	{
+		value.SetValue("", kNullType);
+		return true;
+	}
+	else if (sql.at(0) == '\''&&sql.at(size - 1) == '\'') {
+		std::string temp = sql.substr(1, size - 2)+"$";
+		int len = temp.size();
+		for (int i = 0;i < len;i++)
+		{
+			
+		}
 		value.SetValue(sql.substr(1, size - 2), kStringType);
 		return true;
 	}
