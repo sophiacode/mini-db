@@ -111,6 +111,9 @@ bool Table::UseTable()
 	USER_INT i = 0;
 	record_leng = 0;
 
+	Index * id_index = new Index("id_index", "id_index", kIntegerType);
+	indexs.push_back(id_index);
+
 	while (i <fields_num)										/* 读取字段对应的数据类型进入内存 */
 	{
 		Field temp;
@@ -176,7 +179,7 @@ bool Table::UseTable()
 */
 int Table::FindIndex(std::string index_field_name)
 {
-	for (int i = 0; i < indexs.size(); i++)
+	for (int i = 1; i < indexs.size(); i++)
 	{
 		if (index_field_name == indexs[i]->GetFieldName())
 		{
@@ -293,6 +296,16 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			fwp.open(table_name_records, ios::in|ios::binary);						/* 打开记录文件 */
 			frp.open(table_name_records);
 
+			string index_path = path + "\\" + table_name + "\\index";
+			if (_access(index_path.c_str(), 0))
+			{
+				string cmd = "md " + index_path;
+				system(cmd.c_str());
+			}
+			index_path = index_path + "\\id_index";
+			Index * temp = new Index("id_index", "id_index", kIntegerType, index_path);
+			indexs.push_back(temp);
+
 			std::cout << "创建成功！" << endl;
 			return true;
 		}
@@ -319,7 +332,8 @@ bool Table::SelectRecord(SQLSelect &sql)
 			{
 				if (fields.at(i).GetFieldName() == sql.GetField())
 				{
-					if (fields.at(i).GetFieldType() != sql.GetValue().GetValueType())
+					if (sql.GetValue().GetValueType() != kNullType 
+						&& fields.at(i).GetFieldType() != sql.GetValue().GetValueType())
 					{
 						std::cout << "数据类型无法匹配！" << endl;
 						return false;
@@ -574,6 +588,10 @@ bool Table::CreateRecord(SQLInsert &st)
 		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
 		USER_INT Record_id = idPool->NewNode();					/* 获得新记录的主键 */
 		USER_INT offset = 0;
+		
+		char id_char[20];
+		itoa(Record_id, id_char, 10);
+		indexs[0]->InsertNode(id_char, Record_id);
 
 		for (int i = 0; i < fields.size(); i++)
 		{

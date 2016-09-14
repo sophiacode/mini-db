@@ -332,7 +332,15 @@ bool Index::InsertNode(std::string value, USER_INT data_id)
 {
 	if (type_ == kIntegerType)
 	{
-		int temp = atoi(value.c_str());
+		USER_INT temp;
+		if (value == "")
+		{
+			temp = -0x3fffffff;
+		}
+		else
+		{
+			temp = atoi(value.c_str());
+		}
 		if (bplustree_int_->InsertNode(temp, data_id))
 		{
 			bplustree_int_->DeleteCache();
@@ -370,7 +378,15 @@ int Index::SearchNode(std::string value)
 {
 	if (type_ == kIntegerType)
 	{
-		USER_INT temp = atoi(value.c_str());
+		USER_INT temp;
+		if (value == "")
+		{
+			temp = -0x3fffffff;
+		}
+		else
+		{
+			temp = atoi(value.c_str());
+		}
 		return bplustree_int_->SearchID(temp);
 	}
 
