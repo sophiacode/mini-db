@@ -672,9 +672,6 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
 				{
-					//fwp.seekp((Record_id*fields.size() + j) *true_len, ios::beg);/* 指针定位 */
-					//fwp.write(Null_str.c_str(), record_len);
-					//fwp.flush();
 					if (fields[j].IsCreateIndex())									/* 当对应字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());			/* 找到该字段对应的索引编号index_id */
@@ -905,11 +902,45 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 bool Table::Display()
 {
 	char record__data[record_len];
+	/*real_id.clear();
+	indexs.at(0)->ShowAllId(real_id);*/
 	std::vector<string> record__datas;
 	if (Table::UseTable())
 	{
+		
 		USER_INT k = 0, offset = 0, i = 0;
-		//frp.sync();
+		/*for (k = 0; k < real_id.size(); k++)
+		{
+			record__datas.clear();
+			i = real_id.at(k);
+			offset = 0;
+			for (int j = 0; j < fields.size(); j++)
+			{
+				frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
+				if (fields.at(j).GetFieldType() == kIntegerType)
+				{
+					frp.read(record__data, sizeof(char)*int_len);
+					offset += true_int;
+				}
+				else{
+					frp.read(record__data, sizeof(char)*record_len);
+					offset += true_len;
+				}
+
+				if (record__data[0] == '\a')
+				{
+					record__data[0] == '\0';
+				}
+
+				record__datas.push_back(record__data);
+			}
+
+			std::cout << "--------- No." << k + 1 << " ---------" << endl;
+			for (int j = 0; j < fields.size(); j++)
+			{
+				std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
+			}
+		}*/
 		while(k < records_num)
 		{
 			record__datas.clear();
@@ -918,7 +949,7 @@ bool Table::Display()
 			for (int j = 0; j < fields.size(); j++) 
 			{
 				record__data[0] = '\0';
-				frp.seekg(sizeof(char)*(i*record_leng+offset), ios::beg);
+				frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
 				if (fields.at(j).GetFieldType() == kIntegerType)
 				{
 					frp.read(record__data, sizeof(char)*int_len);
