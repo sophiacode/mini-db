@@ -978,7 +978,7 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT>&_re_vector)
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::ShowAllId(vector<USER_INT> &_re_vector)
 {
-  BPlusTreeNode<KEYTYPE> *p;
+  BPlusTreeNode<KEYTYPE> *p; 
   if (sqt_ != nullptr){
     p = sqt_;
   }
