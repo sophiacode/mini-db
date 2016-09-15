@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <stack>
 #include "global.h"
 #include "BPlusTreeNode.h"
 #include "MemPool.h"
@@ -185,7 +186,7 @@ public:
   *
   *   \接口：键值,id的vector引用，大小关系的枚举
   */
-  bool SearchID(KEYTYPE _key, vector<int> &_re_vector, OperatorType op);
+  bool SearchID(KEYTYPE _key, vector<USER_INT> &_re_vector, OperatorType op);
 
 
   /**
@@ -338,7 +339,7 @@ BPlusTreeNode<KEYTYPE> * BPlusTree<KEYTYPE>::SisterPtr(BPlusTreeNode<KEYTYPE> *_
   }
   for (auto x : Pool->cachelist){
     if (_p->sister_file_ == x->this_file_){
-      x->sister_ = _p;
+      x->brother_ = _p;
       _p->sister_ = x;
       return x;
     }
@@ -375,6 +376,9 @@ BPlusTreeNode<KEYTYPE> * BPlusTree<KEYTYPE>::BrotherPtr(BPlusTreeNode<KEYTYPE> *
   in_file_stream_->read((char*)(p), sizeof(*p));
   _p->brother_ = p;
   p->sister_ = _p;
+  if (p->this_file_ == sqt_f_){
+    sqt_ = p;
+  }
   Pool->RecordNode(p);
   //p->sister_file_ = _p->this_file_;
   return p;
@@ -462,6 +466,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, USER_INT _data_id)
       r = Pool->NewNode();
       r->this_file_ = id_Pool_->NewNode();
       root_ = r;
+      root_f_ = r->this_file_;
       p->father_ = r;
       p->father_file_ = r->this_file_;
       r->is_leaf_ = false;
@@ -642,6 +647,7 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key, USER_INT _data_id)
         }
         root_->key_num_--;
         root_ = p;
+        root_f_ = p->this_file_;
         root_->father_ = nullptr;
         root_->father_file_ = -1;
       }
@@ -1002,8 +1008,10 @@ bool BPlusTree<KEYTYPE>::ShowAllId(vector<USER_INT> &_re_vector)
 
 
 template<class KEYTYPE>
-bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, OperatorType op)
+bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT> &_re_vector, OperatorType op)
 {
+  stack<USER_INT> val;
+  //sqt_ = nullptr;
   if (op == kOpUndefined){
     return false;
   }
@@ -1026,7 +1034,7 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
   insert_index = abs(p->BinarySearch(_key));
   flag_insert_front = insert_index - 1;
   flag_insert_back = -1;
-  while (p != nullptr){
+  while (p != nullptr){//处理等于
     for (int i = insert_index - 1; i < p->key_num_; i++){
       if (p->key_[i] == _key){
         if (op == kOpGreterOrEqual || op == kOpLessOrEqual){
@@ -1045,28 +1053,31 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
     p = SisterPtr(p);
     insert_index = 1;
   }
-  while (p != nullptr){
+  while (q != nullptr){//处理小于
+    if (op == kOpLess || op == kOpNotEqual || op == kOpLessOrEqual){
+      for (int i = flag_insert_front - 1; i >= 0; i--){
+        val.push(q->key_data_id[i]);
+      }
+      q = BrotherPtr(q);
+      if (q != nullptr){
+        flag_insert_front = q->key_num_;
+      }
+    }
+    else{
+      break;
+    }
+  }
+  while (!val.empty()){
+    _re_vector.push_back(val.top());
+    val.pop();
+  }
+  while (p != nullptr){//处理大于
     if (op == kOpGreater || op == kOpNotEqual || op == kOpGreterOrEqual){
       for (int i = flag_insert_back; i < p->key_num_; i++){
         _re_vector.push_back(p->key_data_id[i]);
       }
       p = SisterPtr(p);
       flag_insert_back = 0;
-    }
-    else{
-      break;
-    }
-  }
-  p = q;
-  while (p != nullptr){
-    if (op == kOpLess || op == kOpNotEqual || op == kOpLessOrEqual){
-      for (int i = flag_insert_front - 1; i >= 0; i--){
-        _re_vector.push_back(p->key_data_id[i]);
-      }
-      p = BrotherPtr(p);
-      if (p != nullptr){
-        flag_insert_front = p->key_num_;
-      }
     }
     else{
       break;
@@ -1080,6 +1091,7 @@ template<class KEYTYPE>
 int BPlusTree<KEYTYPE>::DeleteCache()
 {
   int num = Pool->cachelist.size();
+  sqt_ = nullptr;
   for (auto x : Pool->cachelist){
     if (x->this_file_ == -1){
       continue;
