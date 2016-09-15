@@ -732,7 +732,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 			USER_INT Record_id;									/* Record_id记录当前操作记录主键 */
 			USER_INT offset;
-			frp.sync();
+			//frp.sync();
 			for (USER_INT i = 0; i < select_id.size(); i++)
 			{
 				Record_id = select_id[i];
@@ -907,7 +907,7 @@ bool Table::Display()
 	if (Table::UseTable())
 	{
 		USER_INT k = 0, offset = 0, i = 0;
-		frp.sync();
+		//frp.sync();
 		while(k < records_num)
 		{
 			record__datas.clear();
@@ -965,7 +965,7 @@ bool Table::Display(USER_INT id,USER_INT iter)
 	char record__data[record_len];
 	if (UseTable())
 	{
-		frp.sync();
+		//frp.sync();
 		std::cout << "------ No." << iter+1 << " ------" << endl;
 		USER_INT offset = 0;
 		for (int j = 0; j < fields.size(); j++)
@@ -990,7 +990,6 @@ bool Table::Display(USER_INT id,USER_INT iter)
 		return false;
 	}
 }
-
 
 /**
 *  \brief 顺序查找
@@ -1023,7 +1022,6 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 	if (field_id == fields.size())
 	{
 		std::cout << "字段名或数据类型无法匹配！" << endl;
-		frp.close();
 		return false;
 	}
 	else
@@ -1041,7 +1039,10 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 			i = real_id.at(k++);
 			frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
 			frp.read(record__data, length*sizeof(char));
-
+			if (record__data[0] == '\0')
+			{
+				continue;
+			}
 			switch (op)
 			{
 			case kOpEqual:
@@ -1052,17 +1053,45 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 				}
 				break;
 			case kOpGreater:
-				if (record__data > value.GetValueData())
+				if (value.GetValueType()==kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data > value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int,value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int > value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			case kOpLess:
-				if (record__data < value.GetValueData())
+				if (value.GetValueType() == kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data < value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int, value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int < value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			case kOpNotEqual:
@@ -1073,17 +1102,45 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 				}
 				break;
 			case kOpGreterOrEqual:
-				if (record__data >= value.GetValueData())
+				if (value.GetValueType() == kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data >= value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int, value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int >= value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			case kOpLessOrEqual:
-				if (record__data <= value.GetValueData())
+				if (value.GetValueType() == kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data <= value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int, value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int <= value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			default:
