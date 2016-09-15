@@ -45,7 +45,8 @@ bool SQLBase::MergeValue(std::vector<std::string> & sql_token, int pos)
 				count++;
 				iter = sql_token.erase(iter);
 			}
-			if (*iter == "\\" && *(iter+1)=="\'")
+			if (*iter == "\\" && iter+1!=sql_token.end() &&
+				*(iter+1)=="\'")
 			{
 				iter = sql_token.erase(iter);
 			}
@@ -55,7 +56,7 @@ bool SQLBase::MergeValue(std::vector<std::string> & sql_token, int pos)
 			{
 				if (*temp == "\\")
 				{
-					if (*(temp + 1) == "\'")
+					if (temp+1 !=sql_token.end() && *(temp + 1) == "\'")
 					{
 						temp = sql_token.erase(temp);
 						*iter = *iter + " " + *temp;
@@ -76,7 +77,7 @@ bool SQLBase::MergeValue(std::vector<std::string> & sql_token, int pos)
 				}
 			}
 
-			while (*temp == "\'")
+			while (temp!=sql_token.end() && *temp == "\'")
 			{
 				count2++;
 				temp = sql_token.erase(temp);
@@ -541,7 +542,7 @@ void SQLDelete::Parse(std::vector<std::string> sql_token)
 			if (sql_token.at(i) == "where") {
 				field_ = sql_token.at(++i);
 				if((op_=ParseOperator(sql_token.at(++i)))!=kOpUndefined) {
-					if (!(MergeValue(sql_token, i) && ParseValue(sql_token.at(i), *value_))) {
+					if (!(MergeValue(sql_token, ++i) && ParseValue(sql_token.at(i), *value_))) {
 						//std::cerr << "Delete失败：值与字段的类型不匹配." << std::endl;
 						return;
 					}
@@ -637,7 +638,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 				temp_field = sql_token.at(++i);
 				new_fields_.push_back(temp_field);
 				if (sql_token.at(++i) == "=") {
-					if (!(MergeValue(sql_token, i) && ParseValue(sql_token.at(i), temp_value))) {
+					if (!(MergeValue(sql_token, ++i) && ParseValue(sql_token.at(i), temp_value))) {
 						//std::cerr << "Update失败：set子语句中的值与字段的类型不匹配." << std::endl;
 						return;
 					}
@@ -659,7 +660,7 @@ void SQLUpdate::Parse(std::vector<std::string> sql_token)
 			} 
 			where_field_ = sql_token.at(++i);
 			if ((op_ = ParseOperator(sql_token.at(++i))) != kOpUndefined) {
-				if (!(MergeValue(sql_token, i) && ParseValue(sql_token.at(i), *where_value_))) {
+				if (!(MergeValue(sql_token, ++i) && ParseValue(sql_token.at(i), *where_value_))) {
 					//std::cerr << "Update失败：where子语句中的值与字段的类型不匹配." << std::endl;
 					return;
 				}
@@ -754,7 +755,7 @@ void SQLSelect::Parse(std::vector<std::string> sql_token)
 			if ((op_ = ParseOperator(sql_token.at(++i))) == kOpUndefined) {
 				std::cerr << "Select 命令语法错误." << std::endl;
 			}
-			if (!(MergeValue(sql_token, i) && ParseValue(sql_token.at(i), *value_))) {
+			if (!(MergeValue(sql_token, ++i) && ParseValue(sql_token.at(i), *value_))) {
 				//std::cerr << "Select失败：值与字段的类型不匹配." << std::endl;
 				return;
 			}
