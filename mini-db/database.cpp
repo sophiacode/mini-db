@@ -66,7 +66,7 @@ void Record::SetValue(std::vector<Value> values_data)
 Field::Field()
 	:is_create_index_(false)
 {
-	
+
 }
 
 std::string Field::GetFieldName()
@@ -145,7 +145,7 @@ bool Database::CreateDatabase(SQLCreateDatabase &st)
 		}
 		else
 		{
-			std::cout << "数据库" << db_name<< "创建失败！" << std::endl;
+			std::cout << "数据库" << db_name << "创建失败！" << std::endl;
 			return false;
 		}
 	}
@@ -209,19 +209,6 @@ bool Database::UseTable(std::string DatabasePath)
 	else
 	{
 		std::string table_name;
-		/*while (fp.read(table_name_, sizeof(char) * 20))
-		{
-			//fp.read(table_name_, sizeof(char)* 20);
-			std::string table_name(table_name_);
-			Table *table = new Table(DatabasePath);
-			table->SetTableName(table_name);
-			if (table->UseTable())
-			{
-				table_.push_back(table);
-			}
-			fp.close();
-		}
-		std::cout << "打开成功" << endl;*/
 		filebuf *pbuf;
 		long int size;
 		char * buffer;
@@ -229,16 +216,10 @@ bool Database::UseTable(std::string DatabasePath)
 		pbuf = fp.rdbuf();
 		size = pbuf->pubseekoff(0, ios::end, ios::in);
 		int database_num = size / 20;
-
-		/*pbuf->pubseekpos(0, ios::in);
-		buffer = new char[size];
-		pbuf->sgetn(buffer, size);
-		std::string buffer_(buffer);*/
-
 		char table_name_[20];
 		for (int i = 0; i < database_num; i++)
 		{
-			fp.seekg(sizeof(char)*i*20, ios::beg);
+			fp.seekg(sizeof(char)*i * 20, ios::beg);
 			fp >> table_name_;
 			Table *table = new Table(DatabasePath);
 			table->SetTableName(table_name_);
@@ -265,10 +246,10 @@ bool Database::CreateTable(SQLCreateTable & st)
 		ofstream fp;
 		std::string path;
 		std::string table_name_ = st.GetTableName();
-		path = database_path + "\\" + "table_name";  
+		path = database_path + "\\" + "table_name";
 		fp.open(path, std::ios::app);
 		fp.seekp(table_.size() * 20 * sizeof(char), ios::beg);
-		fp.write(table_name_.c_str(), 20*sizeof(char));
+		fp.write(table_name_.c_str(), 20 * sizeof(char));
 		fp.close();
 		return true;
 	}
@@ -285,13 +266,13 @@ Index::Index(std::string index_name, std::string field_name, ValueType type, std
 
 	if (type_ == kIntegerType)
 	{
-		bplustree_int_ = new BPlusTree<USER_INT>(path+".dbi");
+		bplustree_int_ = new BPlusTree<USER_INT>(path + ".dbi");
 		bplustree_string_ = nullptr;
 	}
 	if (type_ == kStringType)
 	{
 		bplustree_int_ = nullptr;
-		bplustree_string_ = new BPlusTree<std::string>(path+".dbi");
+		bplustree_string_ = new BPlusTree<std::string>(path + ".dbi");
 	}
 }
 
@@ -401,12 +382,12 @@ bool Index::SearchNode(std::string value, std::vector<USER_INT>& id)
 	if (type_ == kIntegerType)
 	{
 		USER_INT temp = atoi(value.c_str());
-		return bplustree_int_->SearchID(temp,id);
+		return bplustree_int_->SearchID(temp, id);
 	}
 
 	else if (type_ == kStringType)
 	{
-		return bplustree_string_->SearchID(value,id);
+		return bplustree_string_->SearchID(value, id);
 	}
 }
 
@@ -429,19 +410,19 @@ std::string Index::GetFieldName()
 	return field_name_;
 }
 
-bool Index::UpdateNode(std::string new_value,std::string old_value)
+bool Index::UpdateNode(std::string new_value, std::string old_value)
 {
-if (type_ == kIntegerType)
-{
-USER_INT newkey = atoi(new_value.c_str());
-USER_INT oldkey = atoi(old_value.c_str());
-return bplustree_int_->UpdateNode(oldkey,newkey);
-}
+	if (type_ == kIntegerType)
+	{
+		USER_INT newkey = atoi(new_value.c_str());
+		USER_INT oldkey = atoi(old_value.c_str());
+		return bplustree_int_->UpdateNode(oldkey, newkey);
+	}
 
-else if (type_ == kStringType)
-{
-return bplustree_string_->UpdateNode(old_value,new_value);
-}
+	else if (type_ == kStringType)
+	{
+		return bplustree_string_->UpdateNode(old_value, new_value);
+	}
 }
 
 bool Index::ShowAllId(std::vector<USER_INT>& id)

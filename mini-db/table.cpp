@@ -1028,10 +1028,10 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 	{
 		if (fields.at(field_id).GetFieldType() == kIntegerType)
 		{
-			length = true_int;
+			length = int_len;
 		}
 		else {
-			length = true_len;
+			length = record_len;
 		}
 
 		while (k < records_num)

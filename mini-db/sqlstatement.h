@@ -54,7 +54,7 @@ protected:
 	 *  \param sql_token SQL标识符数组
 	 *  \param pos 开始合并的位置
 	 */
-	void MergeValue(std::vector<std::string> & sql_token, int pos);
+	bool MergeValue(std::vector<std::string> & sql_token, int pos);
 
 	/**
 	 *  \brief 解析value的值与类型
