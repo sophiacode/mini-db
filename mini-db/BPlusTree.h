@@ -1030,7 +1030,7 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
   }
   flag_insert_back = -1;
   while (p != nullptr){
-    if (op == kOpGreterOrEqual && op == kOpLessOrEqual){
+    if (op == kOpGreterOrEqual || op == kOpLessOrEqual){
       for (int i = insert_index - 1; i < p->key_num_; i++){
         if (p->key_[i] == _key){
           _re_vector.push_back(p->key_data_id[i]);
