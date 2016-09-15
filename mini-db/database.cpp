@@ -209,19 +209,6 @@ bool Database::UseTable(std::string DatabasePath)
 	else
 	{
 		std::string table_name;
-		/*while (fp.read(table_name_, sizeof(char) * 20))
-		{
-			//fp.read(table_name_, sizeof(char)* 20);
-			std::string table_name(table_name_);
-			Table *table = new Table(DatabasePath);
-			table->SetTableName(table_name);
-			if (table->UseTable())
-			{
-				table_.push_back(table);
-			}
-			fp.close();
-		}
-		std::cout << "打开成功" << endl;*/
 		filebuf *pbuf;
 		long int size;
 		char * buffer;
@@ -229,12 +216,6 @@ bool Database::UseTable(std::string DatabasePath)
 		pbuf = fp.rdbuf();
 		size = pbuf->pubseekoff(0, ios::end, ios::in);
 		int database_num = size / 20;
-
-		/*pbuf->pubseekpos(0, ios::in);
-		buffer = new char[size];
-		pbuf->sgetn(buffer, size);
-		std::string buffer_(buffer);*/
-
 		char table_name_[20];
 		for (int i = 0; i < database_num; i++)
 		{

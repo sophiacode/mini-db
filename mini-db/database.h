@@ -208,7 +208,7 @@ public:
 	bool DeleteNode(std::string value);
 
 	/**
-	*  \brief 查找节点
+	*  \brief 查找第一个关键字的节点
 	*
 	*  \param value 节点的值
 	*
@@ -216,14 +216,47 @@ public:
 	*/
 	int SearchNode(std::string value);
 
+	/**
+	*  \brief 查找所有关键字的节点
+	*
+	*  \param value 节点的值 id 节点的id数组
+	*
+	*  \return 查找成功返回true 失败返回false
+	*/
 	bool SearchNode(std::string value, std::vector<USER_INT>& id);
 
+	/**
+	*  \brief 查找符合关系式的节点
+	*
+	*  \param value 节点的值 id 节点的id数组 op 操作符
+	*
+	*  \return 查找成功返回true 失败返回false
+	*/
 	bool SearchNode(std::string value, std::vector<USER_INT>& id, OperatorType op);
 
+	/**
+	*  \brief 查找符合关系式的节点
+	*
+	*  \param new_value 新的节点的值 old_value 旧的节点的值
+	*
+	*  \return 更新成功返回true 失败返回false
+	*/
     bool UpdateNode(std::string new_value, std::string old_value);
 
+	/**
+	*  \brief 查找所有id
+	*
+	*  \param id的数组
+	*
+	*  \return 成功返回true 失败返回false
+	*/
 	bool ShowAllId(std::vector<USER_INT> &id);
 
+	/**
+	*  \brief 获取索引对应的字段名
+	*
+	*  \return 索引对应的字段名
+	*/
 	std::string GetFieldName();
 
 public:
