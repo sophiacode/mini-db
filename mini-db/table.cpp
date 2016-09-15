@@ -416,7 +416,7 @@ bool Table::SelectRecord(SQLDelete &sql)
 			}
 		}
 		else {											/* 不存在索引，顺序查找 */
-			if (OrderSelect(sql.GetField(), sql.GetValue(), kOpEqual))
+			if (OrderSelect(sql.GetField(), sql.GetValue(), sql.GetOperatorType()))
 			{
 				return true;
 			}
@@ -493,7 +493,7 @@ bool Table::SelectRecord(SQLUpdate &sql)
 		}
 	}
 	else {													/* 不存在索引，顺序查找 */
-		if (OrderSelect(sql.GetWhereField(), sql.GetWhereValue(), kOpEqual))
+		if (OrderSelect(sql.GetWhereField(), sql.GetWhereValue(), sql.GetOperatorType()))
 		{
 			return true;
 		}
@@ -732,13 +732,15 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 			USER_INT Record_id;									/* Record_id记录当前操作记录主键 */
 			USER_INT offset;
+			std::vector<string> records__data1;					/* records__data1记录原有记录信息 */
+			std::vector<string> records__data2;					/* records__data2记录当前需要更改的记录信息 */
 			//frp.sync();
 			for (USER_INT i = 0; i < select_id.size(); i++)
 			{
 				Record_id = select_id[i];
 				offset = 0;
-				std::vector<string> records__data1;				/* records__data1记录原有记录信息 */
-				std::vector<string> records__data2;				/* records__data2记录当前需要更改的记录信息 */
+				records__data1.clear();
+				records__data2.clear();
 
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
 				{
@@ -772,15 +774,6 @@ bool Table::UpdateRecord(SQLUpdate &su)
 								|| su.GetNewValue().at(j).GetValueType() == kNullType)
 							{
 								records__data2[k] = su.GetNewValue().at(j).GetValueData();
-								
-								if (fields[k].IsCreateIndex())	/* 维护索引 */
-								{
-									int index_id = FindIndex(fields[j].GetFieldName());
-									if (index_id != -1)
-									{
-										indexs[index_id]->UpdateNode(records__data2[index_id], records__data1[index_id]);
-									}
-								}
 							}
 							else {
 								std::cout << "数据类型不匹配！" << endl;
@@ -809,6 +802,15 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						offset += true_len;
 					}
 					fwp.flush();
+
+					if (fields[j].IsCreateIndex())						/* 维护索引 */
+					{
+						int index_id = FindIndex(fields[j].GetFieldName());
+						if (index_id != -1)
+						{
+							indexs[index_id]->UpdateNode(records__data2[j], records__data1[j]);
+						}
+					}
 				}
 			}
 			std::cout << "更新成功！" << endl;
@@ -939,7 +941,7 @@ bool Table::Display()
 
 			if (key == true)
 			{
-				std::cout << "------ No." << k+1 << " ------" << endl;
+				std::cout << "--------- No." << k+1 << " ---------" << endl;
 				for (int j = 0; j < fields.size(); j++)
 				{
 					std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
@@ -966,7 +968,7 @@ bool Table::Display(USER_INT id,USER_INT iter)
 	if (UseTable())
 	{
 		//frp.sync();
-		std::cout << "------ No." << iter+1 << " ------" << endl;
+		std::cout << "--------- No." << iter+1 << " ---------" << endl;
 		USER_INT offset = 0;
 		for (int j = 0; j < fields.size(); j++)
 		{
