@@ -1022,7 +1022,6 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 	if (field_id == fields.size())
 	{
 		std::cout << "字段名或数据类型无法匹配！" << endl;
-		frp.close();
 		return false;
 	}
 	else
@@ -1040,7 +1039,10 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 			i = real_id.at(k++);
 			frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
 			frp.read(record__data, length*sizeof(char));
-
+			if (record__data[0] == '\0')
+			{
+				continue;
+			}
 			switch (op)
 			{
 			case kOpEqual:
@@ -1051,17 +1053,45 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 				}
 				break;
 			case kOpGreater:
-				if (record__data > value.GetValueData())
+				if (value.GetValueType()==kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data > value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int,value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int > value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			case kOpLess:
-				if (record__data < value.GetValueData())
+				if (value.GetValueType() == kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data < value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int, value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int < value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			case kOpNotEqual:
@@ -1072,17 +1102,45 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 				}
 				break;
 			case kOpGreterOrEqual:
-				if (record__data >= value.GetValueData())
+				if (value.GetValueType() == kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data >= value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int, value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int >= value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			case kOpLessOrEqual:
-				if (record__data <= value.GetValueData())
+				if (value.GetValueType() == kStringType)
 				{
-					select_id.push_back(i);
-					count++;
+					if (record__data <= value.GetValueData())
+					{
+						select_id.push_back(i);
+						count++;
+					}
+				}
+				else
+				{
+					int record_data_int, value_data_int;
+					record_data_int = atoi(record__data);
+					value_data_int = atoi(value.GetValueData().c_str());
+					if (record_data_int <= value_data_int)
+					{
+						select_id.push_back(i);
+						count++;
+					}
 				}
 				break;
 			default:
