@@ -132,7 +132,7 @@ public:
   */
   bool InsertNode(KEYTYPE _key, USER_INT _data_id);
 
-  
+
   /**
   *   \删除所有关键字
   *
@@ -226,7 +226,7 @@ template<class KEYTYPE>
 BPlusTree<KEYTYPE>::BPlusTree(string _file_name)
 {
   Pool = new MemPool<KEYTYPE>();
-  id_Pool_ = new IDPool(_file_name+"d");
+  id_Pool_ = new IDPool(_file_name + "d");
   out_file_stream_ = new ofstream();
   in_file_stream_ = new ifstream();
   for (int i = 0; i < _file_name.size(); i++){
@@ -405,7 +405,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, USER_INT _data_id)
       insert_index = abs(-insert_index);
     }
     if (insert_index > 0){
-      if (insert_index == p->key_num_+1){
+      if (insert_index == p->key_num_ + 1){
         flag_first = true;
         last_first_key = p->key_[p->key_num_ - 1];
       }
@@ -509,7 +509,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, USER_INT _data_id)
 
     insert_index = -(r->BinarySearch(q->key_[q->key_num_ - 1]));//p的最后一个键值加入到r中;
     for (int i = insert_index - 1; i < r->key_num_; i++){
-      if (r->son_file_[i] ==  p->this_file_){
+      if (r->son_file_[i] == p->this_file_){
         insert_index = i + 1;
         break;
       }
@@ -535,7 +535,7 @@ bool BPlusTree<KEYTYPE>::InsertNode(KEYTYPE _key, USER_INT _data_id)
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key)
 {
-	vector<USER_INT> data_id;
+  vector<USER_INT> data_id;
   if (SearchID(_key, data_id)){
     for (auto x : data_id){
       DeleteNode(_key, x);
@@ -686,13 +686,13 @@ bool BPlusTree<KEYTYPE>::DeleteNode(KEYTYPE _key, USER_INT _data_id)
           Pool->RecordNode(t);
         }
         r->key_[insert_index - 2] = q->key_[q->key_num_ - 1];
-        
+
       }
       Pool->RecordNode(p);
       Pool->RecordNode(q);
       Pool->RecordNode(r);
     }
-    if (borrow_flag==false && insert_index < r->key_num_){//向右边借
+    if (borrow_flag == false && insert_index < r->key_num_){//向右边借
       q = SonPtr(r, insert_index);
       if (q->key_num_>MinBPlusTree_m){
         borrow_flag = true;
@@ -855,7 +855,7 @@ bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, USER_INT
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key)
 {
-	vector<USER_INT> data_id;
+  vector<USER_INT> data_id;
   if (SearchID(_old_key, data_id)){
     for (auto x : data_id){
       DeleteNode(_old_key, x);
@@ -886,9 +886,9 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SearchNode(KEYTYPE _key)
     fs.read((char*)(&id_Pool_), sizeof(id_Pool_));
     fs.close();
     root_ = Pool->NewNode();
-    root_->this_file_ =  root_f_;
+    root_->this_file_ = root_f_;
     is_primare_key_ = false;//默认不是主键
-    out_file_stream_->open(table_path_, ios::binary|ios::in);
+    out_file_stream_->open(table_path_, ios::binary | ios::in);
     if (!out_file_stream_->is_open()){
       cerr << "打开文件 " << table_path_ << " 失败" << endl;
     }
@@ -903,7 +903,7 @@ BPlusTreeNode<KEYTYPE>* BPlusTree<KEYTYPE>::SearchNode(KEYTYPE _key)
   while (!p->isleaf()){
     insert_index = p->BinarySearch(_key);
     if (insert_index > 0){
-      if (insert_index<=p->key_num_){
+      if (insert_index <= p->key_num_){
         p = SonPtr(p, insert_index - 1);
       }
       else{
@@ -946,15 +946,15 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT>&_re_vector)
     return false;//ERROR：没有找到
   }
   if (p == root_){
-	  if (p->key_num_ == 0){
-		  return false;//ERROR：树为空;
-	  }
+    if (p->key_num_ == 0){
+      return false;//ERROR：树为空;
+    }
   }
   insert_index = -(p->BinarySearch(_key));
   if (insert_index < 0){
     return false;
   }
-  while (p!=nullptr){
+  while (p != nullptr){
     for (int i = insert_index - 1; i < p->key_num_; i++){
       if (p->key_[i] == _key){
         _re_vector.push_back(p->key_data_id[i]);
@@ -986,7 +986,7 @@ bool BPlusTree<KEYTYPE>::ShowAllId(vector<USER_INT> &_re_vector)
     if (sqt_f_ == -1){
       return false;
     }
-    BPlusTreeNode<KEYTYPE>* p = Pool->NewNode();
+    p = Pool->NewNode();
     in_file_stream_->seekg(sqt_f_*sizeof(*p), ios::beg);
     in_file_stream_->read((char*)(p), sizeof(*p));
   }
@@ -1023,12 +1023,9 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
       return false;//ERROR：树为空;
     }
   }
-  insert_index = -(p->BinarySearch(_key));
+  insert_index = abs(p->BinarySearch(_key));
   flag_insert_front = insert_index - 1;
   flag_insert_back = -1;
-  if (insert_index < 0){
-    return false;
-  }
   while (p != nullptr){
     for (int i = insert_index - 1; i < p->key_num_; i++){
       if (p->key_[i] == _key){
@@ -1050,11 +1047,11 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
   }
   while (p != nullptr){
     if (op == kOpGreater || op == kOpNotEqual || op == kOpGreterOrEqual){
-      for (int i = flag_insert_back - 1; i < p->key_num_; i++){
+      for (int i = flag_insert_back; i < p->key_num_; i++){
         _re_vector.push_back(p->key_data_id[i]);
       }
       p = SisterPtr(p);
-      flag_insert_back = 1;
+      flag_insert_back = 0;
     }
     else{
       break;
