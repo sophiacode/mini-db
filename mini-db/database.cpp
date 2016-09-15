@@ -220,7 +220,7 @@ bool Database::UseTable(std::string DatabasePath)
 		for (int i = 0; i < database_num; i++)
 		{
 			fp.seekg(sizeof(char)*i * 20, ios::beg);
-			fp >> table_name_;
+			fp.read(table_name_,20);
 			Table *table = new Table(DatabasePath);
 			table->SetTableName(table_name_);
 			if (table->UseTable())
