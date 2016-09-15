@@ -986,7 +986,7 @@ bool BPlusTree<KEYTYPE>::ShowAllId(vector<USER_INT> &_re_vector)
     if (sqt_f_ == -1){
       return false;
     }
-    BPlusTreeNode<KEYTYPE>* p = Pool->NewNode();
+    p = Pool->NewNode();
     in_file_stream_->seekg(sqt_f_*sizeof(*p), ios::beg);
     in_file_stream_->read((char*)(p), sizeof(*p));
   }
@@ -1023,12 +1023,9 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
       return false;//ERROR£ºÊ÷Îª¿Õ;
     }
   }
-  insert_index = -(p->BinarySearch(_key));
+  insert_index = abs(p->BinarySearch(_key));
   flag_insert_front = insert_index - 1;
   flag_insert_back = -1;
-  if (insert_index < 0){
-    return false;
-  }
   while (p != nullptr){
     for (int i = insert_index - 1; i < p->key_num_; i++){
       if (p->key_[i] == _key){
@@ -1050,11 +1047,11 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<int> &_re_vector, Operato
   }
   while (p != nullptr){
     if (op == kOpGreater || op == kOpNotEqual || op == kOpGreterOrEqual){
-      for (int i = flag_insert_back - 1; i < p->key_num_; i++){
+      for (int i = flag_insert_back; i < p->key_num_; i++){
         _re_vector.push_back(p->key_data_id[i]);
       }
       p = SisterPtr(p);
-      flag_insert_back = 1;
+      flag_insert_back = 0;
     }
     else{
       break;
