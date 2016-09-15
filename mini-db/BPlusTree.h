@@ -276,7 +276,7 @@ template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::CloseTree()
 {
   Pool->deleteNode(root_);
-  Pool->release();
+  //Pool->release();
   root_ = nullptr;
   sqt_ = nullptr;
   out_file_stream_->close();
