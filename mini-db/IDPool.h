@@ -5,10 +5,11 @@
 #include <iostream>
 #include "global.h"
 using namespace std;
+const int IDSIZE = 1000;
 class IDPool
 {
   int blocklist;//重复记录的文件位置偏移量
-  int nodelist[1000];//重复记录
+  int nodelist[IDSIZE];//重复记录
   int nodelist_p;//重复的站顶指针;
   int nowid;//当前id
   ofstream *out_file_stream_;//写入文件流
