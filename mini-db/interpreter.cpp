@@ -47,8 +47,8 @@ void Interpreter::SQLPretreatment()
 	rg = "(^ +)|( +$)";
 	sql_statement_ = std::regex_replace(sql_statement_, rg, "");
 
-	//在( ) , = < > !左右添加空格
-	rg = " ?(\\(|\\)|,|=|<|>|!|') ?";
+	//在( ) , = < > ! \左右添加空格
+	rg = " ?(\\(|\\)|,|=|<|>|!|'|\\\\) ?";
 	sql_statement_ = std::regex_replace(sql_statement_, rg, " $1 ");
 
 	//去除单词间一个以上的空格
