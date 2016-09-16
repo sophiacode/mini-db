@@ -103,10 +103,10 @@ bool Table::UseTable()
 
 	char is_index[2], type[2], field_name[20], records_numb[11], fields_numb[11];
 	fp_fields.seekg(0, ios::beg);
-	fp_fields.read(records_numb, sizeof(records_numb));				/* 读取当前记录数量 */
+	fp_fields.read(records_numb, sizeof(char)*10);				/* 读取当前记录数量 */
 	records_num = atoi(records_numb);
 	fp_fields.seekg(sizeof(char)* 16, ios::beg);
-	fp_fields.read(fields_numb, sizeof(fields_numb));				/* 读取字段数 */
+	fp_fields.read(fields_numb, sizeof(char)*10);				/* 读取字段数 */
 	USER_INT fields_num = atoi(fields_numb);
 	USER_INT i = 0;
 	record_leng = 0;
@@ -250,10 +250,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			char records_numb[11], fields_numb[11];						/* 后16位写入字段数，前16位写入记录数量 */
 			itoa(0, records_numb, 10);
 			fp.seekp(0, ios::beg);
-			fp.write(records_numb, sizeof(records_numb));
+			fp.write(records_numb, sizeof(char)*10);
 			itoa(fields.size(), fields_numb, 10);
 			fp.seekp(16, ios::beg);
-			fp.write(fields_numb, sizeof(fields_numb));
+			fp.write(fields_numb, sizeof(char)*10);
 			fp.flush();
 
 			std::string name;
@@ -322,6 +322,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
+
 	select_id.clear();
 	if (sql.IsInputWhere())																	/* 若select存在where子句，显示选中记录 */
 	{											
@@ -416,7 +417,7 @@ bool Table::SelectRecord(SQLDelete &sql)
 			}
 		}
 		else {											/* 不存在索引，顺序查找 */
-			if (OrderSelect(sql.GetField(), sql.GetValue(), kOpEqual))
+			if (OrderSelect(sql.GetField(), sql.GetValue(), sql.GetOperatorType()))
 			{
 				return true;
 			}
@@ -437,7 +438,6 @@ bool Table::SelectRecord(SQLDelete &sql)
 				record__data[0] = '\0';
 				frp.seekg(sizeof(char)*true_len*(i*fields.size() + j), ios::beg);
 				frp.read(record__data, sizeof(char)* record_len);
-				//frp >> record__data;
 				if (record__data[0] != '\a')
 				{
 					key = true;
@@ -493,7 +493,7 @@ bool Table::SelectRecord(SQLUpdate &sql)
 		}
 	}
 	else {													/* 不存在索引，顺序查找 */
-		if (OrderSelect(sql.GetWhereField(), sql.GetWhereValue(), kOpEqual))
+		if (OrderSelect(sql.GetWhereField(), sql.GetWhereValue(), sql.GetOperatorType()))
 		{
 			return true;
 		}
@@ -524,10 +524,20 @@ bool Table::CreateRecord(SQLInsert &st)
 		{/* 当插入的value指定了相应字段时 */
 			for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
 			{
-				if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+				if (st.GetValues().at(i).GetValueType() == kIntegerType)
 				{
-					std::cout << "输入的值过长！" << endl;
-					return false;
+					if (st.GetValues().at(i).GetValueData().size() >= int_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
+				}
+				else {
+					if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
 				}
 			}
 
@@ -653,34 +663,39 @@ bool Table::DeleteRecord(SQLDelete &sd)
 
 				for (int j = 0; j < fields.size(); j++)				/* 将原记录读入records__data */
 				{
-					frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
-					frp >> record__data;
-					records__data.push_back(record__data);
-
-					fwp.seekp(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
 					if (fields.at(j).GetFieldType() == kIntegerType)
 					{
+						frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
+						frp.read(record__data,int_len);
+						records__data.push_back(record__data);
+
+						fwp.seekp(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
 						fwp.write(Null_str.c_str(), int_len);
 						offset += true_int;
 					}
 					else {
+						frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
+						frp.read(record__data, record_len);
+						records__data.push_back(record__data);
+
+						fwp.seekp(Record_id*record_leng + offset, ios::beg);
 						fwp.write(Null_str.c_str(), record_len);
 						offset += true_len;
 					}
 					fwp.flush();
 				}
 				
+				char id_char[20];
+				itoa(Record_id, id_char, 10);
+				indexs[0]->DeleteNode(id_char);
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
 				{
-					//fwp.seekp((Record_id*fields.size() + j) *true_len, ios::beg);/* 指针定位 */
-					//fwp.write(Null_str.c_str(), record_len);
-					//fwp.flush();
 					if (fields[j].IsCreateIndex())									/* 当对应字段存在索引时，对索引进行维护 */
 					{
 						int index_id = FindIndex(fields[j].GetFieldName());			/* 找到该字段对应的索引编号index_id */
 						if (index_id == -1)
 						{
-							std::cout << "索引匹配失败！" << endl;
+							//std::cout << "索引匹配失败！" << endl;
 							continue;
 						}
 						indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
@@ -688,6 +703,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				}
 			
 				records_num--;										/* 插入成功，表单中记录总数减一 */
+				idPool->deleteNode(Record_id);
 			}
 			std::cout << "删除成功！" << endl;
 			return true;					/* 修改成功，返回true */
@@ -722,23 +738,35 @@ bool Table::UpdateRecord(SQLUpdate &su)
 
 			for (int i = 0; i < su.GetNewValue().size(); i++)	/* 判断更新字长是否匹配 */
 			{
-				if (su.GetNewValue().at(i).GetValueData().size() >= 255)
+				if (su.GetNewValue().at(i).GetValueType() == kIntegerType)
 				{
-					std::cout << "输入的长度过大！" << endl;
-					return false;								/* 字符串过长，更新失败 */
+					if (su.GetNewValue().at(i).GetValueData().size() >= int_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
+				}
+				else {
+					if (su.GetNewValue().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
 				}
 			}
 
 			/* ---------------------------------------------匹配字段与值----------------------------------------------------- */
 			USER_INT Record_id;									/* Record_id记录当前操作记录主键 */
 			USER_INT offset;
+			std::vector<string> records__data1;					/* records__data1记录原有记录信息 */
+			std::vector<string> records__data2;					/* records__data2记录当前需要更改的记录信息 */
 			//frp.sync();
 			for (USER_INT i = 0; i < select_id.size(); i++)
 			{
 				Record_id = select_id[i];
 				offset = 0;
-				std::vector<string> records__data1;				/* records__data1记录原有记录信息 */
-				std::vector<string> records__data2;				/* records__data2记录当前需要更改的记录信息 */
+				records__data1.clear();
+				records__data2.clear();
 
 				for (int j = 0; j < fields.size(); j++)							/* 读入要更改的记录信息 */
 				{
@@ -753,10 +781,8 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						frp.read(record__data, sizeof(char)*record_len);
 						offset += true_len;
 					}
-					records__data1.push_back(r1);
-					records__data2.push_back(r2);
-					records__data1[j] = record__data;
-					records__data2[j] = record__data;
+					records__data1.push_back(record__data);
+					records__data2.push_back(record__data);
 				}
 
 
@@ -772,15 +798,6 @@ bool Table::UpdateRecord(SQLUpdate &su)
 								|| su.GetNewValue().at(j).GetValueType() == kNullType)
 							{
 								records__data2[k] = su.GetNewValue().at(j).GetValueData();
-								
-								if (fields[k].IsCreateIndex())	/* 维护索引 */
-								{
-									int index_id = FindIndex(fields[j].GetFieldName());
-									if (index_id != -1)
-									{
-										indexs[index_id]->UpdateNode(records__data2[index_id], records__data1[index_id]);
-									}
-								}
 							}
 							else {
 								std::cout << "数据类型不匹配！" << endl;
@@ -809,6 +826,15 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						offset += true_len;
 					}
 					fwp.flush();
+
+					if (fields[j].IsCreateIndex())						/* 维护索引 */
+					{
+						int index_id = FindIndex(fields[j].GetFieldName());
+						if (index_id != -1)
+						{
+							indexs[index_id]->UpdateNode(records__data2[j], records__data1[j]);
+						}
+					}
 				}
 			}
 			std::cout << "更新成功！" << endl;
@@ -886,7 +912,14 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 		while (k < records_num)
 		{
 			frp.seekg((k*record_leng + offset)*sizeof(char), ios::beg);
-			frp >> record_field_data;
+      if (fields.at(i).GetFieldType() == kIntegerType)
+      {
+        frp.read(record_field_data, int_len);
+      }
+      else
+      {
+        frp.read(record_field_data, record_len);
+      }
 			temp->InsertNode(record_field_data, k);
 			k++;
 		}
@@ -903,11 +936,45 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 bool Table::Display()
 {
 	char record__data[record_len];
+	/*real_id.clear();
+	indexs.at(0)->ShowAllId(real_id);*/
 	std::vector<string> record__datas;
 	if (Table::UseTable())
 	{
+		
 		USER_INT k = 0, offset = 0, i = 0;
-		//frp.sync();
+		/*for (k = 0; k < real_id.size(); k++)
+		{
+			record__datas.clear();
+			i = real_id.at(k);
+			offset = 0;
+			for (int j = 0; j < fields.size(); j++)
+			{
+				frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
+				if (fields.at(j).GetFieldType() == kIntegerType)
+				{
+					frp.read(record__data, sizeof(char)*int_len);
+					offset += true_int;
+				}
+				else{
+					frp.read(record__data, sizeof(char)*record_len);
+					offset += true_len;
+				}
+
+				if (record__data[0] == '\a')
+				{
+					record__data[0] == '\0';
+				}
+
+				record__datas.push_back(record__data);
+			}
+
+			std::cout << "--------- No." << k + 1 << " ---------" << endl;
+			for (int j = 0; j < fields.size(); j++)
+			{
+				std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
+			}
+		}*/
 		while(k < records_num)
 		{
 			record__datas.clear();
@@ -916,7 +983,7 @@ bool Table::Display()
 			for (int j = 0; j < fields.size(); j++) 
 			{
 				record__data[0] = '\0';
-				frp.seekg(sizeof(char)*(i*record_leng+offset), ios::beg);
+				frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
 				if (fields.at(j).GetFieldType() == kIntegerType)
 				{
 					frp.read(record__data, sizeof(char)*int_len);
@@ -939,7 +1006,7 @@ bool Table::Display()
 
 			if (key == true)
 			{
-				std::cout << "------ No." << k+1 << " ------" << endl;
+				std::cout << "--------- No." << k+1 << " ---------" << endl;
 				for (int j = 0; j < fields.size(); j++)
 				{
 					std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
@@ -966,7 +1033,7 @@ bool Table::Display(USER_INT id,USER_INT iter)
 	if (UseTable())
 	{
 		//frp.sync();
-		std::cout << "------ No." << iter+1 << " ------" << endl;
+		std::cout << "--------- No." << iter+1 << " ---------" << endl;
 		USER_INT offset = 0;
 		for (int j = 0; j < fields.size(); j++)
 		{
@@ -979,6 +1046,10 @@ bool Table::Display(USER_INT id,USER_INT iter)
 			else {
 				frp.read(record__data, sizeof(char)*record_len);
 				offset += true_len;
+			}
+			if (record__data[0] == '\a')
+			{
+				record__data[0] == '\0';
 			}
 
 			std::cout << fields.at(j).GetFieldName() << ":" << record__data << "  " << endl;

@@ -7,10 +7,10 @@ int IDPool::NewNode()
     return nodelist[--nodelist_p];
   }
   else if (blocklist != 0){
-    in_file_stream_->seekg((blocklist - 1)*sizeof(nodelist)+sizeof(*this), ios::beg);
-    in_file_stream_->read((char*)(nodelist), sizeof(nodelist));
+    in_file_stream_->seekg((blocklist - 1)*sizeof(int)*IDSIZE + sizeof(*this), ios::beg);
+    in_file_stream_->read((char*)(nodelist), sizeof(int)*IDSIZE);
     blocklist--;
-    nodelist_p = 1000;
+    nodelist_p = IDSIZE;
     return nodelist[--nodelist_p];
   }
   else{
@@ -20,9 +20,10 @@ int IDPool::NewNode()
 
 void IDPool::deleteNode(int p)
 {
-  if (nodelist_p == 1000){
-    out_file_stream_->seekp(blocklist*sizeof*(nodelist)+sizeof(*this), ios::beg);
-    out_file_stream_->write((char*)(nodelist), sizeof(nodelist));
+  if (nodelist_p == IDSIZE){
+    out_file_stream_->seekp(blocklist*sizeof(int)*IDSIZE + sizeof(*this), ios::beg);
+    out_file_stream_->write((char*)(nodelist), sizeof(int)*IDSIZE);
+    out_file_stream_->flush();
     blocklist++;
     nodelist_p = 0;
   }
@@ -58,6 +59,12 @@ IDPool::IDPool(string sPath)
   }
   _path_[sPath.size()] = '\0';
   out_file_stream_->open(_path_, ios::binary);
+  if (!out_file_stream_->is_open()){
+    cerr << "打开文件 " << _path_ << " 失败" << endl;
+  }
+  out_file_stream_->close();
+
+  out_file_stream_->open(_path_, ios::binary|ios::in);
   if (!out_file_stream_->is_open()){
     cerr << "打开文件 " << _path_ << " 失败" << endl;
   }
