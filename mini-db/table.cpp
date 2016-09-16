@@ -322,6 +322,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 bool Table::SelectRecord(SQLSelect &sql)
 {
 	table_name = sql.GetTableName();
+
 	select_id.clear();
 	if (sql.IsInputWhere())																	/* 若select存在where子句，显示选中记录 */
 	{											
@@ -523,10 +524,20 @@ bool Table::CreateRecord(SQLInsert &st)
 		{/* 当插入的value指定了相应字段时 */
 			for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
 			{
-				if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+				if (st.GetValues().at(i).GetValueType() == kIntegerType)
 				{
-					std::cout << "输入的值过长！" << endl;
-					return false;
+					if (st.GetValues().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
+				}
+				else {
+					if (st.GetValues().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
 				}
 			}
 
@@ -562,10 +573,20 @@ bool Table::CreateRecord(SQLInsert &st)
 			else {
 				for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
 				{
-					if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+					if (st.GetValues().at(i).GetValueType() == kIntegerType)
 					{
-						std::cout << "输入的值过长！" << endl;
-						return false;
+						if (st.GetValues().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
+						{
+							std::cout << "输入的值过长！" << endl;
+							return false;
+						}
+					}
+					else {
+						if (st.GetValues().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
+						{
+							std::cout << "输入的值过长！" << endl;
+							return false;
+						}
 					}
 				}
 
@@ -654,29 +675,29 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				{
 					if (fields.at(j).GetFieldType() == kIntegerType)
 					{
-            frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
-            frp.read(record__data,int_len);
-            records__data.push_back(record__data);
+						frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
+						frp.read(record__data,int_len);
+						records__data.push_back(record__data);
 
-            fwp.seekp(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
+						fwp.seekp(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
 						fwp.write(Null_str.c_str(), int_len);
 						offset += true_int;
 					}
 					else {
-            frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
-            frp.read(record__data, record_len);
-            records__data.push_back(record__data);
+						frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
+						frp.read(record__data, record_len);
+						records__data.push_back(record__data);
 
-            fwp.seekp(Record_id*record_leng + offset, ios::beg);
+						fwp.seekp(Record_id*record_leng + offset, ios::beg);
 						fwp.write(Null_str.c_str(), record_len);
 						offset += true_len;
 					}
 					fwp.flush();
 				}
 				
-        char id_char[20];
-        itoa(Record_id, id_char, 10);
-        indexs[0]->DeleteNode(id_char);
+				char id_char[20];
+				itoa(Record_id, id_char, 10);
+				indexs[0]->DeleteNode(id_char);
 				for (int j = 0; j < fields.size(); j++)								/* 修改字段中的每个值 */
 				{
 					if (fields[j].IsCreateIndex())									/* 当对应字段存在索引时，对索引进行维护 */
@@ -692,7 +713,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 				}
 			
 				records_num--;										/* 插入成功，表单中记录总数减一 */
-        idPool->deleteNode(Record_id);
+				idPool->deleteNode(Record_id);
 			}
 			std::cout << "删除成功！" << endl;
 			return true;					/* 修改成功，返回true */
@@ -727,10 +748,20 @@ bool Table::UpdateRecord(SQLUpdate &su)
 
 			for (int i = 0; i < su.GetNewValue().size(); i++)	/* 判断更新字长是否匹配 */
 			{
-				if (su.GetNewValue().at(i).GetValueData().size() >= 255)
+				if (su.GetNewValue().at(i).GetValueType() == kIntegerType)
 				{
-					std::cout << "输入的长度过大！" << endl;
-					return false;								/* 字符串过长，更新失败 */
+					if (su.GetNewValue().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
+				}
+				else {
+					if (su.GetNewValue().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
+					{
+						std::cout << "输入的值过长！" << endl;
+						return false;
+					}
 				}
 			}
 
@@ -760,10 +791,8 @@ bool Table::UpdateRecord(SQLUpdate &su)
 						frp.read(record__data, sizeof(char)*record_len);
 						offset += true_len;
 					}
-          records__data1.push_back(record__data);
-          records__data2.push_back(record__data);
-          //records__data1[j] = record__data;
-					//records__data2[j] = record__data;
+					records__data1.push_back(record__data);
+					records__data2.push_back(record__data);
 				}
 
 
@@ -1027,6 +1056,10 @@ bool Table::Display(USER_INT id,USER_INT iter)
 			else {
 				frp.read(record__data, sizeof(char)*record_len);
 				offset += true_len;
+			}
+			if (record__data[0] == '\a')
+			{
+				record__data[0] == '\0';
 			}
 
 			std::cout << fields.at(j).GetFieldName() << ":" << record__data << "  " << endl;

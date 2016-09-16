@@ -43,16 +43,22 @@ public:
 
 	/**
 	*  \brief 获取Value的类型
+	*
+	*  \return Value的类型
 	*/
 	ValueType GetValueType();
 
 	/**
 	*  \brief 重置Value
+	*
+	*  \param new_data 新的Value的值 new_type 新的Value的类型
 	*/
 	void SetValue(std::string new_data, ValueType new_type);
 
 	/**
 	*  \brief 重置Value的值
+	*
+	*  \param 新的Value的值
 	*/
 	void SetValuedata(std::string new_data);
 
@@ -80,11 +86,17 @@ public:
 
 	/**
 	*  \brief 显示记录
+	*
+	*  \param values_data 一条记录中值的数组 fields 字段数组
+	*
+	*  \return 成功返回true 失败返回false
 	*/
 	bool Display(std::vector<Value> values_data, std::vector<Field> fields);
 
 	/**
 	*  \brief 设置Value的值
+	*
+	*  \param values_data 值的数组
 	*/
 	void SetValue(std::vector<Value> values_data);
 
@@ -111,26 +123,44 @@ public:
 
 	/**
 	*  \brief 获取字段名
+	*
+	*  \return 字段名
 	*/
 	std::string GetFieldName();
 
 	/**
 	*  \brief 获取字段数据类型
+	*
+	*  \return 字段数据类型
 	*/
 	ValueType GetFieldType();
 
 	/**
 	*  \brief 更改字段名
+	*
+	*  \param new_name 新的字段名
 	*/
 	void SetFieldName(std::string new_name);
 
 	/**
 	*  \brief 更改字段数据类型
+	*
+	*  \param new_type 新的字段数据类型
 	*/
 	void SetFieldType(ValueType new_type);
 
+	/**
+	*  \brief 判断字段是否已经创建索引
+	*
+	*  \return 已经创建返回true 未创建返回false
+	*/
 	bool IsCreateIndex();
 
+	/**
+	*  \brief 设置标识字段是否建立索引
+	*
+	*  \param is_create_index 标识该字段是否建立索引
+	*/
 	void SetIsCreateIndex(bool is_create_index);
 
 private:
@@ -242,31 +272,51 @@ public:
 
 	/**
 	*  \brief 创建数据库
+	*
+	*  \param &st sql创建数据库
+	*
+	*  \return 成功返回true 失败返回false
 	*/
 	bool CreateDatabase(SQLCreateDatabase &st);
 
 	/**
-	*  \brief 打开数据库,并返回当前数据库的路径
+	*  \brief 打开数据库
+	*
+	*  \param &st sql打开数据库
+	*
+	*  \return 数据库路径
 	*/
 	std::string UseDatabase(SQLUse &st);
 
 	/**
 	*  \brief 获取数据库名称
+	*
+	*  \return 数据库名称
 	*/
 	std::string GetDatabaseName();
 
 	/**
 	*  \brief 获取表名
+	*
+	*  \return 表名数组
 	*/
 	std::vector<Table *> GetTable();
-
+	
 	/**
 	*  \brief 创建表单
+	*
+	*  \param st sql创建表
+	*
+	*  \return 创建成功返回true 失败返回false
 	*/
 	bool CreateTable(SQLCreateTable & st);
 
 	/**
 	*  \brief 打开表单
+	*
+	*  \param DatabasePath 数据库路径
+	*
+	*  \return 打开成功返回true 失败返回false
 	*/
 	bool UseTable(std::string DatabasePath);
 
