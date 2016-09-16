@@ -346,12 +346,22 @@ bool Index::DeleteNode(std::string value)
 	if (type_ == kIntegerType)
 	{
 		USER_INT temp = atoi(value.c_str());
-		return bplustree_int_->DeleteNode(temp);
+    if (bplustree_int_->DeleteNode(temp))
+    {
+      bplustree_int_->DeleteCache();
+      return true;
+    }
+    return false;
 	}
 
 	else if (type_ == kStringType)
 	{
-		return bplustree_string_->DeleteNode(value);
+    if (bplustree_string_->DeleteNode(value))
+    {
+      bplustree_string_->DeleteCache();
+      return true;
+    }
+    return false;
 	}
 }
 
@@ -416,12 +426,23 @@ bool Index::UpdateNode(std::string new_value, std::string old_value)
 	{
 		USER_INT newkey = atoi(new_value.c_str());
 		USER_INT oldkey = atoi(old_value.c_str());
-		return bplustree_int_->UpdateNode(oldkey, newkey);
+
+    if (bplustree_int_->UpdateNode(oldkey, newkey))
+    {
+      bplustree_int_->DeleteCache();
+      return true;
+    }
+    return false;
 	}
 
 	else if (type_ == kStringType)
 	{
-		return bplustree_string_->UpdateNode(old_value, new_value);
+    if (bplustree_string_->UpdateNode(old_value, new_value))
+    {
+      bplustree_string_->DeleteCache();
+      return true; 
+    }
+    return false;
 	}
 }
 
