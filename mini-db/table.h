@@ -114,6 +114,10 @@ private:
 	*/
 	int FindIndex(std::string index_field_name);
 
+	bool WildcardSearch(std::string pattern, int field_id, int index_id);
+
+	bool WildcardMatch(std::string str, std::string pattern);
+
 private:
 	USER_INT records_num;				 /* 表中已有数据数量 */
 	USER_INT record_leng;				 /* 一条记录的实际长度 */
