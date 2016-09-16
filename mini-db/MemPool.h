@@ -21,8 +21,8 @@ public:
   *   \记录使用过的节点
   */
   void RecordNode(BPlusTreeNode<KEYTYPE> *_p);
-  MemPool() { ; }
-  ~MemPool() { ; }
+  MemPool() {}
+  ~MemPool() {}
 };
 
 
