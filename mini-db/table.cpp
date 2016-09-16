@@ -21,20 +21,20 @@ Table::Table(std::string new_path)
 */
 Table::~Table()
 {
-	ofstream file_stream_,fp;
+	ofstream file_stream_, fp;
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
-	file_stream_.open(pool_file.c_str(), ios::in |ios::out| ios::binary);
+	file_stream_.open(pool_file.c_str(), ios::in | ios::out | ios::binary);
 	file_stream_.seekp(0, ios::beg);
 	file_stream_.write((char*)(idPool), sizeof(*idPool));
 	file_stream_.close();
 
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名 */
-	fp.open(table_name_fields,ios::binary|ios::in);
+	fp.open(table_name_fields, ios::binary | ios::in);
 	char records_numb[10];
 	itoa(records_num, records_numb, 10);				/* 将新的记录数据条数更新 */
 	fp.seekp(0, ios::beg);
-	fp.write(records_numb, sizeof(char)* 11);
-    fp.flush();
+	fp.write(records_numb, sizeof(char) * 11);
+	fp.flush();
 	fp.close();											/* 关闭写表头文件 */
 
 	fwp.close();										/* 关闭写文件 */
@@ -54,14 +54,14 @@ Table::~Table()
 			{
 				iter->bplustree_int_->CloseTree();
 				sign = "0\0";
-				findex.write(sign.c_str(), sizeof(char)* 2);
+				findex.write(sign.c_str(), sizeof(char) * 2);
 				findex.write((char*)(iter->bplustree_int_), sizeof(*(iter->bplustree_int_)));
 			}
 			else if (iter->bplustree_string_ != nullptr)
 			{
 				iter->bplustree_string_->CloseTree();
 				sign = "1\0";
-				findex.write(sign.c_str(), sizeof(char)* 2);
+				findex.write(sign.c_str(), sizeof(char) * 2);
 				findex.write((char*)(iter->bplustree_string_), sizeof(*(iter->bplustree_string_)));
 			}
 			delete iter;
@@ -103,10 +103,10 @@ bool Table::UseTable()
 
 	char is_index[2], type[2], field_name[20], records_numb[11], fields_numb[11];
 	fp_fields.seekg(0, ios::beg);
-	fp_fields.read(records_numb, sizeof(char)*10);				/* 读取当前记录数量 */
+	fp_fields.read(records_numb, sizeof(char) * 10);				/* 读取当前记录数量 */
 	records_num = atoi(records_numb);
-	fp_fields.seekg(sizeof(char)* 16, ios::beg);
-	fp_fields.read(fields_numb, sizeof(char)*10);				/* 读取字段数 */
+	fp_fields.seekg(sizeof(char) * 16, ios::beg);
+	fp_fields.read(fields_numb, sizeof(char) * 10);				/* 读取字段数 */
 	USER_INT fields_num = atoi(fields_numb);
 	USER_INT i = 0;
 	record_leng = 0;
@@ -119,8 +119,8 @@ bool Table::UseTable()
 		Field temp;
 		ValueType _type;
 		fp_fields.seekg((32 + 24 * i)*sizeof(char), ios::beg);
-		fp_fields.read(is_index, sizeof(char)* 2);
-		fp_fields.read(type, sizeof(char)* 2);
+		fp_fields.read(is_index, sizeof(char) * 2);
+		fp_fields.read(type, sizeof(char) * 2);
 		if (type[0] == '0') {
 			_type = kIntegerType;
 			temp.SetFieldType(kIntegerType);
@@ -132,7 +132,7 @@ bool Table::UseTable()
 			temp.SetFieldType(kStringType);
 			record_leng += true_len;
 		}
-		fp_fields.read(field_name, sizeof(char)* 20);			/* 读取字段名称进入内存 */
+		fp_fields.read(field_name, sizeof(char) * 20);			/* 读取字段名称进入内存 */
 		temp.SetFieldName(field_name);
 		fields.push_back(temp);
 
@@ -149,22 +149,22 @@ bool Table::UseTable()
 	ifstream findex;
 	std::string index_tree = path + "\\" + table_name + "\\index\\index_tree";
 	char sign[2];
-	findex.open(index_tree,ios::binary);
+	findex.open(index_tree, ios::binary);
 	int index_no = 0;
 	for (auto iter : indexs)
 	{
-		findex.read(sign, sizeof(char)* 2);
+		findex.read(sign, sizeof(char) * 2);
 		if (sign[0] == '0')
 		{
 			findex.read((char*)(iter->bplustree_int_), sizeof(*(iter->bplustree_int_)));
 		}
-		else if (sign[0] == '1'){
+		else if (sign[0] == '1') {
 			findex.read((char*)(iter->bplustree_string_), sizeof(*(iter->bplustree_string_)));
 		}
 	}
 	findex.close();
 
-    idPool = new IDPool();
+	idPool = new IDPool();
 	ifstream file_stream_;										/* 读入主键内存池 */
 	std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 	file_stream_.open(pool_file, ios::in | ios::binary);
@@ -172,21 +172,6 @@ bool Table::UseTable()
 	file_stream_.read((char*)(idPool), sizeof(*idPool));
 	file_stream_.close();
 	return true;
-}
-
-/**
-*  \brief 找到字段对应的索引编号
-*/
-int Table::FindIndex(std::string index_field_name)
-{
-	for (int i = 1; i < indexs.size(); i++)
-	{
-		if (index_field_name == indexs[i]->GetFieldName())
-		{
-			return i;
-		}
-	}
-	return -1;
 }
 
 /**
@@ -232,7 +217,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 
 	std::string cmd = "md " + path + "\\" + table_name;		/* 构建命令创建表单文件夹 */
 	std::string table = path + "\\" + table_name;
-	if (!_access(table.c_str(),0))							/* 判断表单是否已经存在 */
+	if (!_access(table.c_str(), 0))							/* 判断表单是否已经存在 */
 	{
 		std::cout << "已存在该表单！" << endl;
 		return false;
@@ -245,15 +230,15 @@ bool Table::CreateTable(SQLCreateTable &sql)
 
 			fstream fp;
 			std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
-			fp.open(table_name_fields, std::ios::out|ios::binary);		/* 创建表头文件 */
-																		
+			fp.open(table_name_fields, std::ios::out | ios::binary);		/* 创建表头文件 */
+
 			char records_numb[11], fields_numb[11];						/* 后16位写入字段数，前16位写入记录数量 */
 			itoa(0, records_numb, 10);
 			fp.seekp(0, ios::beg);
-			fp.write(records_numb, sizeof(char)*10);
+			fp.write(records_numb, sizeof(char) * 10);
 			itoa(fields.size(), fields_numb, 10);
 			fp.seekp(16, ios::beg);
-			fp.write(fields_numb, sizeof(char)*10);
+			fp.write(fields_numb, sizeof(char) * 10);
 			fp.flush();
 
 			std::string name;
@@ -274,7 +259,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 					type_ = "1\0";
 					record_leng += true_len;
 				}
-				
+
 				fp.seekp((32 + i * 24)*sizeof(char), ios::beg);
 				fp.write(is_index.c_str(), 2);							/* 索引标记占2位 */
 				fp.write(type_.c_str(), 2);								/* 数据类型占2位，字段名20位 */
@@ -282,7 +267,7 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			}
 			fp.close();													/* 关闭文件 */
 
-      
+
 			fstream file_stream_;										/* 创建主键存储池的物理文件 */
 			std::string pool_file = path + "\\" + table_name + "\\" + table_name + "_idPool";
 			idPool = new IDPool(pool_file);
@@ -290,10 +275,10 @@ bool Table::CreateTable(SQLCreateTable &sql)
 			file_stream_.close();
 
 			std::string table_name_records = path + "\\" + table_name + "\\" + table_name + "_records";/* 构建表单记录文件名 */
-			fwp.open(table_name_records,ios::binary);								/* 创建记录文件 */
+			fwp.open(table_name_records, ios::binary);								/* 创建记录文件 */
 			fwp.close();
 
-			fwp.open(table_name_records, ios::in|ios::binary);						/* 打开记录文件 */
+			fwp.open(table_name_records, ios::in | ios::binary);						/* 打开记录文件 */
 			frp.open(table_name_records);
 
 			string index_path = path + "\\" + table_name + "\\index";
@@ -325,30 +310,52 @@ bool Table::SelectRecord(SQLSelect &sql)
 
 	select_id.clear();
 	if (sql.IsInputWhere())																	/* 若select存在where子句，显示选中记录 */
-	{											
+	{
 		int field_id = Table::FindIndex(sql.GetField());									/* 查找字段对应的索引id */
-		if (field_id != -1)
+
+		int i;
+		for (i = 0; i < fields.size(); i++)
 		{
-			for (int i = 0; i < fields.size(); i++)
+			if (fields.at(i).GetFieldName() == sql.GetField())
 			{
-				if (fields.at(i).GetFieldName() == sql.GetField())
+				if (sql.GetValue().GetValueType() != kNullType
+					&& fields.at(i).GetFieldType() != sql.GetValue().GetValueType())
 				{
-					if (sql.GetValue().GetValueType() != kNullType 
-						&& fields.at(i).GetFieldType() != sql.GetValue().GetValueType())
-					{
-						std::cout << "数据类型无法匹配！" << endl;
-						return false;
-					}
+					std::cout << "数据类型无法匹配！" << endl;
+					return false;
 				}
 			}
+		}
 
+		for (auto iter : sql.GetValue().GetValueData())
+		{
+			if (iter == '%' || iter == '?')
+			{
+				if (WildcardSearch(sql.GetValue().GetValueData(), i, field_id))
+				{
+					for (USER_INT j = 0; j < select_id.size();j++)
+					{
+						Display(select_id[j], j);
+					}
+					std::cout << endl;
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+
+		if (field_id != -1)
+		{
 			if (indexs.at(field_id)->
-				SearchNode(sql.GetValue().GetValueData(), 
-					       select_id, sql.GetOperatorType()) == true)/* 依照索引查找 */
+				SearchNode(sql.GetValue().GetValueData(),
+					select_id, sql.GetOperatorType()) == true)/* 依照索引查找 */
 			{
 				for (USER_INT iter = 0; iter < select_id.size();iter++)						/* 查找成功 */
 				{
-					Display(select_id[iter],iter);
+					Display(select_id[iter], iter);
 				}
 				std::cout << endl;
 				return true;
@@ -463,7 +470,7 @@ bool Table::SelectRecord(SQLUpdate &sql)
 {
 	table_name = sql.GetTableName();
 	select_id.clear();
-	
+
 	int id;
 	int field_id = Table::FindIndex(sql.GetWhereField());	/* 查找索引对应编号id */
 	if (field_id != -1)
@@ -526,14 +533,14 @@ bool Table::CreateRecord(SQLInsert &st)
 			{
 				if (st.GetValues().at(i).GetValueType() == kIntegerType)
 				{
-					if (st.GetValues().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
+					if (st.GetValues().at(i).GetValueData().size() >= int_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
 					}
 				}
 				else {
-					if (st.GetValues().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
+					if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
@@ -573,20 +580,10 @@ bool Table::CreateRecord(SQLInsert &st)
 			else {
 				for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
 				{
-					if (st.GetValues().at(i).GetValueType() == kIntegerType)
+					if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
 					{
-						if (st.GetValues().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
-						{
-							std::cout << "输入的值过长！" << endl;
-							return false;
-						}
-					}
-					else {
-						if (st.GetValues().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
-						{
-							std::cout << "输入的值过长！" << endl;
-							return false;
-						}
+						std::cout << "输入的值过长！" << endl;
+						return false;
 					}
 				}
 
@@ -597,7 +594,7 @@ bool Table::CreateRecord(SQLInsert &st)
 					{
 						records__data.at(i) = st.GetValues().at(i).GetValueData();
 					}
-					else  {
+					else {
 						std::cout << "数据类型不匹配！" << endl;
 						return false;										/* 同名字段数据类型不匹配，则插入记录失败 */
 					}
@@ -608,7 +605,7 @@ bool Table::CreateRecord(SQLInsert &st)
 		/* -----------------------------------------匹配成功后，进行文件存储------------------------------------------------- */
 		USER_INT Record_id = idPool->NewNode();					/* 获得新记录的主键 */
 		USER_INT offset = 0;
-		
+
 		char id_char[20];
 		itoa(Record_id, id_char, 10);
 		indexs[0]->InsertNode(id_char, Record_id);
@@ -666,7 +663,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 			std::string Null_str = "\a";		/* 删除记录即为将记录置空 */
 			for (USER_INT i = 0; i < select_id.size(); i++)
 			{/* 从要删除主键池中按序取出主键，删除对应记录 */
-				/* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
+			 /* 在delete的SQL类中，有IsInputWhere()，true为部分删除，false为全表删除。若全表删除，select方法应把所有的主键id放入主键池 */
 				Record_id = select_id[i];
 				offset = 0;
 				std::vector<string> records__data;
@@ -676,7 +673,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 					if (fields.at(j).GetFieldType() == kIntegerType)
 					{
 						frp.seekg(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
-						frp.read(record__data,int_len);
+						frp.read(record__data, int_len);
 						records__data.push_back(record__data);
 
 						fwp.seekp(Record_id*record_leng + offset, ios::beg);/* 指针定位 */
@@ -694,7 +691,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 					}
 					fwp.flush();
 				}
-				
+
 				char id_char[20];
 				itoa(Record_id, id_char, 10);
 				indexs[0]->DeleteNode(id_char);
@@ -711,7 +708,7 @@ bool Table::DeleteRecord(SQLDelete &sd)
 						indexs[index_id]->DeleteNode(records__data[j]);				/* 删除对应结点 */
 					}
 				}
-			
+
 				records_num--;										/* 插入成功，表单中记录总数减一 */
 				idPool->deleteNode(Record_id);
 			}
@@ -750,14 +747,14 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			{
 				if (su.GetNewValue().at(i).GetValueType() == kIntegerType)
 				{
-					if (su.GetNewValue().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
+					if (su.GetNewValue().at(i).GetValueData().size() >= int_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
 					}
 				}
 				else {
-					if (su.GetNewValue().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
+					if (su.GetNewValue().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
@@ -770,7 +767,7 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			USER_INT offset;
 			std::vector<string> records__data1;					/* records__data1记录原有记录信息 */
 			std::vector<string> records__data2;					/* records__data2记录当前需要更改的记录信息 */
-			//frp.sync();
+																//frp.sync();
 			for (USER_INT i = 0; i < select_id.size(); i++)
 			{
 				Record_id = select_id[i];
@@ -909,9 +906,9 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 	ofstream fip;
 	std::string table_name_fields = path + "\\" + table_name + "\\" + table_name + "_fields";/* 构建表头文件名table_name_fields */
 	std::string is_index = "1\0";							/* is_index标记是否存在索引 */
-	fip.open(table_name_fields,ios::in|ios::binary);
+	fip.open(table_name_fields, ios::in | ios::binary);
 	fip.seekp((32 + 24 * i)*sizeof(char), ios::beg);
-	fip.write(is_index.c_str(), sizeof(char)* 2);
+	fip.write(is_index.c_str(), sizeof(char) * 2);
 	fip.flush();
 	fip.close();
 
@@ -922,14 +919,14 @@ bool Table::CreateIndex(SQLCreateIndex &si)
 		while (k < records_num)
 		{
 			frp.seekg((k*record_leng + offset)*sizeof(char), ios::beg);
-      if (fields.at(i).GetFieldType() == kIntegerType)
-      {
-        frp.read(record_field_data, int_len);
-      }
-      else
-      {
-        frp.read(record_field_data, record_len);
-      }
+			if (fields.at(i).GetFieldType() == kIntegerType)
+			{
+				frp.read(record_field_data, int_len);
+			}
+			else
+			{
+				frp.read(record_field_data, record_len);
+			}
 			temp->InsertNode(record_field_data, k);
 			k++;
 		}
@@ -951,46 +948,46 @@ bool Table::Display()
 	std::vector<string> record__datas;
 	if (Table::UseTable())
 	{
-		
+
 		USER_INT k = 0, offset = 0, i = 0;
 		/*for (k = 0; k < real_id.size(); k++)
 		{
-			record__datas.clear();
-			i = real_id.at(k);
-			offset = 0;
-			for (int j = 0; j < fields.size(); j++)
-			{
-				frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
-				if (fields.at(j).GetFieldType() == kIntegerType)
-				{
-					frp.read(record__data, sizeof(char)*int_len);
-					offset += true_int;
-				}
-				else{
-					frp.read(record__data, sizeof(char)*record_len);
-					offset += true_len;
-				}
+		record__datas.clear();
+		i = real_id.at(k);
+		offset = 0;
+		for (int j = 0; j < fields.size(); j++)
+		{
+		frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
+		if (fields.at(j).GetFieldType() == kIntegerType)
+		{
+		frp.read(record__data, sizeof(char)*int_len);
+		offset += true_int;
+		}
+		else{
+		frp.read(record__data, sizeof(char)*record_len);
+		offset += true_len;
+		}
 
-				if (record__data[0] == '\a')
-				{
-					record__data[0] == '\0';
-				}
+		if (record__data[0] == '\a')
+		{
+		record__data[0] == '\0';
+		}
 
-				record__datas.push_back(record__data);
-			}
+		record__datas.push_back(record__data);
+		}
 
-			std::cout << "--------- No." << k + 1 << " ---------" << endl;
-			for (int j = 0; j < fields.size(); j++)
-			{
-				std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
-			}
+		std::cout << "--------- No." << k + 1 << " ---------" << endl;
+		for (int j = 0; j < fields.size(); j++)
+		{
+		std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
+		}
 		}*/
-		while(k < records_num)
+		while (k < records_num)
 		{
 			record__datas.clear();
 			bool key = false;
 			offset = 0;
-			for (int j = 0; j < fields.size(); j++) 
+			for (int j = 0; j < fields.size(); j++)
 			{
 				record__data[0] = '\0';
 				frp.seekg(sizeof(char)*(i*record_leng + offset), ios::beg);
@@ -1016,13 +1013,13 @@ bool Table::Display()
 
 			if (key == true)
 			{
-				std::cout << "--------- No." << k+1 << " ---------" << endl;
+				std::cout << "--------- No." << k + 1 << " ---------" << endl;
 				for (int j = 0; j < fields.size(); j++)
 				{
 					std::cout << fields.at(j).GetFieldName() << ":" << record__datas.at(j) << "  " << endl;
 				}
 				k++;
-			}	
+			}
 			i++;
 		}
 		std::cout << endl;
@@ -1037,13 +1034,13 @@ bool Table::Display()
 /**
 *  \brief 表格显示
 */
-bool Table::Display(USER_INT id,USER_INT iter)
+bool Table::Display(USER_INT id, USER_INT iter)
 {
 	char record__data[record_len];
 	if (UseTable())
 	{
 		//frp.sync();
-		std::cout << "--------- No." << iter+1 << " ---------" << endl;
+		std::cout << "--------- No." << iter + 1 << " ---------" << endl;
 		USER_INT offset = 0;
 		for (int j = 0; j < fields.size(); j++)
 		{
@@ -1085,7 +1082,7 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 	OperatorType op = select_op;
 	char record__data[record_len];
 	int field_id = 0;
-	USER_INT count = 0, k = 0, i = 0, offset = 0,length;
+	USER_INT count = 0, k = 0, i = 0, offset = 0, length;
 
 	while (fields.at(field_id).GetFieldName() != field || fields.at(field_id).GetFieldType() != value.GetValueType())
 	{
@@ -1134,7 +1131,7 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 				}
 				break;
 			case kOpGreater:
-				if (value.GetValueType()==kStringType)
+				if (value.GetValueType() == kStringType)
 				{
 					if (record__data > value.GetValueData())
 					{
@@ -1144,7 +1141,7 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 				}
 				else
 				{
-					int record_data_int,value_data_int;
+					int record_data_int, value_data_int;
 					record_data_int = atoi(record__data);
 					value_data_int = atoi(value.GetValueData().c_str());
 					if (record_data_int > value_data_int)
@@ -1238,4 +1235,98 @@ bool Table::OrderSelect(string select_field, Value select_value, OperatorType se
 
 		return true;
 	}
+}
+
+bool Table::WildcardSearch(std::string pattern, int field_id, int index_id)
+{
+	char record[256];
+
+	select_id.clear();
+	if (index_id != -1)
+	{
+
+	}
+	else
+	{
+		indexs[0]->ShowAllId(select_id);
+	}
+	std::vector<USER_INT> ids(select_id);
+
+	select_id.clear();
+	for (auto iter : ids)
+	{
+		frp.seekg(sizeof(char)*(iter*record_leng + field_id*true_len), ios::beg);
+		frp.read(record, record_len*sizeof(char));
+
+		if (WildcardMatch(record, pattern))
+		{
+			select_id.push_back(iter);
+		}
+	}
+
+	if (select_id.empty())
+	{
+		std::cerr << "不存在符合条件的数据！" << endl;
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+
+}
+
+bool Table::WildcardMatch(std::string str, std::string pattern)
+{
+	int ix = 0;
+	int ip = 0;
+	int istar = -1;
+	int match = 0;
+
+	while (ix < str.size())
+	{
+		if (ip < pattern.size() &&
+			(str.at(ix) == pattern.at(ip) || pattern.at(ip) == '?'))
+		{
+			ix++;
+			ip++;
+		}
+		else if (ip < pattern.size() && pattern.at(ip) == '%')
+		{
+			istar = ip;
+			ip++;
+			match = ix;
+		}
+		else if (istar != -1)
+		{
+			ip = istar + 1;
+			match++;
+			ix = match;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	while (ip < pattern.size() && pattern.at(ip) == '%')
+	{
+		ip++;
+	}
+
+	return ip == pattern.size();
+}
+
+/**
+*  \brief 找到字段对应的索引编号
+*/
+int Table::FindIndex(std::string index_field_name)
+{
+	for (int i = 1; i < indexs.size(); i++)
+	{
+		if (index_field_name == indexs[i]->GetFieldName())
+		{
+			return i;
+		}
+	}
+	return -1;
 }
