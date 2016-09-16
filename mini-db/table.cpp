@@ -526,14 +526,14 @@ bool Table::CreateRecord(SQLInsert &st)
 			{
 				if (st.GetValues().at(i).GetValueType() == kIntegerType)
 				{
-					if (st.GetValues().at(i).GetValueData().size() >= int_len)			/* 若字符串过长，则存储失败 */
+					if (st.GetValues().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
 					}
 				}
 				else {
-					if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+					if (st.GetValues().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
@@ -573,10 +573,20 @@ bool Table::CreateRecord(SQLInsert &st)
 			else {
 				for (int i = 0; i < st.GetValues().size(); i++)						/* 判断字符串长度 */
 				{
-					if (st.GetValues().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+					if (st.GetValues().at(i).GetValueType() == kIntegerType)
 					{
-						std::cout << "输入的值过长！" << endl;
-						return false;
+						if (st.GetValues().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
+						{
+							std::cout << "输入的值过长！" << endl;
+							return false;
+						}
+					}
+					else {
+						if (st.GetValues().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
+						{
+							std::cout << "输入的值过长！" << endl;
+							return false;
+						}
 					}
 				}
 
@@ -740,14 +750,14 @@ bool Table::UpdateRecord(SQLUpdate &su)
 			{
 				if (su.GetNewValue().at(i).GetValueType() == kIntegerType)
 				{
-					if (su.GetNewValue().at(i).GetValueData().size() >= int_len)			/* 若字符串过长，则存储失败 */
+					if (su.GetNewValue().at(i).GetValueData().size() > int_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
 					}
 				}
 				else {
-					if (su.GetNewValue().at(i).GetValueData().size() >= record_len)			/* 若字符串过长，则存储失败 */
+					if (su.GetNewValue().at(i).GetValueData().size() > record_len)			/* 若字符串过长，则存储失败 */
 					{
 						std::cout << "输入的值过长！" << endl;
 						return false;
