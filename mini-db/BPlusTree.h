@@ -254,19 +254,19 @@ template<class KEYTYPE>
 BPlusTree<KEYTYPE>::~BPlusTree()
 {
   if (Pool != nullptr){
-    delete Pool;
+    //delete Pool;
     Pool = nullptr;
   }
   if (id_Pool_ != nullptr){
-    delete id_Pool_;
+    //delete id_Pool_;
     id_Pool_ = nullptr;
   }
   if (out_file_stream_ != nullptr){
-    delete out_file_stream_;
+    //delete out_file_stream_;
     out_file_stream_ = nullptr;
   }
   if (in_file_stream_ != nullptr){
-    delete in_file_stream_;
+   // delete in_file_stream_;
     in_file_stream_ = nullptr;
   }
 }
@@ -275,12 +275,13 @@ BPlusTree<KEYTYPE>::~BPlusTree()
 template<class KEYTYPE>
 bool BPlusTree<KEYTYPE>::CloseTree()
 {
-  Pool->deleteNode(root_);
+  //Pool->deleteNode(root_);
   //Pool->release();
+  
+  //out_file_stream_->close();
+  //in_file_stream_->close();
   root_ = nullptr;
   sqt_ = nullptr;
-  out_file_stream_->close();
-  in_file_stream_->close();
   return true;
 }
 
