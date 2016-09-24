@@ -18,86 +18,96 @@ class BPlusTree
 {
 
 public:
-  IDPool *id_Pool_;//ID分配池
+  IDPool *id_Pool_;                           //ID分配池
 
 
-  MemPool<KEYTYPE> *Pool;//内存池
+  MemPool<KEYTYPE> *Pool;                     //内存池
 
 
-  bool is_primare_key_;//是否主键（关系到是否重复）
+  bool is_primare_key_;                       //是否主键（关系到是否重复）
 
 
-  BPlusTreeNode<KEYTYPE> *root_;//根节点
+  BPlusTreeNode<KEYTYPE> *root_;              //根节点
 
 
-  USER_INT root_f_;//根节点在文件中的位置
+  USER_INT root_f_;                           //根节点在文件中的位置
 
 
-  BPlusTreeNode<KEYTYPE> *sqt_;//叶子节点根;
+  BPlusTreeNode<KEYTYPE> *sqt_;               //叶子节点根;
 
 
-  USER_INT sqt_f_;//叶子根节点在文件中的位置
+  USER_INT sqt_f_;                            //叶子根节点在文件中的位置
 
 
-  ofstream *out_file_stream_;//写入文件流
+  ofstream *out_file_stream_;                 //写入文件流
 
 
-  ifstream *in_file_stream_;//写入文件流
+  ifstream *in_file_stream_;                  //写入文件流
 
 
-  char table_path_[500];//索引的路径
+  char table_path_[500];                      //索引的路径
 
 
   /**
-  *   \检查并返回儿子的指针
+  *  \brief 检查并返回儿子的指针
   *
-  *   \有现成指针则返回，否则返回读取文件后new的指针
+  *  \param _p 当前节点
+  *  \param _insert_index 儿子下标
+  *
+  *  \return 有现成指针则返回，否则返回读取文件后new的指针
   */
   BPlusTreeNode<KEYTYPE>* SonPtr(BPlusTreeNode<KEYTYPE> *_p, int _insert_index);
 
 
   /**
-  *   \检查并返回父亲节点
+  *  \brief 检查并返回父亲节点
   *
-  *   \有现成指针则返回，否则返回读取文件后new的指针
+  *  \param _p 当前节点
+  *
+  *  \return 有现成指针则返回，否则返回读取文件后new的指针
   */
   BPlusTreeNode<KEYTYPE> *FatherPtr(BPlusTreeNode<KEYTYPE> *_p);
 
-
+  
   /**
-  *   \检查并返回哥哥节点
+  *  \brief 检查并返回哥哥节点
   *
-  *   \有现成指针则返回，否则返回读取文件后new的指针
+  *  \param _p 当前节点
+  *
+  *  \return 有现成指针则返回，否则返回读取文件后new的指针
   */
   BPlusTreeNode<KEYTYPE> *BrotherPtr(BPlusTreeNode<KEYTYPE> *_p);
 
 
   /**
-  *   \检查并返回妹妹节点
+  *  \brief 检查并返回妹妹节点
   *
-  *   \有现成指针则返回，否则返回读取文件后new的指针
+  *  \param _p 当前节点
+  *
+  *  \return 有现成指针则返回，否则返回读取文件后new的指针
   */
   BPlusTreeNode<KEYTYPE> *SisterPtr(BPlusTreeNode<KEYTYPE> *_p);
 
 
 public:
 
+
   /**
-  *   \构造函数
+  *  \brief 默认构造函数
   */
   BPlusTree();
 
 
   /**
-  *   \构造函数
+  *  \brief 构造函数
   *
-  *   \传入数据库路径：库 \ 表 \
+  *  \param _file_name 文件完整路径
   */
   BPlusTree(string _file_name);
 
 
   /**
-  *   \析构函数
+  *   \brief 析构函数
   */
   ~BPlusTree();
 
@@ -106,104 +116,153 @@ public:
 
 
   /**
-  *   \是否为主键
+  *   \brief 是否为主键
+  *
+  *  \return 返回结果
   */
   bool isPrimareKey() { return is_primare_key_; };
 
 
   /**
-  *   \置为主键
+  *   \brief 置为主键
+  *
+  *  \return 返回结果
   */
   void SetPrimareKey() { is_primare_key_ = true; }
 
 
 
   /**
-  *   \将cache内存中节点全部保存到文件中
+  *   \brief 将cache内存中节点全部保存到文件中
   *
-  *   \返回保存的文件个数
+  *   \return 保存的文件个数
   */
   int DeleteCache();
 
 
   /**
-  *   \插入关键字
+  *   \brief 插入关键字
   *
-  *   \接口：键值，该键值对应于文件中的id
+  *   \param _key键值
+  *
+  *   \param _data_id 该键值对应于文件中的id
+  *
+  *   \return 成功否
   */
   bool InsertNode(KEYTYPE _key, USER_INT _data_id);
 
 
   /**
-  *   \删除所有关键字
+  *   \brief 删除所有关键字
   *
-  *   \接口：键值
+  *   \param _key 键值
+  *
+  *   \return 成功否
   */
   bool DeleteNode(KEYTYPE _key);
 
 
   /**
-  *   \删除指定关键字
+  *   \brief 删除指定关键字
   *
-  *   \接口：键值
+  *   \param _key 键值
+  *
+  *   \return 成功否
   */
   bool DeleteNode(KEYTYPE _key, USER_INT _data_id);
 
 
   /**
-  *   \查找第一个关键字的叶子节点
+  *   \brief 查找第一个关键字的叶子节点
   *
-  *   \接口：键值
+  *   \param _key 键值
+  *
+  *   \return 目标节点
   */
   BPlusTreeNode<KEYTYPE>* SearchNode(KEYTYPE _key);
 
   /**
-  *   \查找第一个关键字的id
+  *   \brief 查找第一个关键字的id
   *
-  *   \接口：键值
+  *   \param _key 键值
+  *
+  *   \return 目标节点
   */
   USER_INT SearchID(KEYTYPE _key);
 
 
   /**
-  *   \查找所有关键字的id
+  *   \brief 查找所有关键字的id
   *
-  *   \接口：键值,id的vector引用
+  *   \param _key 键值
+  *
+  *   \param _re_vector id的vector引用
+  *
+  *   \return 成功否
   */
   bool SearchID(KEYTYPE _key, vector<USER_INT> &_re_vector);
 
 
   /**
-  *   \查找所有id
+  *   \brief 查找所有id
   *
-  *   \接口：id的vector引用
+  *   \接口：_re_vector id的vector引用
+  *
+  *   \return 成功否
   */
   bool ShowAllId(vector<USER_INT> &_re_vector);
 
 
   /**
-  *   \查找符合关系式子关键字的id
+  *   \brief 查找符合关系式子关键字的id
   *
-  *   \接口：键值,id的vector引用，大小关系的枚举
+  *   \param _re_vector 键值,id的vector引用
+  *
+  *   \param op 大小关系的枚举
+  *
+  *   \return 成功否
   */
   bool SearchID(KEYTYPE _key, vector<USER_INT> &_re_vector, OperatorType op);
 
 
   /**
-  *   \更新节点
+  *   \brief 查找符合关系式子关键字的id
   *
-  *   \接口：键值
+  *   \param _key 键值
+  *
+  *   \param _re_vector id的vector引用
+  *
+  *   \return 成功否
+  */
+  bool SearchPrefix(string _key, vector<USER_INT> &_re_vector);
+
+
+  /**
+  *   \brief 更新节点
+  *
+  *   \param _old_key 旧的键值
+  *
+  *   \param _new_key 新的键值
+  *
+  *   \return 成功否
   */
   bool UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key);
 
 
   /**
-  *   \准确更新一个节点
+  *   \brief 准确更新一个节点
   *
-  *   \接口：旧键，新键，id
+  *   \param _old_key 旧的键值
+  *
+  *   \param _new_key 新的键值
+  *
+  *   \param _data_id id值
+  *
+  *   \return 成功否
   */
   bool UpdateNode(KEYTYPE _old_key, KEYTYPE _new_key, USER_INT _data_id);
 };
+
 
 
 //***************************************************************************
@@ -1110,6 +1169,49 @@ bool BPlusTree<KEYTYPE>::SearchID(KEYTYPE _key, vector<USER_INT> &_re_vector, Op
     else{
       break;
     }
+  }
+  return true;
+}
+
+
+
+template<class KEYTYPE>
+bool BPlusTree<KEYTYPE>::SearchPrefix(string _key, vector<USER_INT> &_re_vector)
+{
+  string key_end;
+  key_end = _key;
+  key_end[key_end.size() - 1] += 1;
+  int insert_index;
+  bool flag = false;
+  BPlusTreeNode<KEYTYPE> *p;
+  p = SearchNode(_key);
+  if (p == nullptr){
+    return false;//ERROR：没有找到
+  }
+  if (p == root_){
+    if (p->key_num_ == 0){
+      return false;//ERROR：树为空;
+    }
+  }
+  insert_index = abs(p->BinarySearch(_key));
+  if (insert_index < 0){
+    return false;
+  }
+  while (p != nullptr){
+    for (int i = insert_index - 1; i < p->key_num_; i++){
+      if (p->key_[i] < key_end){
+        _re_vector.push_back(p->key_data_id[i]);
+      }
+      else{
+        flag = true;
+        break;
+      }
+    }
+    if (flag){
+      break;
+    }
+    p = SisterPtr(p);
+    insert_index = 1;
   }
   return true;
 }
